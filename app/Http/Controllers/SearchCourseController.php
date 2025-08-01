@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Course;
+use App\Models\CourseCategory;
+
+class SearchCourseController extends Controller
+{
+
+public function index(Request $request)
+{
+    $category = CourseCategory::get();
+    $selectedCategories = $request->input('categories', []);
+
+    $course = Course::where('status', 2)
+        ->when($selectedCategories, function ($query) use ($selectedCategories) {
+            $query->whereIn('course_category_id', $selectedCategories);
+        })
+        ->get();
+
+    $allCourse = Course::where('status', 2)->get();
+
+    $currencySymbol = session('currency_symbol', '$');
+    $currencyRate = session('currency_rate', 1.0);
+
+    return view('frontend.searchCourse', compact(
+        'course',
+        'category',
+        'selectedCategories',
+        'allCourse',
+        'currencySymbol',
+        'currencyRate'
+    ));
+}
+}
