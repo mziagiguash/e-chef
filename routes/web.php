@@ -44,6 +44,17 @@ use App\Http\Controllers\Students\sslController as sslcz;
 |
 */
 
+Route::get('/debug', function () {
+    return response()->json([
+        'php_version' => phpversion(),
+        'laravel_version' => app()->version(),
+        'env' => config('app.env'),
+        'debug' => config('app.debug'),
+        'db_connection' => config('database.default'),
+    ]);
+});
+
+
 Route::get('/register', [auth::class, 'signUpForm'])->name('register');
 Route::post('/register', [auth::class, 'signUpStore'])->name('register.store');
 Route::get('/login', [auth::class, 'signInForm'])->name('login');
