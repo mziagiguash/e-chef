@@ -28,4 +28,4 @@ RUN chown -R www-data:www-data storage bootstrap/cache \
 EXPOSE 8080
 
 # CMD теперь не вызывает artisan
-CMD ["php-fpm"]
+CMD ["php", "-S", "0.0.0.0:80", "-t", "public"]
