@@ -1,0 +1,30 @@
+<?php
+
+return [
+    'my_profile' => 'ჩემი პროფილი',
+    'setting' => 'პარამეტრები',
+    'about_me' => 'ჩემ შესახებ',
+    'student_bio' => 'სტუდენტის ბიოგრაფია',
+    'information' => ':name-ის ინფორმაცია',
+    'name' => 'სახელი',
+    'email' => 'ელ-ფოსტა',
+    'profession' => 'რითი ხარ დაკავებული',
+    'phone' => 'ტელეფონის ნომერი',
+    'nationality' => 'ეროვნება',
+    'your_information' => 'თქვენი ინფორმაცია',
+    'full_name' => 'სრული სახელი',
+    'dob' => 'დაბადების თარიღი',
+    'email' => 'ელ.ფოსტა',
+    'profession' => 'რას საქმიანობთ',
+    'phone_number' => 'ტელეფონის ნომერი',
+    'nationality' => 'ეროვნება',
+    'about_you' => 'შესახებ',
+    'save_changes' => 'ცვლილებების შენახვა',
+    'change_password' => 'პაროლის შეცვლა',
+    'current_password' => 'მიმდინარე პაროლი',
+    'new_password' => 'ახალი პაროლი',
+    'confirm_new_password' => 'დაადასტურეთ ახალი პაროლი',
+    'change_image' => 'სურათის შეცვლა',
+    'image_note' => 'სურათის ზომა უნდა იყოს 1MB-ზე ნაკლები, პროპორცია — 200px.',
+
+];

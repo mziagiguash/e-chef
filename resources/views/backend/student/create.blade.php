@@ -21,9 +21,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('student.index')}}">Students</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('student.create')}}">Add Student</a></li>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('student.index')}}">Students</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('student.create')}}">Add Student</a></li>
                 </ol>
             </div>
         </div>
@@ -35,44 +35,27 @@
                         <h5 class="card-title">Basic Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{route('student.store')}}" method="post" enctype="multipart/form-data">
+                        <form action="{{localeRoute('student.store')}}" method="post" enctype="multipart/form-data">
                             @csrf
                             <div class="row">
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Name</label>
-                                        <input type="text" class="form-control" name="fullName_en"
-                                            value="{{old('fullName_en')}}">
+                                        <input type="text" class="form-control" name="fullName"
+                                            value="{{old('fullName')}}">
                                     </div>
-                                    @if($errors->has('fullName_en'))
-                                    <span class="text-danger"> {{ $errors->first('fullName_en') }}</span>
+                                    @if($errors->has('fullName'))
+                                    <span class="text-danger"> {{ $errors->first('fullName') }}</span>
                                     @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">নাম (বাংলায়)</label>
-                                        <input type="text" class="form-control" name="fullName_bn"
-                                            value="{{old('fullName_bn')}}">
-                                    </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Phone Number</label>
-                                        <input type="tel" class="form-control" name="contactNumber_en"
-                                            value="{{old('contactNumber_en')}}">
+                                        <input type="tel" class="form-control" name="contact"
+                                            value="{{old('contact')}}">
                                     </div>
-                                    @if($errors->has('contactNumber_en'))
-                                    <span class="text-danger"> {{ $errors->first('contactNumber_en') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">ফোন নাম্বার (বাংলায়)</label>
-                                        <input type="tel" class="form-control" name="contactNumber_bn"
-                                            value="{{old('contactNumber_bn')}}">
-                                    </div>
-                                    @if($errors->has('contactNumber_bn'))
-                                    <span class="text-danger"> {{ $errors->first('contactNumber_bn') }}</span>
+                                    @if($errors->has('contact'))
+                                    <span class="text-danger"> {{ $errors->first('contact') }}</span>
                                     @endif
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
@@ -109,15 +92,14 @@
                                     @if($errors->has('birthDate'))
                                     <span class="text-danger"> {{ $errors->first('birthDate') }}</span>
                                     @endif
-                                </div> 
+                                </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Gender</label>
                                         <select class="form-control" name="gender">
                                             <option value="male" @if(old('gender')=='male') selected @endif>Male</option>
-                                            <option value="female" @if(old('gender')=='female') selected @endif>Fenale</option>
-                                            <option value="other" @if(old('gender')=='other') selected @endif>Other</option>
-                                        </select>
+                                            <option value="female" @if(old('gender')=='female') selected @endif>Female</option>
+                                            </select>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">

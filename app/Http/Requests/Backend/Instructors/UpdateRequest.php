@@ -26,7 +26,7 @@ class UpdateRequest extends FormRequest
         return [
             'fullName_en' => 'required|max:255',
             'emailAddress' => 'required|unique:instructors,email,' . $id,
-            'contactNumber_en' => 'required|unique:instructors,contact_en,' . $id,
+            'contact' => 'required|unique:instructors,contact,' . $id,
             'thumbnail_video_url' => 'nullable|url',
             'thumbnail_video_file' => 'nullable|mimes:mp4,webm,avi,mov|max:102400', // до 100MB
 

@@ -16,16 +16,19 @@ class checkStudent
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next)
-    {
-        if (!Session::has('userId') || Session::has('userId') == null) {
-            return redirect()->route('studentlogOut');
-        } else {
-            $user = Student::where('status', 1)->where('id', currentUserId())->exists();
-            if (!$user)
-                return redirect()->route('studentlogOut');
-            else
-                return $next($request);
-        }
-        return redirect()->route('studentlogOut');
+{
+    // Проверка наличия userId в сессии
+    if (!Session::has('userId') || Session::get('userId') == null) {
+        return redirect()->route('studentlogOut', ['locale' => app()->getLocale()]);
     }
+
+    // Проверка, что студент с этим ID существует и активен (status = 1)
+    $userExists = Student::where('id', currentUserId())->where('status', 1)->exists();
+
+    if (!$userExists) {
+        return redirect()->route('studentlogOut', ['locale' => app()->getLocale()]);
+    }
+
+    return $next($request);
+}
 }

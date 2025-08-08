@@ -21,8 +21,8 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('quiz.index')}}">Quizzes</a></li>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('quiz.index')}}">Quizzes</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0);">Edit Quiz</a></li>
                 </ol>
             </div>
@@ -35,7 +35,7 @@
                         <h5 class="card-title">Basic Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{route('quiz.update',encryptor('encrypt', $quiz->id))}}" method="post"
+                        <form action="{{localeRoute('quiz.update',encryptor('encrypt', $quiz->id))}}" method="post"
                             enctype="multipart/form-data">
                             @csrf
                             @method('PATCH')
@@ -58,7 +58,7 @@
                                             @forelse ($course as $c)
                                             <option value="{{$c->id}}" {{old('courseId', $quiz->course_id) ==
                                                 $c->id?'selected':''}}>
-                                                {{$c->title_en}}</option>
+                                                {{$c->title}}</option>
                                             @empty
                                             <option value="">No Quiz Found</option>
                                             @endforelse

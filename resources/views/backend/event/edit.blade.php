@@ -24,8 +24,8 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('event.index')}}">Events</a></li>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('event.index')}}">Events</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0);">Edit Event</a></li>
                 </ol>
             </div>
@@ -38,7 +38,7 @@
                         <h5 class="card-title">Event Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('event.update', $event->id) }}" method="post"
+                        <form action="{{ localeRoute('event.update', $event->id) }}" method="post"
                             enctype="multipart/form-data">
                             @csrf
                             @method('PATCH')

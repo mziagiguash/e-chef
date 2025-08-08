@@ -39,13 +39,13 @@ public function cart()
             //$cart[$id]['quantity']++;
         } else {
             $cart[$id] = [
-                "title_en" => $course->title_en,
+                "title" => $course->title,
                 "quantity" => 1,
                 "price" => $course->price,
                 "old_price" => $course->old_price,
                 "image" => $course->image,
                 "difficulty" => $course->difficulty,
-                "instructor" => $course->instructor ? $course->instructor->name_en : 'Unknown Instructor',
+                "instructor" => $course->instructor ? $course->instructor->name : 'Unknown Instructor',
             ];
             session()->put('cart', $cart);
             $this->cart_total();

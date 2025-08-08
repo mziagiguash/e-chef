@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('lesson.index')}}">Course Lessons</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('lesson.index')}}">All Course Lesson</a>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('lesson.index')}}">Course Lessons</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('lesson.index')}}">All Course Lesson</a>
                     </li>
                 </ol>
             </div>
@@ -44,7 +44,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">All Course Lessons List </h4>
-                                <a href="{{route('lesson.create')}}" class="btn btn-primary">+ Add new</a>
+                                <a href="{{localeRoute('lesson.create')}}" class="btn btn-primary">+ Add new</a>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -62,16 +62,16 @@
                                             <tr>
                                                 <td>{{$l->id}}</td>
                                                 <td>{{$l->title}}</td>
-                                                <td>{{$l->course?->title_en}}</td>
+                                                <td>{{$l->course?->title}}</td>
                                                 <td>
-                                                    <a href="{{route('lesson.edit', encryptor('encrypt',$l->id))}}"
+                                                    <a href="{{localeRoute('lesson.edit', encryptor('encrypt',$l->id))}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$l->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$l->id}}"
-                                                        action="{{route('lesson.destroy', encryptor('encrypt',$l->id))}}"
+                                                        action="{{localeRoute('lesson.destroy', encryptor('encrypt',$l->id))}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')

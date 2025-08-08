@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('discussion.index')}}">Discussions</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('discussion.index')}}">All Discussion</a>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('discussion.index')}}">Discussions</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('discussion.index')}}">All Discussion</a>
                     </li>
                 </ol>
             </div>
@@ -61,20 +61,20 @@
                                         <tbody>
                                             @forelse ($discussion as $d)
                                             <tr>
-                                                <td>{{$d->user?->name_en}}</td>
+                                                <td>{{$d->user?->name}}</td>
                                                 <td>{{$d->user?->role?->name}}</td>
-                                                <td>{{$d->course?->title_en}}</td>
+                                                <td>{{$d->course?->title}}</td>
                                                 <td>{{$d->title}}</td>
                                                 <td>{{$d->content}}</td>
                                                 <td>
-                                                    <a href="{{route('discussion.edit', encryptor('encrypt',$d->id))}}"
+                                                    <a href="{{localeRoute('discussion.edit', encryptor('encrypt',$d->id))}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$d->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$d->id}}"
-                                                        action="{{route('discussion.destroy', encryptor('encrypt',$d->id))}}"
+                                                        action="{{localeRoute('discussion.destroy', encryptor('encrypt',$d->id))}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')

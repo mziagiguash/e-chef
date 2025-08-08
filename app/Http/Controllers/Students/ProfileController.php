@@ -21,8 +21,8 @@ class ProfileController extends Controller
     {
         try {
             $data = Student::find(currentUserId());
-            $data->name_en = $request->fullName_en;
-            $data->contact_en = $request->contactNumber_en;
+            $data->name = $request->fullName;
+            $data->contact = $request->contactNumber;
             $data->email = $request->emailAddress;
             $data->date_of_birth = $request->dob;
             $data->gender = $request->gender;
@@ -64,7 +64,7 @@ class ProfileController extends Controller
                 return redirect()->back()->with('success', 'Password Have been Changed');
             }
         } catch (Exception $e) {
-            // dd($e); 
+            // dd($e);
             return redirect()->back()->withInput()->with('error', 'Something went wrong. Please try again');
         }
     }
@@ -74,7 +74,7 @@ class ProfileController extends Controller
         return request()->session()->put(
             [
                 'userId' => encryptor('encrypt', $student->id),
-                'userName' => encryptor('encrypt', $student->name_en),
+                'userName' => encryptor('encrypt', $student->name),
                 'emailAddress' => encryptor('encrypt', $student->email),
                 'studentLogin' => 1,
                 'image' => $student->image ?? 'No Image Found'

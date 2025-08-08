@@ -15,17 +15,22 @@ class checkAuth
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
+
     public function handle(Request $request, Closure $next)
-    {
-        if (!Session::has('userId') || Session::has('userId') == null) {
-            return redirect()->route('logOut');
-        } else {
-            $user = User::where('status', 1)->where('id', currentUserId())->first();
-            if (!$user)
-                return redirect()->route('logOut'); 
-            else
-                return $next($request);
-        }
-        return redirect()->route('logOut');
+{
+    if (!Session::has('userId') || Session::get('userId') === null) {
+        return redirect()->route('logOut', ['locale' => app()->getLocale()]);
     }
+
+    $user = User::where('status', 1)
+                ->where('id', currentUserId())
+                ->first();
+
+    if (!$user) {
+        return redirect()->route('logOut', ['locale' => app()->getLocale()]);
+    }
+
+    return $next($request);
+}
+
 }

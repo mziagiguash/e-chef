@@ -33,9 +33,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('role.index')}}">Permissions</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('role.index')}}">All Permission</a></li>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('role.index')}}">Permissions</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('role.index')}}">All Permission</a></li>
                 </ol>
             </div>
         </div> 
@@ -71,7 +71,7 @@
                             @endphp
                             @endif
                             @endforeach
-                            <form action="{{route('permission.save',encryptor('encrypt',$role->id))}}" method="post">
+                            <form action="{{localeRoute('permission.save',encryptor('encrypt',$role->id))}}" method="post">
                                 @csrf
                                 <div class="row p-2">
                                     @forelse($routes as $k=>$r)

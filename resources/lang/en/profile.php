@@ -1,0 +1,30 @@
+<?php
+
+return [
+    'my_profile' => 'My Profile',
+    'setting' => 'Setting',
+    'about_me' => 'About Me',
+    'student_bio' => "Student's Bio",
+    'information' => ":name's Information",
+    'name' => 'Name',
+    'email' => 'E-mail',
+    'profession' => 'What do you do',
+    'phone' => 'Phone Number',
+    'nationality' => 'Nationality',
+    'your_information' => 'Your Information',
+    'full_name' => 'Full Name',
+    'dob' => 'Date of Birth',
+    'email' => 'Email',
+    'profession' => 'What Do You Do',
+    'phone_number' => 'Phone Number',
+    'nationality' => 'Nationality',
+    'about_you' => 'About You',
+    'save_changes' => 'Save Changes',
+    'change_password' => 'Change Password',
+    'current_password' => 'Current Password',
+    'new_password' => 'New Password',
+    'confirm_new_password' => 'Confirm New Password',
+    'change_image' => 'CHANGE IMAGE',
+    'image_note' => 'Image size should be under 1MB image ratio 200px.',
+
+];

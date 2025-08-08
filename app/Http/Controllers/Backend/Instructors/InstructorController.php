@@ -41,10 +41,8 @@ class InstructorController extends Controller
         try {
             DB::beginTransaction();
             $instructor = new Instructor;
-            $instructor->name_en = $request->fullName_en;
-            $instructor->name_bn = $request->fullName_bn;
-            $instructor->contact_en = $request->contactNumber_en;
-            $instructor->contact_bn = $request->contactNumber_bn;
+            $instructor->name = $request->fullName;
+            $instructor->contact = $request->contactNumber;
             $instructor->email = $request->emailAddress;
             $instructor->role_id = $request->roleId;
             $instructor->bio = $request->bio;
@@ -63,9 +61,9 @@ class InstructorController extends Controller
             if ($instructor->save()) {
                 $user = new User;
                 $user->instructor_id = $instructor->id;
-                $user->name_en = $request->fullName_en;
+                $user->name = $request->fullName;
                 $user->email = $request->emailAddress;
-                $user->contact_en = $request->contactNumber_en;
+                $user->contact = $request->contactNumber;
                 $user->role_id = $request->roleId;
                 $user->status = $request->status;
                 $user->password = Hash::make($request->password);
@@ -96,7 +94,7 @@ class InstructorController extends Controller
     public function frontShow($id)
     {
         $instructor = Instructor::findOrFail(encryptor('decrypt', $id));
-        // dd($course); 
+        // dd($course);
         return view('frontend.instructorProfile', compact('instructor'));
     }
 
@@ -117,10 +115,8 @@ class InstructorController extends Controller
     {
         try {
             $instructor = Instructor::findOrFail(encryptor('decrypt', $id));
-            $instructor->name_en = $request->fullName_en;
-            $instructor->name_bn = $request->fullName_bn;
-            $instructor->contact_en = $request->contactNumber_en;
-            $instructor->contact_bn = $request->contactNumber_bn;
+            $instructor->name = $request->fullName;
+            $instructor->contact = $request->contactNumber;
             $instructor->email = $request->emailAddress;
             $instructor->role_id = $request->roleId;
             $instructor->bio = $request->bio;
@@ -139,9 +135,9 @@ class InstructorController extends Controller
             if ($instructor->save()) {
                 $user = User::where('instructor_id', $instructor->id)->first();
                 $user->instructor_id = $instructor->id;
-                $user->name_en = $request->fullName_en;
+                $user->name = $request->fullName;
                 $user->email = $request->emailAddress;
-                $user->contact_en = $request->contactNumber_en;
+                $user->contact = $request->contactNumber;
                 $user->role_id = $request->roleId;
                 $user->status = $request->status;
                 $user->password = Hash::make($request->password);

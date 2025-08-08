@@ -21,8 +21,8 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('material.index')}}">Course Materials</a></li>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('material.index')}}">Course Materials</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0);">Edit Course Material</a></li>
                 </ol>
             </div>
@@ -35,7 +35,7 @@
                         <h5 class="card-title">Basic Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{route('material.update',encryptor('encrypt', $material->id))}}" method="post"
+                        <form action="{{localeRoute('material.update',encryptor('encrypt', $material->id))}}" method="post"
                             enctype="multipart/form-data">
                             @csrf
                             @method('PATCH')

@@ -21,8 +21,8 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('student.index')}}">Students</a></li>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('student.index')}}">Students</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0);">Edit Student</a></li>
                 </ol>
             </div>
@@ -35,7 +35,7 @@
                         <h5 class="card-title">Basic Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{route('student.update',encryptor('encrypt', $student->id))}}" method="post"
+                        <form action="{{localeRoute('student.update',encryptor('encrypt', $student->id))}}" method="post"
                             enctype="multipart/form-data">
                             @csrf
                             @method('PATCH')
@@ -44,38 +44,21 @@
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Name</label>
-                                        <input type="text" class="form-control" name="fullName_en"
-                                            value="{{old('fullName_en',$student->name_en)}}">
+                                        <input type="text" class="form-control" name="fullName"
+                                            value="{{old('fullName',$student->name)}}">
                                     </div>
-                                    @if($errors->has('fullName_en'))
-                                    <span class="text-danger"> {{ $errors->first('fullName_en') }}</span>
+                                    @if($errors->has('fullName'))
+                                    <span class="text-danger"> {{ $errors->first('fullName') }}</span>
                                     @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">নাম (বাংলায়)</label>
-                                        <input type="text" class="form-control" name="fullName_bn"
-                                            value="{{old('fullName_bn',$student->name_bn)}}">
-                                    </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Phone Number</label>
-                                        <input type="tel" class="form-control" name="contactNumber_en"
-                                            value="{{old('contactNumber_en',$student->contact_en)}}">
+                                        <input type="tel" class="form-control" name="contactNumber"
+                                            value="{{old('contactNumber',$student->contact)}}">
                                     </div>
-                                    @if($errors->has('contactNumber_en'))
-                                    <span class="text-danger"> {{ $errors->first('contactNumber_en') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">ফোন নাম্বার (বাংলায়)</label>
-                                        <input type="tel" class="form-control" name="contactNumber_bn"
-                                            value="{{old('contactNumber_bn',$student->contact_bn)}}">
-                                    </div>
-                                    @if($errors->has('contactNumber_bn'))
-                                    <span class="text-danger"> {{ $errors->first('contactNumber_bn') }}</span>
+                                    @if($errors->has('contactNumber'))
+                                    <span class="text-danger"> {{ $errors->first('contactNumber') }}</span>
                                     @endif
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
@@ -124,10 +107,7 @@
                                                 @endif>Male
                                             </option>
                                             <option value="female" @if(old('gender',$student->gender)=='female' )
-                                                selected @endif>Fenale
-                                            </option>
-                                            <option value="other" @if(old('gender',$student->gender)=='other' ) selected
-                                                @endif>Other
+                                                selected @endif>Female
                                             </option>
                                         </select>
                                     </div>

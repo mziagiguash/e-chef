@@ -21,9 +21,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('course.index')}}">Courses</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('course.create')}}">Add Course</a></li>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('course.index')}}">Courses</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('course.create')}}">Add Course</a></li>
                 </ol>
             </div>
         </div>
@@ -35,43 +35,26 @@
                         <h5 class="card-title">Basic Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{route('course.store')}}" method="post" enctype="multipart/form-data">
+                        <form action="{{localeRoute('course.store')}}" method="post" enctype="multipart/form-data">
                             @csrf
                             <div class="row">
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Title</label>
-                                        <input type="text" class="form-control" name="courseTitle_en"
-                                            value="{{old('courseTitle_en')}}">
+                                        <input type="text" class="form-control" name="courseTitle"
+                                            value="{{old('courseTitle')}}">
                                     </div>
-                                    @if($errors->has('courseTitle_en'))
-                                    <span class="text-danger"> {{ $errors->first('courseTitle_en') }}</span>
+                                    @if($errors->has('courseTitle'))
+                                    <span class="text-danger"> {{ $errors->first('courseTitle') }}</span>
                                     @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">টাইটেল (বাংলায়)</label>
-                                        <input type="text" class="form-control" name="courseTitle_bn"
-                                            value="{{old('courseTitle_bn')}}">
-                                    </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Description</label>
-                                        <textarea class="form-control" name="courseDescription_en">{{old('courseDescription_en')}}</textarea>
+                                        <textarea class="form-control" name="courseDescription">{{old('courseDescription')}}</textarea>
                                     </div>
-                                    @if($errors->has('courseDescription_en'))
-                                    <span class="text-danger"> {{ $errors->first('courseDescription_en') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">বিস্তারিত (বাংলায়)</label>
-                                        <textarea class="form-control" name="courseDescription_bn"
-                                            value="{{old('courseDescription_bn')}}"></textarea>
-                                    </div>
-                                    @if($errors->has('courseDescription_bn'))
-                                    <span class="text-danger"> {{ $errors->first('courseDescription_bn') }}</span>
+                                    @if($errors->has('courseDescription'))
+                                    <span class="text-danger"> {{ $errors->first('courseDescription') }}</span>
                                     @endif
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
@@ -96,7 +79,7 @@
                                         <select class="form-control" name="instructorId">
                                             @forelse ($instructor as $i)
                                             <option value="{{$i->id}}" {{old('instructorId')==$i->id?'selected':''}}>
-                                                {{$i->name_en}}</option>
+                                                {{$i->name}}</option>
                                             @empty
                                             <option value="">No Instructor Found</option>
                                             @endforelse
@@ -197,21 +180,11 @@
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Prerequisites</label>
-                                        <textarea class="form-control" name="prerequisites_en"
-                                            value="{{old('prerequisites_en')}}"></textarea>
+                                        <textarea class="form-control" name="prerequisites"
+                                            value="{{old('prerequisites')}}"></textarea>
                                     </div>
-                                    @if($errors->has('prerequisites_en'))
-                                    <span class="text-danger"> {{ $errors->first('prerequisites_en') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">পূর্বশর্ত (বাংলায়)</label>
-                                        <textarea class="form-control" name="prerequisites_bn"
-                                            value="{{old('prerequisites_bn')}}"></textarea>
-                                    </div>
-                                    @if($errors->has('prerequisites_bn'))
-                                    <span class="text-danger"> {{ $errors->first('prerequisites_bn') }}</span>
+                                    @if($errors->has('prerequisites'))
+                                    <span class="text-danger"> {{ $errors->first('prerequisites') }}</span>
                                     @endif
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">

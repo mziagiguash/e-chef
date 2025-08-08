@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('enrollment.index')}}">Enrollments</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('enrollment.index')}}">All Enrollment</a></li>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('enrollment.index')}}">Enrollments</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('enrollment.index')}}">All Enrollment</a></li>
                 </ol>
             </div>
         </div>
@@ -34,7 +34,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">All Enrollments List </h4>
-                                <a href="{{route('enrollment.create')}}" class="btn btn-primary">+ Add new</a>
+                                <a href="{{localeRoute('enrollment.create')}}" class="btn btn-primary">+ Add new</a>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -57,23 +57,22 @@
                                                         src="{{asset('public/uploads/students/'.$e->student?->image)}}"
                                                         alt="">
                                                 </td>
-                                                <td><strong>{{$e->student?->name_en}}</strong></td>
-                                                <td><strong>{{$e->course?->title_en}}</strong></td>
+                                                <td><strong>{{$e->student?->name}}</strong></td>
+                                                <td><strong>{{$e->course?->title}}</strong></td>
                                                 <td><img class="img fluid" width="100"
                                                         src="{{asset('public/uploads/courses/'.$e->course?->image)}}"
                                                         alt="">
                                                 </td>
-                                                <td><strong>{{$e->course?->price==null?'Free':'৳'.$e->course?->price}}</strong></td>
                                                 <td><strong>{{$e->enrollment_date}}</strong></td>
                                                 <td>
-                                                    <a href="{{route('enrollment.edit', encryptor('encrypt',$e->id))}}"
+                                                    <a href="{{localeRoute('enrollment.edit', encryptor('encrypt',$e->id))}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$e->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$e->id}}"
-                                                        action="{{route('enrollment.destroy', encryptor('encrypt',$e->id))}}"
+                                                        action="{{localeRoute('enrollment.destroy', encryptor('encrypt',$e->id))}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')

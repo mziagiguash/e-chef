@@ -12,7 +12,7 @@
                         <div class="col-xl-12">
                             <div class="auth-form">
                                 <h4 class="text-center mb-4">Sign up your account</h4>
-                                <form action="{{route('register.store')}}" method="POST">
+                                <form action="{{localeRoute('register.store')}}" method="POST">
                                     @csrf
                                     <div class="form-group">
                                         <label><strong>Full Name</strong></label>
@@ -32,10 +32,10 @@
                                     </div>
                                     <div class="form-group">
                                         <label><strong>Phone Number</strong></label>
-                                        <input type="text" class="form-control" value="{{old('contact_en')}}"
-                                            name="contact_en" id="contact_en" placeholder="Enter Contact No">
-                                        @if($errors->has('contact_en'))
-                                        <small class="d-block text-danger">{{$errors->first('contact_en')}}</small>
+                                        <input type="text" class="form-control" value="{{old('contact')}}"
+                                            name="contact" id="contact" placeholder="Enter Contact No">
+                                        @if($errors->has('contact'))
+                                        <small class="d-block text-danger">{{$errors->first('contact')}}</small>
                                         @endif
                                     </div>
                                     <div class="form-group">
@@ -56,7 +56,7 @@
                                     </div>
                                 </form>
                                 <div class="new-account mt-3">
-                                    <p>Already have an account? <a class="text-primary" href="{{route('login')}}">Sign
+                                    <p>Already have an account? <a class="text-primary" href="{{localeRoute('login')}}">Sign
                                             in</a></p>
                                 </div>
                             </div>

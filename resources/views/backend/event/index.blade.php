@@ -23,9 +23,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('event.index')}}">Events</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('event.index')}}">All Event</a></li>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('event.index')}}">Events</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('event.index')}}">All Event</a></li>
                 </ol>
             </div>
         </div>
@@ -37,7 +37,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">All Events List </h4>
-                                <a href="{{route('event.create')}}" class="btn btn-primary">+ Add new</a>
+                                <a href="{{localeRoute('event.create')}}" class="btn btn-primary">+ Add new</a>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -62,14 +62,14 @@
                                                 <td>{{$e->location}}</td>
                                                 <td>{{ \Carbon\Carbon::parse($e->date)->format('j F, Y, l') }}</td>
                                                 <td>
-                                                    <a href="{{route('event.edit', $e->id)}}"
+                                                    <a href="{{localeRoute('event.edit', $e->id)}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$e->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$e->id}}"
-                                                        action="{{route('event.destroy', $e->id)}}" method="post">
+                                                        action="{{localeRoute('event.destroy', $e->id)}}" method="post">
                                                         @csrf
                                                         @method('DELETE')
                                                     </form>

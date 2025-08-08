@@ -16,17 +16,18 @@ class SetLocale
      * @param  \Closure(\Illuminate\Http\Request): \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse  $next
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function handle(Request $request, Closure $next)
-    {
-        $locale = $request->route('locale');
+public function handle(Request $request, Closure $next)
+{
+    $locale = $request->route('locale');
 
-        if (in_array($locale, ['en', 'ru', 'ka'])) {
-            App::setLocale($locale);
-            session(['locale' => $locale]);
-        } else {
-            App::setLocale(Config::get('app.locale'));
-        }
-
-        return $next($request);
+    if (array_key_exists($locale, config('app.available_locales'))) {
+        App::setLocale($locale);
+        session(['locale' => $locale]);
+    } else {
+        App::setLocale(Config::get('app.locale'));
     }
+
+    return $next($request);
+}
+
 }

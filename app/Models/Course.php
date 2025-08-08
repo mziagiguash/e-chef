@@ -10,12 +10,14 @@ class Course extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title_en', 'price', 'image'
+        'course_id', 'title', 'price', 'image',
+        'description',
+        'prerequisites',
     ];
 
     public function courseCategory()
     {
-        return $this->belongsTo(CourseCategory::class); 
+        return $this->belongsTo(CourseCategory::class);
     }
 
     public function instructor()
@@ -52,4 +54,17 @@ class Course extends Model
     {
         return $this->hasMany(Lesson::class);
     }
+
+    // Все переводы
+   public function translations()
+{
+    return $this->hasMany(CourseTranslation::class);
+}
+
+public function translation($locale = null)
+{
+    $locale = $locale ?: app()->getLocale();
+    return $this->translations()->where('locale', $locale)->first();
+}
+
 }

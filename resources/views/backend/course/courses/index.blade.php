@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('course.index')}}">Instructors</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('course.index')}}">All Course</a></li>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('course.index')}}">Instructors</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('course.index')}}">All Course</a></li>
                 </ol>
             </div>
         </div>
@@ -31,7 +31,7 @@
             <div class="col-lg-12">
                 <div class="row tab-content">
                     <div class="card-header">
-                        <a href="{{route('course.create')}}" class="btn btn-primary">+ Add new</a>
+                        <a href="{{localeRoute('course.create')}}" class="btn btn-primary">+ Add new</a>
                     </div>
                     <div class="col-lg-12">
                         <div class="row">
@@ -46,11 +46,11 @@
                                             <div class="dropdown-menu dropdown-menu-right border py-0">
                                                 <div class="py-2">
                                                     <a class="dropdown-item"
-                                                        href="{{route('course.edit', encryptor('encrypt',$d->id))}}">Edit</a>
+                                                        href="{{localeRoute('course.edit', encryptor('encrypt',$d->id))}}">Edit</a>
                                                     <a class="dropdown-item text-danger" href="javascript:void(0);"
                                                         onclick="$('#form{{$d->id}}').submit()">Delete</a>
                                                     <form id="form{{$d->id}}"
-                                                        action="{{route('course.destroy', encryptor('encrypt',$d->id))}}"
+                                                        action="{{localeRoute('course.destroy', encryptor('encrypt',$d->id))}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')
@@ -65,7 +65,7 @@
                                                 <img src="{{asset('public/uploads/courses/'.$d->image)}}" class="w-100"
                                                     height="200" alt="">
                                             </div>
-                                            <h3 class="mt-4 mb-1">{{$d->title_en}}</h3>
+                                            <h3 class="mt-4 mb-1">{{$d->title}}</h3>
                                             <ul class="list-group mb-3 list-group-flush">
                                                 <li class="list-group-item px-0 d-flex justify-content-between">
                                                     <span>Difficulty</span>
@@ -75,7 +75,7 @@
                                                 </li>
                                                 <li class="list-group-item px-0 d-flex justify-content-between">
                                                     <span class="mb-0">Instructor :</span>
-                                                    <strong>{{$d->instructor?->name_en}}</strong>
+                                                    <strong>{{$d->instructor?->name}}</strong>
                                                 </li>
                                                 <li class="list-group-item px-0 d-flex justify-content-between">
                                                     <span class="mb-0">Category :</span>

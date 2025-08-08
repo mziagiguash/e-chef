@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('answer.index')}}">Answers</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('answer.index')}}">All Answer</a>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('answer.index')}}">Answers</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('answer.index')}}">All Answer</a>
                     </li>
                 </ol>
             </div>
@@ -61,18 +61,18 @@
                                             @forelse ($answer as $a)
                                             <tr>
                                                 <td>{{$a->id}}</td>
-                                                <td>{{$a->student?->name_en}}</td>
+                                                <td>{{$a->student?->name}}</td>
                                                 <td>{{$a->question?->content}}</td>
                                                 <td>{{$a->answer}}</td>
                                                 <td>
-                                                    <a href="{{route('answer.edit', encryptor('encrypt',$a->id))}}"
+                                                    <a href="{{localeRoute('answer.edit', encryptor('encrypt',$a->id))}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$a->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$a->id}}"
-                                                        action="{{route('answer.destroy', encryptor('encrypt',$a->id))}}"
+                                                        action="{{localeRoute('answer.destroy', encryptor('encrypt',$a->id))}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')

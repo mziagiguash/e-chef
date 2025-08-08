@@ -4,13 +4,46 @@
 
 @section('content')
 
+<style>
+
+.students-info-intro-end {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-width: 100%;
+}
+
+.enrolled-courses-text p,
+.completed-courses-text p {
+    word-break: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    font-size: 14px;
+    text-align: left;
+}
+
+
+    .enrolled-courses,
+    .completed-courses {
+        max-width: 220px;
+        font-size: 14px;
+    }
+    .students-info-intro-end,
+    .students-info-intro-end * {
+    font-family: 'Inter', sans-serif; /* Или любой основной шрифт проекта */
+    font-size: 14px;
+    line-height: 1.3;
+}
+</style>
+
 <!-- Breadcrumb Starts Here -->
 <div class="py-0">
     <div class="container">
         <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
             <ol class="breadcrumb align-items-center bg-transparent mb-0">
-                <li class="breadcrumb-item"><a href="index.html" class="fs-6 text-secondary">Home</a></li>
-                <li class="breadcrumb-item fs-6 text-secondary" aria-current="page">My Profile</li>
+                <li class="breadcrumb-item" ><a class="fs-6 text-secondary" href="{{ localeRoute('home') }}">{{ __('menu.home') }}</a></li>
+                <li class="breadcrumb-item" aria-current="page"><a class="fs-6 text-secondary" href="{{ localeRoute('studentdashboard') }}">{{ __('menu.dashboard') }}</a></li>
             </ol>
         </nav>
     </div>
@@ -28,14 +61,14 @@
                             <img src="{{ asset('public/uploads/students/' . $student_info->image) }}" alt="Student" />
                         </div>
                         <div class="text">
-                            <h5>{{$student_info->name_en}}</h5>
+                            <h5>{{$student_info->name}}</h5>
                             <p>{{$student_info->profession?$student_info->profession:'Student'}}</p>
                         </div>
                     </div>
                 </div>
                 <div>
                     <div class="students-info-intro-end">
-                        <div class="enrolled-courses">
+                        <div class="enrolled-courses row">
                             <div class="enrolled-courses-icon">
                                 <svg width="28" height="26" viewBox="0 0 28 26" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -50,11 +83,11 @@
                                 </svg>
                             </div>
                             <div class="enrolled-courses-text">
-                                <h6 class="font-title--xs">{{$enrollment?$enrollment->count():0}}</h6>
-                                <p class="fs-6 mt-1">Enrolled Courses</p>
+                                <h5>{{$enrollment?$enrollment->count():0}}</h5>
+                                <p>{{ __('stud_dashboard.enrolled_courses') }}</p>
                             </div>
                         </div>
-                        <div class="completed-courses">
+                        <div class="completed-courses row">
                             <div class="completed-courses-icon">
                                 <svg width="22" height="26" viewBox="0 0 22 26" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -67,8 +100,8 @@
                                 </svg>
                             </div>
                             <div class="completed-courses-text">
-                                <h5 class="font-title--xs">0</h5>
-                                <p class="fs-6 mt-1">Completed Courses</p>
+                                <h5>{{$enrollment?$enrollment->count():0}}</h5>
+                                <p>{{ __('stud_dashboard.completed_courses') }}</p>
                             </div>
                         </div>
                     </div>
@@ -76,37 +109,36 @@
             </div>
             <!-- Nav  -->
             <nav class="students-info-intro__nav">
-                <div class="nav" id="nav-tab" role="tablist">
-                    <button class="nav-link active" id="nav-profile-tab" data-bs-toggle="tab"
-                        data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile"
-                        aria-selected="true">Dashboard</button>
+    <div class="nav" id="nav-tab" role="tablist">
+        <button class="nav-link active" id="nav-profile-tab" data-bs-toggle="tab"
+            data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile"
+            aria-selected="true">{{ __('stud_dashboard.dashboard') }}</button>
 
-                    <button class="nav-link" id="nav-coursesall-tab" data-bs-toggle="tab"
-                        data-bs-target="#nav-coursesall" type="button" role="tab" aria-controls="nav-coursesall"
-                        aria-selected="false">All Courses</button>
+        <button class="nav-link" id="nav-coursesall-tab" data-bs-toggle="tab"
+            data-bs-target="#nav-coursesall" type="button" role="tab" aria-controls="nav-coursesall"
+            aria-selected="false">{{ __('stud_dashboard.all_courses') }}</button>
 
-                    <button class="nav-link" id="nav-activecourses-tab" data-bs-toggle="tab"
-                        data-bs-target="#nav-activecourses" type="button" role="tab" aria-controls="nav-activecourses"
-                        aria-selected="false">
-                        Active Courses
-                    </button>
+        <button class="nav-link" id="nav-activecourses-tab" data-bs-toggle="tab"
+            data-bs-target="#nav-activecourses" type="button" role="tab" aria-controls="nav-activecourses"
+            aria-selected="false">{{ __('stud_dashboard.active_courses') }}</button>
 
-                    <button class="nav-link" id="nav-completedcourses-tab" data-bs-toggle="tab"
-                        data-bs-target="#nav-completedcourses" type="button" role="tab"
-                        aria-controls="nav-completedcourses" aria-selected="false">
-                        Completed Courses
-                    </button>
+        <button class="nav-link" id="nav-completedcourses-tab" data-bs-toggle="tab"
+            data-bs-target="#nav-completedcourses" type="button" role="tab"
+            aria-controls="nav-completedcourses" aria-selected="false">{{ __('stud_dashboard.completed_courses_tab') }}</button>
 
-                    <button class="nav-link" id="nav-purchase-tab" data-bs-toggle="tab" data-bs-target="#nav-purchase"
-                        type="button" role="tab" aria-controls="nav-purchase" aria-selected="false">Purchase
-                        History</button>
+        <button class="nav-link" id="nav-purchase-tab" data-bs-toggle="tab"
+            data-bs-target="#nav-purchase" type="button" role="tab" aria-controls="nav-purchase"
+            aria-selected="false">{{ __('stud_dashboard.purchase_history') }}</button>
 
-                    <button class="nav-link "><a href="{{route('student_profile')}}"
-                            class="text-secondary">Profile</a></button>
+        <button class="nav-link">
+            <a href="{{ localeRoute('student_profile') }}" class="text-secondary">{{ __('stud_dashboard.profile') }}</a>
+        </button>
 
-                    <button class="nav-link "><a href="{{route('home')}}" class="text-secondary">Home</a></button>
-                </div>
-            </nav>
+        <button class="nav-link">
+            <a href="{{ localeRoute('home') }}" class="text-secondary">{{ __('stud_dashboard.home') }}</a>
+        </button>
+    </div>
+</nav>
         </div>
 
         <div class="students-info-main">
@@ -119,14 +151,11 @@
                             <div class="container">
                                 <div class="row">
                                     <div class="col-md-6 col-12 mx-auto text-center">
-                                        <h5 class="font-title--sm">Invest in your career with Us</h5>
-                                        <p class="my-4 font-para--lg">
-                                            Duis posuere maximus arcu eu tincidunt. Nam rutrum, nibh vitae tempus
-                                            venenatis, ex tortor ultricies
-                                            magna, et faucibus magna eros quis arcu.
+                                        <h5 class="font-title--sm">{{ __('stud_dashboard.invest_title') }}</h5>
+                                        <p class="my-4 font-para--lg">{{ __('stud_dashboard.invest_text') }}
                                         </p>
-                                        <a href="{{route('searchCourse')}}"
-                                            class="button button-md button--primary">Let’s Go</a>
+                                        <a href="{{localeRoute('searchCourse')}}"
+                                            class="button button-md button--primary">{{ __('stud_dashboard.invest_button') }}</a>
                                     </div>
                                 </div>
                             </div>
@@ -146,15 +175,15 @@
                                 </div>
                                 <div class="contentCard-bottom">
                                     <h5>
-                                        <a href="{{route('courseDetails', encryptor('encrypt', $a->course?->id))}}"
-                                            class="font-title--card">{{$a->course?->title_en}}</a>
+                                        <a href="{{localeRoute('courseDetails', encryptor('encrypt', $a->course?->id))}}"
+                                            class="font-title--card">{{$a->course?->title}}</a>
                                     </h5>
                                     <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                        <a href="{{route('instructorProfile', encryptor('encrypt', $a->course?->instructor->id))}}"
+                                        <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $a->course?->instructor->id))}}"
                                             class="contentCard-user d-flex align-items-center">
                                             <img src="{{asset('public/uploads/users/'.$a->course?->instructor?->image)}}"
                                                 alt="client-image" class="rounded-circle" height="34" width="34" />
-                                            <p class="font-para--md">{{$a->course?->instructor?->name_en}}</p>
+                                            <p class="font-para--md">{{$a->course?->instructor?->name}}</p>
                                         </a>
                                         <div class="contentCard-course--status d-flex align-items-center">
                                             <span class="percentage">43%</span>
@@ -162,7 +191,7 @@
                                         </div>
                                     </div>
                                     <a class="button button-md button--primary-outline w-100 my-3"
-                                        href="{{route('watchCourse', encryptor('encrypt', $a->course?->id))}}">Watch
+                                        href="{{localeRoute('watchCourse', encryptor('encrypt', $a->course?->id))}}">Watch
                                         Course</a>
                                     <div class="contentCard-watch--progress">
                                         <span class="percentage" style="width: 43%;"></span>
@@ -177,7 +206,7 @@
                                 <p class="my-4 font-para--lg">
                                     Your Course List is Empty!
                                 </p>
-                                <a href="{{route('searchCourse')}}" class="button button-md button--primary">Enroll
+                                <a href="{{localeRoute('searchCourse')}}" class="button button-md button--primary">Enroll
                                     Now!</a>
                             </div>
                         </div>
@@ -500,14 +529,13 @@
                                             <div class="text d-flex flex-column flex-lg-row">
                                                 <div class="text-main">
                                                     <h6>
-                                                        <a href="#">{{$data->title_en}}</a>
+                                                        <a href="#">{{$data->title}}</a>
                                                     </h6>
-                                                    <p> By 
+                                                    <p> By
                                                         <a href="#">
                                                          {{$data->instructor}}</a>
                                                     </p>
                                                 </div>
-                                                <p class="ms-2">{{$data->price?('৳'.$data->price):'Free'}}</p>
                                             </div>
                                         </div>
                                         @endforeach

@@ -22,12 +22,12 @@ class AuthenticationController extends Controller
     {
         try {
             $user = new User;
-            $user->name_en = $request->name;
-            $user->contact_en = $request->contact_en;
+            $user->name = $request->name;
+            $user->contact = $request->contact;
             $user->email = $request->email;
             $user->password = Hash::make($request->password);
             $user->role_id = 4;
-            // dd($request->all()); 
+            // dd($request->all());
             if ($user->save())
                 return redirect('login')->with('success', 'Successfully Registered');
             else
@@ -46,7 +46,7 @@ class AuthenticationController extends Controller
     public function signInCheck(SignInRequest $request)
     {
         try {
-            $user = User::where('contact_en', $request->username)->orWhere('email', $request->username)->first();
+            $user = User::where('contact', $request->username)->orWhere('email', $request->username)->first();
             if ($user) {
                 if ($user->status == 1) {
                     if (Hash::check($request->password, $user->password)) {
@@ -69,7 +69,7 @@ class AuthenticationController extends Controller
         return request()->session()->put(
             [
                 'userId' => encryptor('encrypt', $user->id),
-                'userName' => encryptor('encrypt', $user->name_en),
+                'userName' => encryptor('encrypt', $user->name),
                 'emailAddress' => encryptor('encrypt', $user->email),
                 'role_id' => encryptor('encrypt', $user->role_id),
                 'accessType' => encryptor('encrypt', $user->full_access),

@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('option.index')}}">Options</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('option.index')}}">All Option</a>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('option.index')}}">Options</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('option.index')}}">All Option</a>
                     </li>
                 </ol>
             </div>
@@ -44,7 +44,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">All Options List </h4>
-                                <a href="{{route('option.create')}}" class="btn btn-primary">+ Add new</a>
+                                <a href="{{localeRoute('option.create')}}" class="btn btn-primary">+ Add new</a>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -69,14 +69,14 @@
                                                         badge-success":"badge-danger"}}">{{ $o->is_correct == 1 ? 'Correct' : 'Wrong' }}</span>
                                                 </td>
                                                 <td>
-                                                    <a href="{{route('option.edit', encryptor('encrypt',$o->id))}}"
+                                                    <a href="{{localeRoute('option.edit', encryptor('encrypt',$o->id))}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$o->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$o->id}}"
-                                                        action="{{route('option.destroy', encryptor('encrypt',$o->id))}}"
+                                                        action="{{localeRoute('option.destroy', encryptor('encrypt',$o->id))}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')

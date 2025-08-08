@@ -62,7 +62,7 @@
                         <div id="categoryCollapse" class="accordion-collapse collapse show"
                             aria-labelledby="categoryAcc" data-bs-parent="#sidebarFilter">
                             <div class="accordion-body">
-                                <form action="{{route('searchCourse')}}" method="get">
+                                <form action="{{localeRoute('searchCourse')}}" method="get">
                                     @csrf
                                     <div class="accordion-body__item">
                                         <div class="check-box">
@@ -372,21 +372,21 @@
                     <div class="col-md-6 mb-4">
                         <div class="contentCard contentCard--course">
                             <div class="contentCard-top">
-                                <a href="{{route('courseDetails', encryptor('encrypt', $c->id))}}"><img
+                                <a href="{{localeRoute('courseDetails', encryptor('encrypt', $c->id))}}"><img
                                         src="{{asset('public/uploads/courses/'.$c->image)}}" alt="images"
                                         class="img-fluid" /></a>
                             </div>
                             <div class="contentCard-bottom">
                                 <h5>
-                                    <a href="{{route('courseDetails', ['id' => encryptor('encrypt', $c->id)])}}"
-                                        class="font-title--card">{{$c->title_en}}</a>
+                                    <a href="{{localeRoute('courseDetails', ['id' => encryptor('encrypt', $c->id)])}}"
+                                        class="font-title--card">{{$c->title}}</a>
                                 </h5>
                                 <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                    <a href="{{route('instructorProfile', encryptor('encrypt', $c->instructor?->id))}}"
+                                    <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $c->instructor?->id))}}"
                                         class="contentCard-user d-flex align-items-center">
                                         <img src="{{asset('public/uploads/users/'.$c->instructor?->image)}}"
                                             alt="Instructor Image" class="rounded-circle" height="34" width="34" />
-                                        <p class="font-para--md">{{$c->instructor?->name_en}}</p>
+                                        <p class="font-para--md">{{$c->instructor?->name}}</p>
                                     </a>
                                     <div class="price">
     <span>

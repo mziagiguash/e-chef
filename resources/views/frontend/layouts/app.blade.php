@@ -84,227 +84,210 @@
 
 <body @yield('body-attr')>
 
-    <!-- Header Starts Here -->
-    <header @yield('header-attr')>
-        <nav class="navbar navbar-expand-xl navbar-light bg-transparent">
-            <div class="container">
-@php
-    $locales = ['en' => '🇺🇸', 'ru' => '🇷🇺', 'ka' => '🇬🇪'];
-    $currentLocale = app()->getLocale();
+   <body @yield('body-attr')>
+    
+@stack('scripts')
+<!-- Header Starts Here -->
+<header @yield('header-attr')>
+    <nav class="navbar navbar-expand-xl navbar-light bg-transparent">
+        <div class="container">
 
-    // Текущий путь без локали (если в начале есть локаль, убираем её)
-    $path = request()->path();
-    $segments = explode('/', $path);
-    if (in_array($segments[0] ?? '', array_keys($locales))) {
-        array_shift($segments);
-    }
-    $pathWithoutLocale = implode('/', $segments);
-@endphp
+            @php
+                $currentLocale = app()->getLocale();
+                $path = request()->path();
+                $segments = explode('/', $path);
+                if (in_array($segments[0] ?? '', array_keys($locales))) {
+                    array_shift($segments);
+                }
+                $pathWithoutLocale = implode('/', $segments);
+            @endphp
 
-<div class="nav-item position-relative language-switcher" style="cursor: pointer;">
-    <div class="d-flex align-items-center" style="font-size: 24px;">
-        {{ $locales[$currentLocale] ?? '🌐' }}
-    </div>
+            <!-- Language Switcher -->
+            <div class="nav-item position-relative language-switcher" style="cursor: pointer;">
+                <div class="d-flex align-items-center" style="font-size: 24px;">
+                    {{ $locales[$currentLocale] ?? '🌐' }}
+                </div>
 
-    <div class="language-menu p-0 border rounded shadow position-absolute bg-white"
-         style="top: 100%; left: 0; min-width: 50px; display: none; flex-direction: column; z-index: 1050;">
-        @foreach ($locales as $locale => $flag)
-            @if ($locale !== $currentLocale)
-                <a href="{{ url($locale . '/' . $pathWithoutLocale) }}"
-                   class="px-3 py-2 text-center text-decoration-none"
-                   style="font-size: 24px; color: inherit;">
-                    {{ $flag }}
-                </a>
-            @endif
-        @endforeach
-    </div>
-</div>
-
-<script>
-    // Простейший скрипт для показа/скрытия меню по клику (можно заменить на hover через CSS)
-    document.querySelector('.language-switcher').addEventListener('click', function() {
-        const menu = this.querySelector('.language-menu');
-        menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
-    });
-
-    // Закрыть меню при клике вне области переключателя
-    document.addEventListener('click', function(e) {
-        const switcher = document.querySelector('.language-switcher');
-        if (!switcher.contains(e.target)) {
-            const menu = switcher.querySelector('.language-menu');
-            if (menu) menu.style.display = 'none';
-        }
-    });
-</script>
-
-
-                <!-- Logo -->
-                <a class="navbar-brand" href="{{route('home')}}">
-                    <img src="{{asset('public/frontend/dist/images/logo/logo.png')}}" alt="Logo" class="img-fluid" />
-                </a>
-                <button class="menu-icon-container">
-                    <span class="menu-icon"></span>
-                </button>
-                <!-- Navbar Item -->
-                <div class="collapse navbar-collapse d-none d-xl-block d-none d-xl-block" id="navbarSupportedContent">
-                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="{{route('home')}}">მთავარი</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="{{route('searchCourse')}}">კურსები</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="{{route('about')}}">ჩვენ შესახებ</a>
-                        </li>
-                        {{-- <li class="nav-item">
-                            <a class="nav-link" href="http://localhost:8081/">
-                                Events
+                <div class="language-menu p-0 border rounded shadow position-absolute bg-white"
+                     style="top: 100%; left: 0; min-width: 50px; display: none; flex-direction: column; z-index: 1050;">
+                    @foreach ($locales as $locale => $flag)
+                        @if ($locale !== $currentLocale)
+                            <a href="{{ url($locale . '/' . $pathWithoutLocale) }}"
+                               class="px-3 py-2 text-center text-decoration-none"
+                               style="font-size: 24px; color: inherit;">
+                                {{ $flag }}
                             </a>
-                        </li> --}}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{route('contact')}}">კონტაქტი</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{route('dashboard')}}">ადმინი</a>
-                        </li>
-                    </ul>
-                    <div class="d-flex align-items-center justify-content-between rightContent">
-                        <form class="header__Search-form" id="searchForm">
-                            <button type="button" class="border-0 bg-transparent header__Search-button"
-                                onclick="openSearch()">
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="9.19522" cy="9.19518" r="7.61714" stroke="#35343E" stroke-width="1.6"
-                                        stroke-linecap="round" stroke-linejoin="round"></circle>
-                                    <path d="M15.0493 15.4866L18.3493 18.778" stroke="#35343E" stroke-width="1.6"
-                                        stroke-linecap="round" stroke-linejoin="round"></path>
-                                </svg>
-                            </button>
-                            <div id="myOverlay" class="overlay">
-                                <span class="closebtn" onclick="closeSearch()" title="Close Overlay">×</span>
-                                <div class="overlay-content">
-                                    <div>
-                                        <input type="text" placeholder="Search.." name="search" />
-                                        <button type="button">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none" stroke="#ffff" stroke-width="2"
-                                                stroke-linecap="round" stroke-linejoin="round"
-                                                class="feather feather-search">
-                                                <circle cx="11" cy="11" r="8"></circle>
-                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                        <a href="{{route('cart')}}" class="cart-nav border-0 bg-transparent mx-3">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M2.87778 2.51099L2.77634 2.50038C2.40716 2.48688 2.07562 2.74796 2.01087 3.12209L2.00026 3.22354C1.98676 3.59272 2.24784 3.92426 2.62197 3.98901L4.13098 4.25L5.04551 15.1457L5.06443 15.3095C5.24843 16.5519 6.31708 17.486 7.58988 17.486H18.5019L18.6662 17.4808C19.8626 17.4044 20.8545 16.4996 21.0291 15.2978L21.9781 8.73941L21.9945 8.58877C22.0819 7.38969 21.132 6.349 19.9089 6.349H5.81198L5.57725 3.54727L5.55956 3.43641C5.49112 3.14809 5.25673 2.92273 4.95778 2.87099L2.87778 2.51099ZM7.47394 15.9797C6.97867 15.9255 6.58258 15.5277 6.54028 15.0207L5.93798 7.849H19.9089L19.997 7.85548C20.3128 7.90242 20.5409 8.19769 20.4936 8.52465L19.5446 15.0826L19.5208 15.1998C19.4005 15.6584 18.985 15.986 18.5019 15.986H7.58988L7.47394 15.9797ZM5.90828 20.5853C5.90828 19.7492 6.58595 19.0703 7.42228 19.0703C8.25849 19.0703 8.93728 19.7491 8.93728 20.5853C8.93728 21.4216 8.25838 22.0993 7.42228 22.0993C6.58606 22.0993 5.90828 21.4215 5.90828 20.5853ZM17.1597 20.5853C17.1597 19.7491 17.8385 19.0703 18.6747 19.0703C19.5109 19.0703 20.1897 19.7491 20.1897 20.5853C20.1897 21.4216 19.5108 22.0993 18.6747 22.0993C17.8386 22.0993 17.1597 21.4216 17.1597 20.5853ZM17.6484 10.795C17.6484 10.3808 17.3126 10.045 16.8984 10.045H14.1254L14.0236 10.0518C13.6575 10.1015 13.3754 10.4153 13.3754 10.795C13.3754 11.2092 13.7112 11.545 14.1254 11.545H16.8984L17.0001 11.5382C17.3662 11.4885 17.6484 11.1747 17.6484 10.795Z"
-                                    fill="#35343E"></path>
-                            </svg>
-                            <span class="badge bg-primary">{{ count((array) session('cart')) }}</span>
-                            <span class="visually-hidden">დამატებულია</span>
-                        </a>
-                        @if(request()->session()->get('studentLogin'))
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Logo -->
+            <a class="navbar-brand" href="{{ localeRoute('home') }}">
+                <img src="{{ asset('public/frontend/dist/images/logo/logo.png') }}" alt="Logo" class="img-fluid" />
+            </a>
+
+            <button class="menu-icon-container">
+                <span class="menu-icon"></span>
+            </button>
+
+            <!-- Navbar Items -->
+            <div class="collapse navbar-collapse d-none d-xl-block" id="navbarSupportedContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ localeRoute('home') }}">{{ __('menu.home') }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ localeRoute('searchCourse') }}">{{ __('menu.courses') }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ localeRoute('about') }}">{{ __('menu.about_us') }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ localeRoute('contact') }}">{{ __('menu.contacts') }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ localeRoute('dashboard') }}">{{ __('menu.admin') }}</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center justify-content-between rightContent">
+
+    {{-- Search Form --}}
+    <form class="header__Search-form" id="searchForm">
+        <button type="button" class="border-0 bg-transparent header__Search-button" onclick="openSearch()">
+            {{-- SVG Search Icon --}}
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="9.19522" cy="9.19518" r="7.61714" stroke="#35343E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15.0493 15.4866L18.3493 18.778" stroke="#35343E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+
+        <div id="myOverlay" class="overlay">
+            <span class="closebtn" onclick="closeSearch()" title="Close Overlay">×</span>
+            <div class="overlay-content">
+                <input type="text" placeholder="Search.." name="search" />
+                <button type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </form>
+
+    {{-- Cart --}}
+    <a href="{{ localeRoute('cart') }}" class="cart-nav border-0 bg-transparent mx-3">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M2.87778 2.51099L2.77634 2.50038C2.40716 2.48688 2.07562 2.74796 2.01087 3.12209L2.00026 3.22354C1.98676 3.59272 2.24784 3.92426 2.62197 3.98901L4.13098 4.25L5.04551 15.1457L5.06443 15.3095C5.24843 16.5519 6.31708 17.486 7.58988 17.486H18.5019L18.6662 17.4808C19.8626 17.4044 20.8545 16.4996 21.0291 15.2978L21.9781 8.73941L21.9945 8.58877C22.0819 7.38969 21.132 6.349 19.9089 6.349H5.81198L5.57725 3.54727L5.55956 3.43641C5.49112 3.14809 5.25673 2.92273 4.95778 2.87099L2.87778 2.51099ZM7.47394 15.9797C6.97867 15.9255 6.58258 15.5277 6.54028 15.0207L5.93798 7.849H19.9089L19.997 7.85548C20.3128 7.90242 20.5409 8.19769 20.4936 8.52465L19.5446 15.0826L19.5208 15.1998C19.4005 15.6584 18.985 15.986 18.5019 15.986H7.58988L7.47394 15.9797ZM5.90828 20.5853C5.90828 19.7492 6.58595 19.0703 7.42228 19.0703C8.25849 19.0703 8.93728 19.7491 8.93728 20.5853C8.93728 21.4216 8.25838 22.0993 7.42228 22.0993C6.58606 22.0993 5.90828 21.4215 5.90828 20.5853ZM17.1597 20.5853C17.1597 19.7491 17.8385 19.0703 18.6747 19.0703C19.5109 19.0703 20.1897 19.7491 20.1897 20.5853C20.1897 21.4216 19.5108 22.0993 18.6747 22.0993C17.8386 22.0993 17.1597 21.4216 17.1597 20.5853ZM17.6484 10.795C17.6484 10.3808 17.3126 10.045 16.8984 10.045H14.1254L14.0236 10.0518C13.6575 10.1015 13.3754 10.4153 13.3754 10.795C13.3754 11.2092 13.7112 11.545 14.1254 11.545H16.8984L17.0001 11.5382C17.3662 11.4885 17.6484 11.1747 17.6484 10.795Z" fill="#35343E"/>
+        </svg>
+        <span class="badge bg-primary">{{ count((array) session('cart')) }}</span>
+        <span class="visually-hidden">{{ __('menu.items_added') }}</span>
+    </a>
+
+    {{-- User --}}
+ @if(request()->session()->get('studentLogin'))
                         <div class="dropdown user-image ms-3" id="imageDropdown">
-                            <a href="{{route('studentdashboard')}}" onclick="toggleDropdown(event)">
+                            <a href="{{localeRoute('studentdashboard')}}" onclick="toggleDropdown(event)">
                                 <img src="{{asset('public/uploads/students/'.request()->session()->get('image'))}}"
                                     alt="Student Profile" height="48" width="48"/>
                             </a>
                             <div class="dropdown-content">
-                                <a href="{{route('student_profile')}}">პროფილი</a>
-                                <a href="{{route('studentdashboard')}}">კაბინეტი</a>
-                                <a href="{{route('studentlogOut')}}" class="text-danger">გამოსვლა</a>
+                                <a href="{{localeRoute('student_profile')}}">Profile</a>
+                                <a href="{{localeRoute('studentdashboard')}}">Dashboard</a>
+                                <a href="{{localeRoute('studentlogOut')}}" class="text-danger">Logout</a>
                             </div>
                         </div>
                         @else
-                        <a href="{{ route('studentLogin', ['locale' => app()->getLocale()]) }}" class="button button--text">შესვლა</a>
-                        <a href="{{ route('studentRegister', ['locale' => app()->getLocale()]) }}" class="button button--dark">რეგისტრაცია</a>
+                        <a href="{{localeRoute('studentLogin')}}" class="button button--text">Sign in</a>
+                        <a href="{{localeRoute('studentRegister')}}" class="button button--dark">Sign Up</a>
                         @endif
-                    </div>
-                </div>
+</div>
 
-                {{-- Mobile Navbar --}}
-                <div class="navbar-mobile">
-                    <div>
-                        <div class="navbar-mobile__top">
-                            <a href="index.html">
-                                <img src="{{asset('public/frontend/dist/images/logo/logo.png')}}" alt="brand"
-                                    class="img-fluid" />
-                            </a>
-                            <div>
-                                <a href="{{ route('cart') }}" class="cart-nav">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+            </div>
+
+{{-- Mobile Navbar --}}
+<div class="navbar-mobile">
+    <div>
+        <div class="navbar-mobile__top">
+            <a href="{{ localeRoute('home') }}">
+                <img src="{{ asset('public/frontend/dist/images/logo/logo.png') }}" alt="brand"
+                     class="img-fluid" />
+            </a>
+            <div>
+                <a href="{{ localeRoute('cart') }}" class="cart-nav">
+                    {{-- SVG Cart --}}
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path fill-rule="evenodd" clip-rule="evenodd"
                                             d="M2.87778 2.51099L2.77634 2.50038C2.40716 2.48688 2.07562 2.74796 2.01087 3.12209L2.00026 3.22354C1.98676 3.59272 2.24784 3.92426 2.62197 3.98901L4.13098 4.25L5.04551 15.1457L5.06443 15.3095C5.24843 16.5519 6.31708 17.486 7.58988 17.486H18.5019L18.6662 17.4808C19.8626 17.4044 20.8545 16.4996 21.0291 15.2978L21.9781 8.73941L21.9945 8.58877C22.0819 7.38969 21.132 6.349 19.9089 6.349H5.81198L5.57725 3.54727L5.55956 3.43641C5.49112 3.14809 5.25673 2.92273 4.95778 2.87099L2.87778 2.51099ZM7.47394 15.9797C6.97867 15.9255 6.58258 15.5277 6.54028 15.0207L5.93798 7.849H19.9089L19.997 7.85548C20.3128 7.90242 20.5409 8.19769 20.4936 8.52465L19.5446 15.0826L19.5208 15.1998C19.4005 15.6584 18.985 15.986 18.5019 15.986H7.58988L7.47394 15.9797ZM5.90828 20.5853C5.90828 19.7492 6.58595 19.0703 7.42228 19.0703C8.25849 19.0703 8.93728 19.7491 8.93728 20.5853C8.93728 21.4216 8.25838 22.0993 7.42228 22.0993C6.58606 22.0993 5.90828 21.4215 5.90828 20.5853ZM17.1597 20.5853C17.1597 19.7491 17.8385 19.0703 18.6747 19.0703C19.5109 19.0703 20.1897 19.7491 20.1897 20.5853C20.1897 21.4216 19.5108 22.0993 18.6747 22.0993C17.8386 22.0993 17.1597 21.4216 17.1597 20.5853ZM17.6484 10.795C17.6484 10.3808 17.3126 10.045 16.8984 10.045H14.1254L14.0236 10.0518C13.6575 10.1015 13.3754 10.4153 13.3754 10.795C13.3754 11.2092 13.7112 11.545 14.1254 11.545H16.8984L17.0001 11.5382C17.3662 11.4885 17.6484 11.1747 17.6484 10.795Z"
                                             fill="#35343E"></path>
                                     </svg>
-                                    {{-- <span class="badge bg-primary">2</span> --}}
-                                    <span class="badge bg-primary">{{ count((array) session('cart')) }}</span>
-                                    <span class="visually-hidden">დამატებულია</span>
-                                </a>
-                                <button class="navbar-mobile--cross">
-                                    <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor"
+                    <span class="badge bg-primary">{{ count((array) session('cart')) }}</span>
+                    <span class="visually-hidden">{{ __('menu.items_added') }}</span>
+                </a>
+                <button class="navbar-mobile--cross">
+                    {{-- SVG Close Icon --}}
+                    <svg width="20" height="19" viewBox="0 0 20 19" fill="currentColor"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path d="M14.5967 4.59668L5.40429 13.7891" stroke="currentColor"
                                             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                                         <path d="M5.40332 4.59668L14.5957 13.7891" stroke="currentColor"
                                             stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="navbar-mobile__menu">
-                            <ul class="navbar-mobile__menu-list">
-                                <li class="active navbar-mobile__menu-item">
-                                    <a href="{{route('home')}}">
-                                        <span class="navbar-mobile__menu-link">მთავარი</span>
-                                    </a>
-                                </li>
-                                <li class="navbar-mobile__menu-item">
-                                    <a href="{{route('searchCourse')}}">
-                                        <span class="navbar-mobile__menu-link">კურსები</span>
-                                    </a>
-                                </li>
-                                <li class="navbar-mobile__menu-item">
-                                    <a href="{{route('about')}}">
-                                        <span class="navbar-mobile__menu-link">ჩვენ შესახებ</span>
-                                    </a>
-                                </li>
-                                <li class="navbar-mobile__menu-item">
-                                    <a href="#">
-                                        <span class="navbar-mobile__menu-link">გვერდები</span>
-                                        <span class="navbar-mobile__menu-dropicon">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                </button>
+            </div>
+        </div>
+
+        <div class="navbar-mobile__menu">
+            <ul class="navbar-mobile__menu-list">
+                <li class="active navbar-mobile__menu-item">
+                    <a href="{{ localeRoute('home') }}">
+                        <span class="navbar-mobile__menu-link">{{ __('menu.home') }}</span>
+                    </a>
+                </li>
+                <li class="navbar-mobile__menu-item">
+                    <a href="{{ localeRoute('searchCourse') }}">
+                        <span class="navbar-mobile__menu-link">{{ __('menu.courses') }}</span>
+                    </a>
+                </li>
+                <li class="navbar-mobile__menu-item">
+                    <a href="{{ localeRoute('about') }}">
+                        <span class="navbar-mobile__menu-link">{{ __('menu.about_us') }}</span>
+                    </a>
+                </li>
+                <li class="navbar-mobile__menu-item">
+                    <a href="#">
+                        <span class="navbar-mobile__menu-link">{{ __('menu.pages') }}</span>
+                        <span class="navbar-mobile__menu-dropicon">
+                            {{-- SVG Chevron --}}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                                 stroke-linecap="round" stroke-linejoin="round"
                                                 class="feather feather-chevron-right">
                                                 <polyline points="9 18 15 12 9 6"></polyline>
                                             </svg>
-                                        </span>
-                                    </a>
-                                    <ul class="navbar-mobile__menu-dropmenu">
-                                        <li><a href="{{route('searchCourse')}}">კურსები</a></li>
-                                        <li><a href="{{route('student_profile')}}">სტუდენტის პროფილი</a></li>
-                                        <li><a href="{{route('about')}}">ჩვენ შესახებ</a></li>
-                                        <li><a href="{{route('contact')}}">კონტაქტი</a></li>
-                                    </ul>
-                                </li>
-                                <li class="navbar-mobile__menu-item">
-                                    <a href="{{route('contact')}}">
-                                        <span class="navbar-mobile__menu-link">კონტაქტი</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="nav-mobile__footer">
-                        <ul class="social-icons social-icons--outline justify-content-center">
+                        </span>
+                    </a>
+                    <ul class="navbar-mobile__menu-dropmenu">
+                        <li><a href="{{ localeRoute('searchCourse') }}">{{ __('menu.courses') }}</a></li>
+                        <li><a href="{{ localeRoute('student_profile') }}">{{ __('menu.profile') }}</a></li>
+                        <li><a href="{{ localeRoute('about') }}">{{ __('menu.about_us') }}</a></li>
+                        <li><a href="{{ localeRoute('contact') }}">{{ __('menu.contacts') }}</a></li>
+                    </ul>
+                </li>
+                <li class="navbar-mobile__menu-item">
+                    <a href="{{ localeRoute('contact') }}">
+                        <span class="navbar-mobile__menu-link">{{ __('menu.contacts') }}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="nav-mobile__footer">
+        <ul class="social-icons social-icons--outline justify-content-center">
                             <li>
                                 <a href="#">
                                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
@@ -368,28 +351,28 @@
                                 </a>
                             </li>
                         </ul>
-                    </div>
-                </div>
+    </div>
+</div>
             </div>
         </nav>
     </header>
 
     @yield('content')
 
-    <!-- Footer Starts Here -->
-    <footer class="footer @yield('footer-class')">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="footer__wrapper">
-                        <div class="footer__wrapper_logo">
-                            <img src="{{asset('public/frontend/dist/images/logo/footerlogo.png')}}" alt="logo"
-                                class="img-fluid" />
-                        </div>
-                        <p>
-                           Professional School "Interservise"
-                        </p>
-                        <div class="footer__wrapper_social d-none d-lg-block">
+<!-- Footer Starts Here -->
+<footer class="footer @yield('footer-class')">
+    <div class="container">
+        <div class="row">
+            <!-- Логотип и описание -->
+            <div class="col-lg-6">
+                <div class="footer__wrapper">
+                    <div class="footer__wrapper_logo">
+                        <img src="{{ asset('public/frontend/dist/images/logo/footerlogo.png') }}" alt="logo" class="img-fluid" />
+                    </div>
+                    <p>Professional School "Interservise"</p>
+
+                    <!-- Соцсети (desktop) -->
+                    <div class="footer__wrapper_social d-none d-lg-block">
                             <ul>
                                 <li>
                                     <a href="#">
@@ -454,44 +437,52 @@
                                 </li>
                             </ul>
                         </div>
-                    </div>
                 </div>
-                <div class="col-lg-2 col-sm-4 col-6">
-                    <div class="footer__list">
-                        <h6>Company</h6>
-                        <ul>
-                            <li><a href="about.html">About Us</a></li>
-                            <li><a href="course-search.html">Courses</a></li>
-                            <li><a href="#">career</a></li>
-                            <li><a href="#">Affiliate</a></li>
-                        </ul>
-                    </div>
+            </div>
+
+            <!-- Company -->
+            <div class="col-lg-2 col-sm-4 col-6">
+                <div class="footer__list">
+                    <h6>{{ __('footer.company') }}</h6>
+                    <ul>
+                        <li><a href="{{ localeRoute('about') }}">{{ __('menu.about_us') }}</a></li>
+                        <li><a href="{{ localeRoute('searchCourse') }}">{{ __('menu.courses') }}</a></li>
+                        <li><a href="#">{{ __('footer.career') }}</a></li>
+                        <li><a href="#">{{ __('footer.affiliate') }}</a></li>
+                    </ul>
                 </div>
-                <div class="col-lg-2 col-sm-4 col-6">
-                    <div class="footer__list">
-                        <h6>Support</h6>
-                        <ul>
-                            <li><a href="#">Help &amp; Supports </a></li>
-                            <li><a href="#">Pravacy Polocy</a></li>
-                            <li><a href="faq.html">FAQs</a></li>
-                            <li><a href="contact.html">Contact Us</a></li>
-                        </ul>
-                    </div>
+            </div>
+
+            <!-- Support -->
+            <div class="col-lg-2 col-sm-4 col-6">
+                <div class="footer__list">
+                    <h6>{{ __('footer.support') }}</h6>
+                    <ul>
+                        <li><a href="#">{{ __('footer.help_support') }}</a></li>
+                        <li><a href="#">{{ __('footer.privacy_policy') }}</a></li>
+                        <li><a href="faq.html">{{ __('footer.faqs') }}</a></li>
+                        <li><a href="{{ localeRoute('contact') }}">{{ __('menu.contacts') }}</a></li>
+                    </ul>
                 </div>
-                <div class="col-lg-2 col-sm-4 col-6">
-                    <div class="footer__list">
-                        <h6>Quick Links</h6>
-                        <ul>
-                            <li><a href="event-search.html">Events</a></li>
-                            <li><a href="become-instructor.html">Become a Instructor</a></li>
-                            <li><a href="#">Partnerships</a></li>
-                            <li><a href="#">Get the app</a></li>
-                        </ul>
-                    </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="col-lg-2 col-sm-4 col-6">
+                <div class="footer__list">
+                    <h6>{{ __('footer.quick_links') }}</h6>
+                    <ul>
+                        <li><a href="event-search.html">{{ __('footer.events') }}</a></li>
+                        <li><a href="become-instructor.html">{{ __('footer.become_instructor') }}</a></li>
+                        <li><a href="#">{{ __('footer.partnerships') }}</a></li>
+                        <li><a href="#">{{ __('footer.get_app') }}</a></li>
+                    </ul>
                 </div>
-                <div class="col-12 d-block d-lg-none">
-                    <div class="footer__wrapper_social d-flex my-4">
-                        <ul>
+            </div>
+
+            <!-- Соцсети (mobile) -->
+            <div class="col-12 d-block d-lg-none">
+                <div class="footer__wrapper_social d-flex my-4">
+                     <ul>
                             <li>
                                 <a href="#">
                                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
@@ -554,76 +545,118 @@
                                 </a>
                             </li>
                         </ul>
-                    </div>
                 </div>
             </div>
         </div>
-        <div class="footer__bottom">
-            <div class="container">
-                <div class="footer__bottom-content">
-                    <div class="footer__bottom_copyright">
-                        <p>I.E. Mzia Giguashvili - All rights reserved © 2025</p>
-                    </div>
-                    <div class="footer__bottom_topbutton">
-                        <a href="#">
-                            Go To Top
-                            <div class="icon ms-2">
-                                <svg width="10" height="6" viewBox="0 0 10 6" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9 5L5 1L1 5" stroke="white" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
-                                </svg>
-                            </div>
-                        </a>
-                    </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer__bottom">
+        <div class="container">
+            <div class="footer__bottom-content d-flex justify-content-between align-items-center">
+                <div class="footer__bottom_copyright">
+                    &copy; {{ date('Y') }} Professional School "Interservise". {{ __('footer.copyright') }}
+                </div>
+                <div class="footer__bottom_topbutton">
+                    <a href="#">
+                        Go To Top
+                        <div class="icon ms-2">
+                            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L5 1L1 5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
-    </footer>
+    </div>
+</footer>
 
-    <script src="{{asset('public/frontend/src/js/jquery.min.js')}}"></script>
-    <script src="{{asset('public/frontend/src/js/bootstrap.bundle.min.js')}}"></script>
-    <script src="{{asset('public/frontend/src/scss/vendors/plugin/js/isotope.pkgd.min.js')}}"></script>
-    <script src="{{asset('public/frontend/src/scss/vendors/plugin/js/jquery.magnific-popup.min.js')}}"></script>
-    <script src="{{asset('public/frontend/src/scss/vendors/plugin/js/slick.min.js')}}"></script>
-    <script src="{{asset('public/frontend/src/scss/vendors/plugin/js/jquery.nice-select.min.js')}}"></script>
-    <script src="{{asset('public/frontend/src/js/app.js')}}"></script>
-    <script src="{{asset('public/frontend/dist/main.js')}}"></script>
-
-    <script>
-        function toggleDropdown(event) {
-            event.preventDefault();
-            var dropdown = document.getElementById('imageDropdown');
-            dropdown.classList.toggle('active');
-
-            // Close the dropdown when clicking somewhere else on the page
-            document.body.addEventListener('click', function (e) {
-                if (!dropdown.contains(e.target)) {
-                    dropdown.classList.remove('active');
-                }
+<!-- Scroll to Top -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const goToTop = document.getElementById('goToTop');
+        if (goToTop) {
+            goToTop.addEventListener('click', function (e) {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         }
-    </script>
+    });
+</script>
 
-    {{-- TOASTER --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" />
-    <script>
+<!-- Core JS Files -->
+<script src="{{ asset('public/frontend/src/js/jquery.min.js') }}"></script>
+<script src="{{ asset('public/frontend/src/js/bootstrap.bundle.min.js') }}"></script>
+
+<!-- Plugin JS Files -->
+<script src="{{ asset('public/frontend/src/scss/vendors/plugin/js/isotope.pkgd.min.js') }}"></script>
+<script src="{{ asset('public/frontend/src/scss/vendors/plugin/js/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ asset('public/frontend/src/scss/vendors/plugin/js/slick.min.js') }}"></script>
+<script src="{{ asset('public/frontend/src/scss/vendors/plugin/js/jquery.nice-select.min.js') }}"></script>
+
+<!-- App & Compiled JS -->
+<script src="{{ asset('public/frontend/src/js/app.js') }}"></script>
+<script src="{{ asset('public/frontend/dist/main.js') }}"></script>
+
+<!-- Dropdown Toggle Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const userImage = document.querySelector('.dropdown.user-image');
+        if (userImage) {
+            userImage.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const content = this.querySelector('.dropdown-content');
+                if (content) content.classList.toggle('show');
+            });
+
+            document.addEventListener('click', function () {
+                document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+            });
+        }
+    });
+
+    function toggleDropdown(event) {
+        event.preventDefault();
+        const dropdown = document.getElementById('imageDropdown');
+        if (dropdown) {
+            dropdown.classList.toggle('active');
+
+            // Remove previous listener to avoid multiple triggers
+            document.body.removeEventListener('click', closeDropdown);
+            document.body.addEventListener('click', closeDropdown);
+        }
+    }
+
+    function closeDropdown(e) {
+        const dropdown = document.getElementById('imageDropdown');
+        if (dropdown && !dropdown.contains(e.target)) {
+            dropdown.classList.remove('active');
+        }
+    }
+</script>
+
+<!-- TOASTER -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
         @if(Session::has('success'))
-        				toastr.success("{{ Session::get('success') }}");
-        		@endif
-        		@if(Session::has('info'))
-        				toastr.info("{{ Session::get('info') }}");
-        		@endif
-        		@if(Session::has('warning'))
-        				toastr.warning("{{ Session::get('warning') }}");
-        		@endif
-        		@if(Session::has('error'))
-        				toastr.error("{{ Session::get('error') }}");
-        		@endif
-    </script>
+            toastr.success("{{ Session::get('success') }}");
+        @endif
+        @if(Session::has('info'))
+            toastr.info("{{ Session::get('info') }}");
+        @endif
+        @if(Session::has('warning'))
+            toastr.warning("{{ Session::get('warning') }}");
+        @endif
+        @if(Session::has('error'))
+            toastr.error("{{ Session::get('error') }}");
+        @endif
+    });
+</script>
 
-    @stack('scripts')
+@stack('scripts')
 
 
 </body>

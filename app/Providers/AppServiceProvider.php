@@ -12,12 +12,14 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-    public function boot(): void
-    {
-        $locale = app()->getLocale(); // уже установлено в middleware
-        $currencyConfig = config("currency.$locale", config('currency.en'));
+public function boot(): void
+{
+    $locale = app()->getLocale();
+    $currencyConfig = config("currency.$locale", config('currency.en'));
 
-        View::share('currentCurrency', $currencyConfig['symbol']);
-        View::share('currencyRate', $currencyConfig['rate']);
-    }
+    View::share('currentCurrency', $currencyConfig['symbol']);
+    View::share('currencyRate', $currencyConfig['rate']);
+    View::share('locales', config('app.available_locales')); // 💡 берем из конфига
+}
+
 }

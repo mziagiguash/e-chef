@@ -28,7 +28,7 @@
                     <div class="tab-content" id="pills-tabContent">
                         <div class="tab-pane fade show active" id="pills-checkout" role="tabpanel"
                             aria-labelledby="pills-checkout-tab">
-                            <form action="{{route('payment.ssl.submit')}}" method="post">
+                            <form action="{{localeRoute('payment.ssl.submit')}}" method="post">
                                 @csrf
                                 <div class="mb-4">
                                     <div class="ps-0 ">
@@ -49,7 +49,7 @@
                 <div class="checkout-area-summery">
                     <h6 class="checkout-area__label">Summery</h6>
 
-                    <div class="cart">
+<div class="cart">
                         <div class="cart__includes-info cart__includes-info--bordertop-0">
                             <div class="productContent__wrapper">
                                 @php $total = 0 @endphp
@@ -68,11 +68,13 @@
                                         </h6>
                                         <p>by {{$details['instructor']}}</p>
                                         <div class="price">
-                                            <h6 class="font-para--md">{{$details['price'] ? '৳' . $details['price'] :
-                                                'Free'}}</h6>
-                                            <p><del>{{$details['old_price'] ? '৳' . $details['old_price'] : ''}}</del>
-                                            </p>
-                                        </div>
+                                <h6 class="font-para--md">
+                                    {{ ($details['price'] == null || $details['price'] == 0) ? 'Free' : '$' . $details['price'] }}
+                                </h6>
+                                <p>
+                                    <del>{{ $details['old_price'] ? '$' . $details['old_price'] : '' }}</del>
+                                </p>
+                            </div>
                                     </div>
                                 </div>
                                 @endforeach
@@ -84,29 +86,22 @@
                             <ul>
                                 <li>
                                     <p>Subtotal</p>
-                                    <p>{{'৳' . number_format((float) session('cart_details')['cart_total'] , 2)}}
                                     </p>
-                                    {{-- {{ '৳' . (session('cart_details') && array_key_exists('cart_total',
                                     session('cart_details')) ? number_format(session('cart_details')['cart_total'], 2) :
                                     '0.00') }} --}}
                                 </li>
                                 <li>
                                     <p>Coupon Discount ({{session('cart_details')['discount'] ?? 0.00}}%)</p>
-                                    <p>{{'৳' . number_format((float) isset(session('cart_details')['discount_amount']) ?
                                         session('cart_details')['discount_amount']: 0.00 , 2)}}</p>
                                 </li>
                                 <li>
                                     <p>Taxes (15%)</p>
-                                    <p>{{'৳' . number_format((float) session('cart_details')['tax'] , 2)}}</p>
-                                    {{-- {{ '৳' . (session('cart_details') && array_key_exists('tax',
                                     session('cart_details')) ? number_format(session('cart_details')['tax'], 2) :
                                     '0.00') }} --}}
                                 </li>
                                 <li>
                                     <p class="font-title--card">Total:</p>
-                                    <p class="total-price font-title--card">{{'৳' .
                                         number_format((float)session('cart_details')['total_amount'] , 2)}}</p>
-                                    {{-- {{ '৳' . (session('cart_details') && array_key_exists('total_amount',
                                     session('cart_details')) ? number_format(session('cart_details')['total_amount'], 2)
                                     : '0.00') }} --}}
                                 </li>
@@ -127,7 +122,7 @@
                             <p class="mt-2 mb-lg-4 mb-3">Don't have account?
                                 <a href="#" onclick="hide_signin()" class="text-black-50">Sign up</a>
                             </p>
-                            <form action="{{route('studentLogin.check','checkout')}}" method="POST">
+                            <form action="{{localeRoute('studentLogin.check','checkout')}}" method="POST">
                                 @csrf
                                 <div class="form-element">
                                     <label for="email">Email</label>
@@ -179,7 +174,7 @@
                             <h2 class="font-title--md mb-0">Sign Up Before Checkout</h2>
                             <p class="mt-2 mb-lg-4 mb-3">Already have account? <a href="#" onclick="hide_signin()"
                                     class="text-black-50">Sign In</a></p>
-                            <form action="{{route('studentRegister.store','checkout')}}" method="POST">
+                            <form action="{{localeRoute('studentRegister.store','checkout')}}" method="POST">
                                 @csrf
                                 <div class="form-element">
                                     <label for="name">Full Name</label>

@@ -24,9 +24,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('courseCategory.index')}}">Categories</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('courseCategory.create')}}">Add Category</a>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('courseCategory.index')}}">Categories</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('courseCategory.create')}}">Add Category</a>
                     </li>
                 </ol>
             </div>
@@ -39,7 +39,7 @@
                         <h5 class="card-title">Category Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{route('courseCategory.store')}}" method="post" enctype="multipart/form-data">
+                        <form action="{{localeRoute('courseCategory.store')}}" method="post" enctype="multipart/form-data">
                             @csrf
                             <div class="row">
                                 <div class="col-lg-6 col-md-6 col-sm-12">

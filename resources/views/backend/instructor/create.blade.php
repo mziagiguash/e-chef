@@ -21,9 +21,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('instructor.index')}}">Instructors</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('instructor.create')}}">Add Instructor</a></li>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('instructor.index')}}">Instructors</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('instructor.create')}}">Add Instructor</a></li>
                 </ol>
             </div>
         </div>
@@ -35,44 +35,27 @@
                         <h5 class="card-title">Basic Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{route('instructor.store')}}" method="post" enctype="multipart/form-data">
+                        <form action="{{localeRoute('instructor.store')}}" method="post" enctype="multipart/form-data">
                             @csrf
                             <div class="row">
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Name</label>
-                                        <input type="text" class="form-control" name="fullName_en"
-                                            value="{{old('fullName_en')}}">
+                                        <input type="text" class="form-control" name="fullName"
+                                            value="{{old('fullName')}}">
                                     </div>
-                                    @if($errors->has('fullName_en'))
-                                    <span class="text-danger"> {{ $errors->first('fullName_en') }}</span>
+                                    @if($errors->has('fullName'))
+                                    <span class="text-danger"> {{ $errors->first('fullName_') }}</span>
                                     @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">নাম (বাংলায়)</label>
-                                        <input type="text" class="form-control" name="fullName_bn"
-                                            value="{{old('fullName_bn')}}">
-                                    </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Phone Number</label>
-                                        <input type="tel" class="form-control" name="contactNumber_en"
-                                            value="{{old('contactNumber_en')}}">
+                                        <input type="tel" class="form-control" name="contactNumber"
+                                            value="{{old('contactNumber')}}">
                                     </div>
-                                    @if($errors->has('contactNumber_en'))
-                                    <span class="text-danger"> {{ $errors->first('contactNumber_en') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">ফোন নাম্বার (বাংলায়)</label>
-                                        <input type="tel" class="form-control" name="contactNumber_bn"
-                                            value="{{old('contactNumber_bn')}}">
-                                    </div>
-                                    @if($errors->has('contactNumber_bn'))
-                                    <span class="text-danger"> {{ $errors->first('contactNumber_bn') }}</span>
+                                    @if($errors->has('contactNumber'))
+                                    <span class="text-danger"> {{ $errors->first('contactNumber') }}</span>
                                     @endif
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">

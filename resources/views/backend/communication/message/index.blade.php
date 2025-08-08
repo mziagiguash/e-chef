@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('message.index')}}">Messages</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('message.index')}}">All Message</a>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('message.index')}}">Messages</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('message.index')}}">All Message</a>
                     </li>
                 </ol>
             </div>
@@ -61,18 +61,18 @@
                                             @forelse ($message as $m)
                                             <tr>
                                                 <td>{{$m->id}}</td>
-                                                <td>{{$m->user?->name_en}}</td>
-                                                <td>{{$m->user?->name_en}}</td>
+                                                <td>{{$m->user?->name}}</td>
+                                                <td>{{$m->user?->name}}</td>
                                                 <td>{{$m->content}}</td>
                                                 <td>
-                                                    <a href="{{route('message.edit', encryptor('encrypt',$m->id))}}"
+                                                    <a href="{{localeRoute('message.edit', encryptor('encrypt',$m->id))}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$m->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$m->id}}"
-                                                        action="{{route('message.destroy', encryptor('encrypt',$m->id))}}"
+                                                        action="{{localeRoute('message.destroy', encryptor('encrypt',$m->id))}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')

@@ -12,7 +12,7 @@
                         <div class="col-xl-12">
                             <div class="auth-form">
                                 <h4 class="text-center mb-4">Sign in your account</h4>
-                                <form action="{{route('login.check')}}" method="POST">
+                                <form action="{{localeRoute('login.check')}}" method="POST">
                                     @csrf
                                     <div class="form-group">
                                         <label><strong>Email or Phone</strong></label>
@@ -48,7 +48,7 @@
                                     </div>
                                 </form>
                                 <div class="new-account mt-3">
-                                    <p>Don't have an account? <a class="text-primary" href="{{route('register')}}">Sign
+                                    <p>Don't have an account? <a class="text-primary" href="{{localeRoute('register')}}">Sign
                                             up</a></p>
                                 </div>
                             </div>

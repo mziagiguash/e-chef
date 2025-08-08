@@ -27,7 +27,7 @@
         <div class="container-fluid">
             <div class="coursedescription-header">
                 <div class="coursedescription-header-start">
-                    <a class="logo-image" href="{{route('home')}}">
+                    <a class="logo-image" href="{{localeRoute('home')}}">
                         <img src="{{asset('public/frontend/dist/images/logo/logo.png')}}" alt="Logo" />
                     </a>
                     <div class="topic-info">
@@ -37,7 +37,7 @@
                             </a>
                         </div>
                         <div class="topic-info-text">
-                            <h6 class="font-title--xs"><a href="#">{{$course->title_en}}</a></h6>
+                            <h6 class="font-title--xs"><a href="#">{{$course->title}}</a></h6>
                             <div class="lesson-hours">
                                 <div class="book-lesson">
                                     <i class="fas fa-book-open text-primary"></i>
@@ -78,7 +78,7 @@
                         </video>
                     </div>
                     <div class="course-description-start-content">
-                        <h5 class="font-title--sm material-title">{{$course->title_en}}</h5>
+                        <h5 class="font-title--sm material-title">{{$course->title}}</h5>
                         <nav class="course-description-start-content-tab">
                             <div class="nav nav-tabs" id="nav-tab" role="tablist">
                                 <button class="nav-link active" id="nav-ldescrip-tab" data-bs-toggle="tab"
@@ -237,13 +237,13 @@
                                     <div class="course-overview-main-item">
                                         <h6 class="font-title--card">Description</h6>
                                         <p class="mb-3 font-para--lg">
-                                           {{$course->description_en}}
+                                           {{$course->description}}
                                         </p>
                                     </div>
                                     <div class="course-overview-main-item">
                                         <h6 class="font-title--card">Requirments</h6>
                                         <p class="mb-2 font-para--lg">
-                                           {{$course->prerequisites_en}}
+                                           {{$course->prerequisites}}
                                         </p>
                                     </div>
                                 </div>
@@ -262,8 +262,8 @@
                                                 </div>
                                                 <div class="instructor-text">
                                                     <h6 class="font-title--xs">
-                                                        <a href="{{route('instructorProfile', encryptor('encrypt', $course->instructor->id))}}">
-                                                            {{$course?->instructor?->name_en}}</a></h6>
+                                                        <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $course->instructor->id))}}">
+                                                            {{$course?->instructor?->name}}</a></h6>
                                                     <p>{{$course?->instructor?->designation}}</p>
                                                     <div class="d-flex align-items-center instructor-text-bottom">
                                                         <div class="d-flex align-items-center ratings-icon">

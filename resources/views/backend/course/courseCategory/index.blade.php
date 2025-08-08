@@ -23,9 +23,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('courseCategory.index')}}">Categories</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('courseCategory.index')}}">All Category</a></li>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('courseCategory.index')}}">Categories</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('courseCategory.index')}}">All Category</a></li>
                 </ol>
             </div>
         </div>
@@ -45,7 +45,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">All Categories List </h4>
-                                <a href="{{route('courseCategory.create')}}" class="btn btn-primary">+ Add new</a>
+                                <a href="{{localeRoute('courseCategory.create')}}" class="btn btn-primary">+ Add new</a>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -75,14 +75,14 @@
                                                         alt="">
                                                 </td>
                                                 <td>
-                                                    <a href="{{route('courseCategory.edit', $d->id)}}"
+                                                    <a href="{{localeRoute('courseCategory.edit', $d->id)}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$d->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$d->id}}"
-                                                        action="{{route('courseCategory.destroy', $d->id)}}"
+                                                        action="{{localeRoute('courseCategory.destroy', $d->id)}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')
@@ -113,7 +113,7 @@
                                             <div class="dropdown-menu dropdown-menu-right border py-0">
                                                 <div class="py-2">
                                                     <a class="dropdown-item"
-                                                        href="{{route('user.edit', encryptor('encrypt',$d->id))}}">Edit</a>
+                                                        href="{{localeRoute('user.edit', encryptor('encrypt',$d->id))}}">Edit</a>
                                                     <a class="dropdown-item text-danger"
                                                         href="javascript:void(0);">Delete</a>
                                                 </div>

@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('student.index')}}">Students</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('student.index')}}">All Student</a></li>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('student.index')}}">Students</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('student.index')}}">All Student</a></li>
                 </ol>
             </div>
         </div>
@@ -42,7 +42,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">All Students List </h4>
-                                <a href="{{route('student.create')}}" class="btn btn-primary">+ Add new</a>
+                                <a href="{{localeRoute('student.create')}}" class="btn btn-primary">+ Add new</a>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -64,12 +64,12 @@
                                             <tr>
                                                 <td><img class="rounded-circle" width="35" height="35"
                                                         src="{{asset('public/uploads/students/'.$d->image)}}" alt=""></td>
-                                                <td><strong>{{$d->name_en}}</strong></td>
+                                                <td><strong>{{$d->name}}</strong></td>
                                                 <td>{{$d->email}}</td>
-                                                <td>{{$d->contact_en}}</td>
+                                                <td>{{$d->contact}}</td>
                                                 <td>{{$d->role?->name}}</td>
                                                 <td>
-                                                   {{ $d->gender == 'male' ? __('Male') : ($d->gender == 'female' ? __('Female') : __('Other')) }}
+                                               {{ $d->gender == 'male' ? __('Male') : __('Female') }}
                                                 </td>
                                                 <td>
                                                     <span class="badge {{$d->status==1?"
@@ -77,14 +77,14 @@
                                                         @else{{__('Inactive')}} @endif</span>
                                                 </td>
                                                 <td>
-                                                    <a href="{{route('student.edit', encryptor('encrypt',$d->id))}}"
+                                                    <a href="{{localeRoute('student.edit', encryptor('encrypt',$d->id))}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$d->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$d->id}}"
-                                                        action="{{route('student.destroy', encryptor('encrypt',$d->id))}}"
+                                                        action="{{localeRoute('student.destroy', encryptor('encrypt',$d->id))}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')
@@ -115,7 +115,7 @@
                                             <div class="dropdown-menu dropdown-menu-right border py-0">
                                                 <div class="py-2">
                                                     <a class="dropdown-item"
-                                                        href="{{route('student.edit', encryptor('encrypt',$d->id))}}">Edit</a>
+                                                        href="{{localeRoute('student.edit', encryptor('encrypt',$d->id))}}">Edit</a>
                                                     <a class="dropdown-item text-danger"
                                                         href="javascript:void(0);">Delete</a>
                                                 </div>
@@ -128,12 +128,12 @@
                                                 <img src="{{asset('public/uploads/students/'.$d->image)}}" width="100"
                                                     height="100" class="rounded-circle" alt="">
                                             </div>
-                                            <h3 class="mt-4 mb-1">{{$d->name_en}}</h3>
+                                            <h3 class="mt-4 mb-1">{{$d->name_}}</h3>
                                             <p class="text-muted">{{$d->role?->name}}</p>
                                             <ul class="list-group mb-3 list-group-flush">
                                                 <li class="list-group-item px-0 d-flex justify-content-between">
                                                     <span>Phone No. :</span>
-                                                    <strong>{{$d->contact_en}}</strong>
+                                                    <strong>{{$d->contact}}</strong>
                                                 </li>
                                                 <li class="list-group-item px-0 d-flex justify-content-between">
                                                     <span class="mb-0">Email :</span>

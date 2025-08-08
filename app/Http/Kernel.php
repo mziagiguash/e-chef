@@ -27,6 +27,7 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
     // ...
     'setlocale' => \App\Http\Middleware\SetLocale::class,
+
 ];
 
     /**

@@ -39,10 +39,8 @@ class StudentController extends Controller
     {
         try {
             $student = new Student();
-            $student->name_en = $request->fullName_en;
-            $student->name_bn = $request->fullName_bn;
-            $student->contact_en = $request->contactNumber_en;
-            $student->contact_bn = $request->contactNumber_bn;
+            $student->name = $request->fullName;
+            $student->contact = $request->contactNumber;
             $student->email = $request->emailAddress;
             $student->role_id = $request->roleId;
             $student->date_of_birth = $request->birthDate;
@@ -94,10 +92,8 @@ class StudentController extends Controller
         try {
 
             $student = Student::findOrFail(encryptor('decrypt', $id));
-            $student->name_en = $request->fullName_en;
-            $student->name_bn = $request->fullName_bn;
-            $student->contact_en = $request->contactNumber_en;
-            $student->contact_bn = $request->contactNumber_bn;
+            $student->name = $request->fullName;
+            $student->contact = $request->contactNumber;
             $student->email = $request->emailAddress;
             $student->role_id = $request->roleId;
             $student->date_of_birth = $request->birthDate;

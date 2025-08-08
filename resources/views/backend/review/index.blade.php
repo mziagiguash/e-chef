@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('review.index')}}">Reviews</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('review.index')}}">All Review</a>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('review.index')}}">Reviews</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('review.index')}}">All Review</a>
                     </li>
                 </ol>
             </div>
@@ -64,17 +64,17 @@
                                                 <td>{{$r->id}}</td>
                                                 <td>{{$r->rating}}</td>
                                                 <td>{{$r->comment}}</td>
-                                                <td>{{$r->course?->title_en}}</td>
-                                                <td>{{$r->student?->name_en}}</td>
+                                                <td>{{$r->course?->title}}</td>
+                                                <td>{{$r->student?->name}}</td>
                                                 <td>
-                                                    <a href="{{route('review.edit', encryptor('encrypt',$r->id))}}"
+                                                    <a href="{{localeRoute('review.edit', encryptor('encrypt',$r->id))}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$r->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$r->id}}"
-                                                        action="{{route('review.destroy', encryptor('encrypt',$r->id))}}"
+                                                        action="{{localeRoute('review.destroy', encryptor('encrypt',$r->id))}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')

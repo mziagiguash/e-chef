@@ -16,7 +16,7 @@
                 <li class="breadcrumb-item"><a href="course-search.html" class="fs-6 text-secondary">Courses</a></li>
                 <li class="breadcrumb-item d-none d-lg-inline-block"><a href="#"
                         class="fs-6 text-secondary">Course Detail Instructor</a></li>
-                <li class="breadcrumb-item d-none d-lg-inline-block"><a href="#" class="fs-6 text-secondary">{{$instructor->name_en}}</a></li>
+                <li class="breadcrumb-item d-none d-lg-inline-block"><a href="#" class="fs-6 text-secondary">{{$instructor->name}}</a></li>
             </ol>
         </nav>
     </div>
@@ -32,7 +32,7 @@
                         <img src="{{asset('public/uploads/users/'.$instructor->image)}}" alt="Instructor" />
                     </div>
                     <div class="instructor-info text-center">
-                        <h5 class="font-title--sm">{{$instructor->name_en}}</h5>
+                        <h5 class="font-title--sm">{{$instructor->name}}</h5>
                         <p class="text-secondary mb-3">{{$instructor->designation}}</p>
                         <ul class="list-inline social-links">
                             <li class="list-inline-item">
@@ -267,8 +267,8 @@
                                                     <p class="font-para--md">Brandon Dias</p>
                                                 </a>
                                                 <div class="price">
-                                                    <span>৳12</span>
-                                                    <del>৳95</del>
+                                                    <span>$12</span>
+                                                    <del>$95</del>
                                                 </div>
                                             </div>
                                             <div class="contentCard-more">
@@ -325,8 +325,8 @@
                                                     <p class="font-para--md">Brandon Dias</p>
                                                 </a>
                                                 <div class="price">
-                                                    <span>৳12</span>
-                                                    <del>৳95</del>
+                                                    <span>$12</span>
+                                                    <del>$95</del>
                                                 </div>
                                             </div>
                                             <div class="contentCard-more">
@@ -383,8 +383,8 @@
                                                     <p class="font-para--md">Brandon Dias</p>
                                                 </a>
                                                 <div class="price">
-                                                    <span>৳12</span>
-                                                    <del>৳95</del>
+                                                    <span>$12</span>
+                                                    <del>$95</del>
                                                 </div>
                                             </div>
                                             <div class="contentCard-more">
@@ -441,8 +441,8 @@
                                                     <p class="font-para--md">Brandon Dias</p>
                                                 </a>
                                                 <div class="price">
-                                                    <span>৳12</span>
-                                                    <del>৳95</del>
+                                                    <span>$12</span>
+                                                    <del>$95</del>
                                                 </div>
                                             </div>
                                             <div class="contentCard-more">
@@ -499,8 +499,8 @@
                                                     <p class="font-para--md">Brandon Dias</p>
                                                 </a>
                                                 <div class="price">
-                                                    <span>৳12</span>
-                                                    <del>৳95</del>
+                                                    <span>$12</span>
+                                                    <del>$95</del>
                                                 </div>
                                             </div>
                                             <div class="contentCard-more">
@@ -557,8 +557,8 @@
                                                     <p class="font-para--md">Brandon Dias</p>
                                                 </a>
                                                 <div class="price">
-                                                    <span>৳12</span>
-                                                    <del>৳95</del>
+                                                    <span>$12</span>
+                                                    <del>$95</del>
                                                 </div>
                                             </div>
                                             <div class="contentCard-more">

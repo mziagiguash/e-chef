@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('quiz.index')}}">Quizzes</a></li>
-                    <li class="breadcrumb-item active"><a href="{{route('quiz.index')}}">All Quiz</a>
+                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('quiz.index')}}">Quizzes</a></li>
+                    <li class="breadcrumb-item active"><a href="{{localeRoute('quiz.index')}}">All Quiz</a>
                     </li>
                 </ol>
             </div>
@@ -44,7 +44,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">All Quizzes List </h4>
-                                <a href="{{route('quiz.create')}}" class="btn btn-primary">+ Add new</a>
+                                <a href="{{localeRoute('quiz.create')}}" class="btn btn-primary">+ Add new</a>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -62,16 +62,16 @@
                                             <tr>
                                                 <td>{{$q->id}}</td>
                                                 <td>{{$q->title}}</td>
-                                                <td>{{$q->course?->title_en}}</td> 
+                                                <td>{{$q->course?->title}}</td> 
                                                 <td>
-                                                    <a href="{{route('quiz.edit', encryptor('encrypt',$q->id))}}"
+                                                    <a href="{{localeRoute('quiz.edit', encryptor('encrypt',$q->id))}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$q->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$q->id}}"
-                                                        action="{{route('quiz.destroy', encryptor('encrypt',$q->id))}}"
+                                                        action="{{localeRoute('quiz.destroy', encryptor('encrypt',$q->id))}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')

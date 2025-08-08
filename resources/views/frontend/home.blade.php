@@ -72,7 +72,7 @@
         </div>
         <div class="row">
             <div class="col-lg-12 text-center">
-                <a href="{{route('searchCourse')}}" class="button button-lg button--primary mt-5">Browse all Courses</a>
+                <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary mt-5">Browse all Courses</a>
             </div>
         </div>
     </div>
@@ -147,19 +147,19 @@
                                 </div>
                                 <div class="contentCard-bottom">
                                     <h5>
-                                        <a href="{{route('courseDetails', ['id' => encryptor('encrypt', $pc->id)])}}"
-                                            class="font-title--card">{{$pc->title_en}}</a>
+                                        <a href="{{localeRoute('courseDetails', ['id' => encryptor('encrypt', $pc->id)])}}"
+                                            class="font-title--card">{{$pc->title}}</a>
                                     </h5>
                                     <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                        <a href="{{route('instructorProfile', encryptor('encrypt', $pc->instructor?->id))}}"
+                                        <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $pc->instructor?->id))}}"
                                             class="contentCard-user d-flex align-items-center">
                                             <img src="{{asset('public/uploads/users/'.$pc?->instructor->image)}}"
                                                 alt="client-image" class="rounded-circle" height="34" width="34" />
-                                            <p class="font-para--md">{{$pc?->instructor->name_en}}</p>
+                                            <p class="font-para--md">{{$pc?->instructor->name}}</p>
                                         </a>
                                         <div class="price">
-                                            <span>{{$pc->price?'৳'.$pc->price:'Free'}}</span>
-                                            <del>{{$pc->old_price?'৳'.$pc->old_price:''}}</del>
+                                             <del>$95</del>
+                                             <span>$12</span>
                                         </div>
                                     </div>
                                     <div class="contentCard-more">
@@ -205,7 +205,7 @@
                     </div>
                     <div class="row">
                         <div class="col-lg-12 text-center">
-                            <a href="{{route('searchCourse')}}" class="button button-lg button--primary">Browse all
+                            <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary">Browse all
                                 Courses</a>
                         </div>
                     </div>
@@ -220,19 +220,19 @@
                                 </div>
                                 <div class="contentCard-bottom">
                                     <h5>
-                                        <a href="{{route('courseDetails', ['id' => encryptor('encrypt', $dc->id)])}}"
-                                            class="font-title--card">{{$dc->title_en}}</a>
+                                        <a href="{{localeRoute('courseDetails', ['id' => encryptor('encrypt', $dc->id)])}}"
+                                            class="font-title--card">{{$dc->title}}</a>
                                     </h5>
                                     <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                        <a href="{{route('instructorProfile', encryptor('encrypt', $dc->instructor?->id))}}"
+                                        <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $dc->instructor?->id))}}"
                                             class="contentCard-user d-flex align-items-center">
                                             <img src="{{asset('public/uploads/users/'.$dc?->instructor->image)}}" alt="client-image"
                                                 class="rounded-circle" height="34" width="34" />
-                                            <p class="font-para--md">{{$dc?->instructor->name_en}}</p>
+                                            <p class="font-para--md">{{$dc?->instructor->name}}</p>
                                         </a>
                                         <div class="price">
-                                            <span>{{$dc->price?'৳'.$dc->price:'Free'}}</span>
-                                            <del>{{$dc->old_price?'৳'.$dc->old_price:''}}</del>
+                                            <del>$95</del>
+                                            <span>$12</span>
                                         </div>
                                     </div>
                                     <div class="contentCard-more">
@@ -274,7 +274,7 @@
                     </div>
                     <div class="row">
                         <div class="col-lg-12 text-center">
-                            <a href="{{route('searchCourse')}}" class="button button-lg button--primary">Browse all
+                            <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary">Browse all
                                 Courses</a>
                         </div>
                     </div>
@@ -290,19 +290,19 @@
                                 </div>
                                 <div class="contentCard-bottom">
                                     <h5>
-                                        <a href="{{route('courseDetails', ['id' => encryptor('encrypt', $dv->id)])}}"
-                                            class="font-title--card">{{$dv->title_en}}</a>
+                                        <a href="{{localeRoute('courseDetails', ['id' => encryptor('encrypt', $dv->id)])}}"
+                                            class="font-title--card">{{$dv->title}}</a>
                                     </h5>
                                     <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                        <a href="{{route('instructorProfile', encryptor('encrypt', $dv->instructor?->id))}}"
+                                        <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $dv->instructor?->id))}}"
                                             class="contentCard-user d-flex align-items-center">
                                             <img src="{{asset('public/uploads/users/'.$dv?->instructor->image)}}" alt="client-image"
                                                 class="rounded-circle" height="34" width="34" />
-                                            <p class="font-para--md">{{$dv?->instructor->name_en}}</p>
+                                            <p class="font-para--md">{{$dv?->instructor->name}}</p>
                                         </a>
                                         <div class="price">
-                                            <span>{{$dv->price?'৳'.$dv->price:'Free'}}</span>
-                                            <del>{{$dv->old_price?'৳'.$dv->old_price:''}}</del>
+                                            <del>$95</del>
+                                            <span>$12</span>
                                         </div>
                                     </div>
                                     <div class="contentCard-more">
@@ -344,7 +344,7 @@
                     </div>
                     <div class="row">
                         <div class="col-lg-12 text-center">
-                            <a href="{{route('searchCourse')}}" class="button button-lg button--primary">Browse all
+                            <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary">Browse all
                                 Courses</a>
                         </div>
                     </div>
@@ -360,19 +360,19 @@
                                 </div>
                                 <div class="contentCard-bottom">
                                     <h5>
-                                        <a href="{{route('courseDetails', ['id' => encryptor('encrypt', $bc->id)])}}"
-                                            class="font-title--card">{{$bc->title_en}}</a>
+                                        <a href="{{localeRoute('courseDetails', ['id' => encryptor('encrypt', $bc->id)])}}"
+                                            class="font-title--card">{{$bc->title}}</a>
                                     </h5>
                                     <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                        <a href="{{route('instructorProfile', encryptor('encrypt', $bc->instructor?->id))}}"
+                                        <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $bc->instructor?->id))}}"
                                             class="contentCard-user d-flex align-items-center">
                                             <img src="{{asset('public/uploads/users/'.$bc?->instructor->image)}}" alt="client-image"
                                                 class="rounded-circle" height="34" width="34" />
-                                            <p class="font-para--md">{{$bc?->instructor->name_en}}</p>
+                                            <p class="font-para--md">{{$bc?->instructor->name}}</p>
                                         </a>
                                         <div class="price">
-                                            <span>{{$bc->price?'৳'.$bc->price:'Free'}}</span>
-                                            <del>{{$bc->old_price?'৳'.$bc->old_price:''}}</del>
+                                            <del>$95</del>
+                                            <span>$12</span>
                                         </div>
                                     </div>
                                     <div class="contentCard-more">
@@ -414,7 +414,7 @@
                     </div>
                     <div class="row">
                         <div class="col-lg-12 text-center">
-                            <a href="{{route('searchCourse')}}" class="button button-lg button--primary">Browse all
+                            <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary">Browse all
                                 Courses</a>
                         </div>
                     </div>
@@ -430,20 +430,19 @@
                                 </div>
                                 <div class="contentCard-bottom">
                                     <h5>
-                                        <a href="{{route('courseDetails', ['id' => encryptor('encrypt', $ic->id)])}}"
-                                            class="font-title--card">{{$ic->title_en}}</a>
+                                        <a href="{{localeRoute('courseDetails', ['id' => encryptor('encrypt', $ic->id)])}}"
+                                            class="font-title--card">{{$ic->title}}</a>
                                     </h5>
                                     <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                        <a href="{{route('instructorProfile', encryptor('encrypt', $ic->instructor?->id))}}"
+                                        <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $ic->instructor?->id))}}"
                                             class="contentCard-user d-flex align-items-center">
                                             <img src="{{asset('public/uploads/users/'.$ic?->instructor->image)}}" alt="client-image"
                                                 class="rounded-circle" height="34" width="34" />
-                                            <p class="font-para--md">{{$ic?->instructor->name_en}}</p>
+                                            <p class="font-para--md">{{$ic?->instructor->name}}</p>
                                         </a>
                                         <div class="price">
-                                            <span>{{$ic->price?'৳'.$ic->price:'Free'}}</span>
-                                            <del>{{$ic->old_price?'৳'.$ic->old_price:''}}</del>
-                                        </div>
+                                            <del>$95</del>
+                                            <span>$12</span></div>
                                     </div>
                                     <div class="contentCard-more">
                                         <div class="d-flex align-items-center">
@@ -484,7 +483,7 @@
                     </div>
                     <div class="row">
                         <div class="col-lg-12 text-center">
-                            <a href="{{route('searchCourse')}}" class="button button-lg button--primary">Browse all
+                            <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary">Browse all
                                 Courses</a>
                         </div>
                     </div>
@@ -977,8 +976,8 @@
                             </div>
                             <div class="mentor__title">
                                 <h6>
-                                    <a href="{{route('instructorProfile', encryptor('encrypt', $i->id))}}"
-                                        tabindex="0">{{$i->name_en}}</a>
+                                    <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $i->id))}}"
+                                        tabindex="0">{{$i->name}}</a>
                                 </h6>
                                 <p>{{$i->designation}}</p>
                             </div>
@@ -1016,8 +1015,8 @@
                         </div>
                         <div class="contentCard-bottom">
                             <h5>
-                                <a href="{{route('courseDetails', encryptor('encrypt', $c->id))}}"
-                                    class="font-title--card">{{$c->title_en}}</a>
+                                <a href="{{localeRoute('courseDetails', encryptor('encrypt', $c->id))}}"
+                                    class="font-title--card">{{$c->title}}</a>
                             </h5>
                             <div class="contentCard-more">
                                 <div class="d-flex align-items-center">
@@ -1044,7 +1043,7 @@
         </div>
         <div class="row">
             <div class="col-lg-12 text-center">
-                <a href="{{route('searchCourse')}}" class="button button-lg button--primary mt-lg-5 mt-5">Browse all
+                <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary mt-lg-5 mt-5">Browse all
                     events</a>
             </div>
         </div>

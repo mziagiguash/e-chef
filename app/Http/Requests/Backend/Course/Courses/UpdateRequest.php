@@ -22,12 +22,12 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'courseTitle_en' => 'required|max:255',
+            'courseTitle' => 'required|max:255',
             'categoryId' => 'required|max:3',
             'instructorId' => 'required|max:3',
             'thumbnail_video_url' => 'nullable|url',
         'thumbnail_video_file' => 'nullable|mimes:mp4,webm,avi,mov|max:102400', // до 100MB
-        
+
         ];
     }
 }

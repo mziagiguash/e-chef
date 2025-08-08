@@ -22,7 +22,7 @@ class AddNewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'courseTitle_en'=> 'required|max:255',
+            'courseTitle'=> 'required|max:255',
             'categoryId'=> 'required|max:3',
             'instructorId'=> 'required|max:3',
             'thumbnail_video_url' => 'nullable|url',

@@ -11,6 +11,8 @@ use App\Models\CourseCategory;
 use App\Models\Instructor;
 use App\Models\Lesson;
 use App\Models\Material;
+use Illuminate\Support\Facades\DB;
+
 use Exception;
 use File;
 
@@ -44,58 +46,72 @@ class CourseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(AddNewRequest $request)
-    {
-        try {
-            $course = new Course;
-            $course->title_en = $request->courseTitle_en;
-            $course->title_bn = $request->courseTitle_bn;
-            $course->description_en = $request->courseDescription_en;
-            $course->description_bn = $request->courseDescription_bn;
-            $course->course_category_id = $request->categoryId;
-            $course->instructor_id = $request->instructorId;
-            $course->type = $request->courseType;
-            $course->price = $request->coursePrice;
-            $course->old_price = $request->courseOldPrice;
-            $course->subscription_price = $request->subscriptionPrice;
-            $course->start_from = $request->start_from;
-            $course->duration = $request->duration;
-            $course->lesson = $request->lesson;
-            $course->difficulty = $request->courseDifficulty;
-            $course->course_code = $request->course_code;
-            $course->prerequisites_en = $request->prerequisites_en;
-            $course->prerequisites_bn = $request->prerequisites_bn;
-            if ($request->hasFile('thumbnail_video_file')) {
-    $videoPath = $request->file('thumbnail_video_file')->store('uploads/videos', 'public');
-    $course->thumbnail_video = $videoPath;
-} elseif ($request->filled('thumbnail_video_url')) {
-    $course->thumbnail_video = $request->input('thumbnail_video_url');
-} else {
-    $course->thumbnail_video = null;
-}
+public function store(AddNewRequest $request)
+{
+    try {
+        DB::beginTransaction();
 
-            $course->tag = $request->tag;
-            $course->language = 'en';
+        // 1. Сохраняем основную модель Course
+        $course = new Course();
+        $course->course_category_id = $request->categoryId;
+        $course->instructor_id = $request->instructorId;
+        $course->type = $request->courseType;
+        $course->price = $request->coursePrice;
+        $course->old_price = $request->courseOldPrice;
+        $course->subscription_price = $request->subscription_price;
+        $course->start_from = $request->start_from;
+        $course->duration = $request->duration;
+        $course->lesson = $request->lesson;
+        $course->difficulty = $request->courseDifficulty;
+        $course->course_code = $request->course_code;
+        $course->tag = $request->tag;
+        $course->status = 2; // default to active
+        $course->language = app()->getLocale(); // optional, for reference
 
-            if ($request->hasFile('image')) {
-                $imageName = rand(111, 999) . time() . '.' . $request->image->extension();
-                $request->image->move(public_path('uploads/courses'), $imageName);
-                $course->image = $imageName;
-            }
-            if ($request->hasFile('thumbnail_image')) {
-                $thumbnailImageName = rand(111, 999) . time() . '.' . $request->thumbnail_image->extension();
-                $request->thumbnail_image->move(public_path('uploads/courses/thumbnails'), $thumbnailImageName);
-                $course->thumbnail_image = $thumbnailImageName;
-            }
-            if ($course->save())
-                return redirect()->route('course.index')->with('success', 'Data Saved');
-            else
-                return redirect()->back()->withInput()->with('error', 'Please try again');
-        } catch (Exception $e) {
-            dd($e);
-            return redirect()->back()->withInput()->with('error', 'Please try again');
+        // Обработка видео (URL или файл)
+        if ($request->hasFile('thumbnail_video_file')) {
+            $videoPath = $request->file('thumbnail_video_file')->store('uploads/videos', 'public');
+            $course->thumbnail_video = $videoPath;
+        } elseif ($request->filled('thumbnail_video_url')) {
+            $course->thumbnail_video = $request->input('thumbnail_video_url');
         }
+
+        // Обработка изображений
+        if ($request->hasFile('image')) {
+            $imageName = rand(111, 999) . time() . '.' . $request->image->extension();
+            $request->image->move(public_path('uploads/courses'), $imageName);
+            $course->image = $imageName;
+        }
+
+        if ($request->hasFile('thumbnail_image')) {
+            $thumbName = rand(111, 999) . time() . '.' . $request->thumbnail_image->extension();
+            $request->thumbnail_image->move(public_path('uploads/courses/thumbnails'), $thumbName);
+            $course->thumbnail_image = $thumbName;
+        }
+
+        $course->save();
+
+        // 2. Сохраняем переводы
+        $translations = $request->input('translations', []);
+        foreach ($translations as $locale => $fields) {
+            $course->translations()->create([
+                'locale' => $locale,
+                'title' => $fields['title'] ?? '',
+                'description' => $fields['description'] ?? '',
+                'prerequisites' => $fields['prerequisites'] ?? '',
+            ]);
+        }
+
+        DB::commit();
+
+        return redirect()->route('course.index')->with('success', 'Course created successfully.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        report($e);
+        return redirect()->back()->withInput()->with('error', 'Something went wrong. Please try again.');
     }
+}
 
     /**
      * Display the specified resource.
@@ -136,10 +152,8 @@ public function frontShow($id)
     {
         try {
             $course = Course::findOrFail(encryptor('decrypt', $id));
-            $course->title_en = $request->courseTitle_en;
-            $course->title_bn = $request->courseTitle_bn;
-            $course->description_en = $request->courseDescription_en;
-            $course->description_bn = $request->courseDescription_bn;
+            $course->title = $request->courseTitle;
+            $course->description = $request->courseDescription;
             $course->course_category_id = $request->categoryId;
             $course->instructor_id = $request->instructorId;
             $course->type = $request->courseType;
@@ -151,8 +165,7 @@ public function frontShow($id)
             $course->lesson = $request->lesson;
             $course->difficulty = $request->courseDifficulty;
             $course->course_code = $request->course_code;
-            $course->prerequisites_en = $request->prerequisites_en;
-            $course->prerequisites_bn = $request->prerequisites_bn;
+            $course->prerequisites = $request->prerequisites;
             if ($request->hasFile('thumbnail_video_file')) {
     $videoPath = $request->file('thumbnail_video_file')->store('uploads/videos', 'public');
     $course->thumbnail_video = $videoPath;
@@ -187,10 +200,8 @@ public function frontShow($id)
     {
         try {
             $course = Course::findOrFail(encryptor('decrypt', $id));
-            $course->title_en = $request->courseTitle_en;
-            $course->title_bn = $request->courseTitle_bn;
-            $course->description_en = $request->courseDescription_en;
-            $course->description_bn = $request->courseDescription_bn;
+            $course->title = $request->courseTitle;
+            $course->description = $request->courseDescription;
             $course->course_category_id = $request->categoryId;
             $course->instructor_id = $request->instructorId;
             $course->type = $request->courseType;
@@ -202,8 +213,7 @@ public function frontShow($id)
             $course->lesson = $request->lesson;
             $course->difficulty = $request->courseDifficulty;
             $course->course_code = $request->course_code;
-            $course->prerequisites_en = $request->prerequisites_en;
-            $course->prerequisites_bn = $request->prerequisites_bn;
+            $course->prerequisites = $request->prerequisites;
             if ($request->hasFile('thumbnail_video_file')) {
     $videoPath = $request->file('thumbnail_video_file')->store('uploads/videos', 'public');
     $course->thumbnail_video = $videoPath;
