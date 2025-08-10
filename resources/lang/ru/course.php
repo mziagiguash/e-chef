@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'search_placeholder' => 'Поиск курса...',
+    'search' => 'Поиск',
+    'category' => 'Категория',
+    'all' => 'Все',
+    'apply_filter' => 'Применить фильтр',
+    'level' => 'Уровень',
+    'intermediate' => 'Средний',
+    'advanced' => 'Продвинутый',
+    'expert' => 'Эксперт',
+    'price' => 'Цена',
+    'to' => 'до',
+    'rating' => 'Рейтинг',
+    'stars_and_higher' => 'звезды и выше',
+    'duration' => 'Продолжительность',
+    'hours' => 'часов',
+    'hours_150_plus' => '150+ часов',
+    'most_viewed' => 'Популярные',
+    'nothing' => 'Ничего',
+    'some_option' => 'Некоторая опция',
+    'another_option' => 'Другая опция',
+    'results_found' => 'Найдено результатов: :count.',
+    'filter' => 'Фильтр',
+    'lesson_hours' => 'Часы занятий',
+    'no_course_found' => 'Курсы не найдены',
+];

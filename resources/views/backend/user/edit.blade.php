@@ -28,8 +28,8 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('user.index')}}">Users</a></li>
+                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{route('user.index')}}">Users</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0);">Edit User</a></li>
                 </ol>
             </div>
@@ -42,7 +42,7 @@
                         <h5 class="card-title">Basic Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{localeRoute('user.update', encryptor('encrypt', $user->id))}}" method="post"
+                        <form action="{{route('user.update', encryptor('encrypt', $user->id))}}" method="post"
                             enctype="multipart/form-data">
                             @csrf
                             @method('PATCH')

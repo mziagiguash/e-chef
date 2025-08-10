@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('student.index')}}">Students</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('student.index')}}">All Student</a></li>
+                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{route('student.index')}}">Students</a></li>
+                    <li class="breadcrumb-item active"><a href="{{route('student.index')}}">All Student</a></li>
                 </ol>
             </div>
         </div>
@@ -42,7 +42,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">All Students List </h4>
-                                <a href="{{localeRoute('student.create')}}" class="btn btn-primary">+ Add new</a>
+                                <a href="{{route('student.create')}}" class="btn btn-primary">+ Add new</a>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -77,14 +77,14 @@
                                                         @else{{__('Inactive')}} @endif</span>
                                                 </td>
                                                 <td>
-                                                    <a href="{{localeRoute('student.edit', encryptor('encrypt',$d->id))}}"
+                                                    <a href="{{route('student.edit', encryptor('encrypt',$d->id))}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$d->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$d->id}}"
-                                                        action="{{localeRoute('student.destroy', encryptor('encrypt',$d->id))}}"
+                                                        action="{{route('student.destroy', encryptor('encrypt',$d->id))}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')
@@ -115,7 +115,7 @@
                                             <div class="dropdown-menu dropdown-menu-right border py-0">
                                                 <div class="py-2">
                                                     <a class="dropdown-item"
-                                                        href="{{localeRoute('student.edit', encryptor('encrypt',$d->id))}}">Edit</a>
+                                                        href="{{route('student.edit', encryptor('encrypt',$d->id))}}">Edit</a>
                                                     <a class="dropdown-item text-danger"
                                                         href="javascript:void(0);">Delete</a>
                                                 </div>

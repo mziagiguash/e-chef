@@ -23,7 +23,7 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
                     <li class="breadcrumb-item active"><a href="{{localeRoute('course.index')}}">Courses</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0);">Edit Course</a></li>
+                    <li class="breadcrumb-item active">Edit Course</li>
                 </ol>
             </div>
         </div>
@@ -32,7 +32,19 @@
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="card-title">Basic Info</h5>
+                        <h3 class="mt-3 ">Basic Info</h3>
+                        <ul class="nav nav-tabs" role="tablist">
+                            @foreach(['en' => 'English', 'ru' => 'Русский', 'ka' => 'ქართული'] as $locale => $langName)
+                                <li class="nav-item">
+                                    <a class="nav-link {{ $loop->first ? 'active' : '' }}"
+                                       data-bs-toggle="tab"
+                                       href="#tab-{{ $locale }}"
+                                       role="tab">
+                                        {{ $langName }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
                     </div>
                     <div class="card-body">
                         @if(fullAccess())
@@ -55,36 +67,23 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
-                                        <label class="form-label">Title</label>
-                                        <input type="text" class="form-control" name="courseTitle"
-                                            value="{{old('courseTitle',$course->title)}}">
-                                    </div>
-                                    @if($errors->has('courseTitle'))
-                                    <span class="text-danger"> {{ $errors->first('courseTitle') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Description</label>
-                                        <textarea class="form-control"
-                                            name="description">{{old('description',$course->description)}}</textarea>
-                                    </div>
-                                    @if($errors->has('description'))
-                                    <span class="text-danger"> {{ $errors->first('description') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <textarea class="form-control"
-                                    </div>
-                                    @endif
-                                </div>
+                                            <label class="form-label">Title ({{ $langName }})</label>
+                                            <input type="text" class="form-control"
+                                                   name="translations[{{ $locale }}][title]"
+                                                   value="{{ old("translations.$locale.title") }}">
+                                            @error("translations.$locale.title")
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                <div class="form-group">
+                                            <label class="form-label">Description ({{ $langName }})</label>
+                                            <textarea class="form-control"
+                                                      name="translations[{{ $locale }}][description]">{{ old("translations.$locale.description") }}</textarea>
+                                            @error("translations.$locale.description")
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Category</label>
@@ -102,6 +101,26 @@
                                     <span class="text-danger"> {{ $errors->first('categoryId') }}</span>
                                     @endif
                                 </div>
+                                 <div class="form-group">
+                                            <label class="form-label">Prerequisites ({{ $langName }})</label>
+                                            <textarea class="form-control"
+                                                      name="translations[{{ $locale }}][prerequisites]">{{ old("translations.$locale.prerequisites") }}</textarea>
+                                            @error("translations.$locale.prerequisites")
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Keywords ({{ $langName }})</label>
+                                            <input type="text" class="form-control"
+                                                   name="translations[{{ $locale }}][keywords]"
+                                                   value="{{ old("translations.$locale.keywords") }}">
+                                            @error("translations.$locale.keywords")
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        </div>
+                                @endforeach
+                            </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Instructor</label>
@@ -328,12 +347,6 @@
                                     </div>
                                     @if($errors->has('description'))
                                     <span class="text-danger"> {{ $errors->first('description') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <textarea class="form-control"
-                                    </div>
                                     @endif
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">

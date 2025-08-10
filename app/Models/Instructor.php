@@ -22,4 +22,15 @@ class Instructor extends Model
     public function courses(){
         return $this->hasMany(Course::class);
     }
+  public function translations()
+{
+    return $this->hasMany(InstructorTranslation::class);
+}
+
+
+public function translation($locale = null)
+{
+    $locale = $locale ?: app()->getLocale();
+    return $this->translations()->where('locale', $locale)->first();
+}
 }

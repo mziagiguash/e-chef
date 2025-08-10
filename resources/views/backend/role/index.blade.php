@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('role.index')}}">Roles</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('role.index')}}">All Role</a></li>
+                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{route('role.index')}}">Roles</a></li>
+                    <li class="breadcrumb-item active"><a href="{{route('role.index')}}">All Role</a></li>
                 </ol>
             </div>
         </div>
@@ -34,7 +34,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">All Role List </h4>
-                                <a href="{{localeRoute('role.create')}}" class="btn btn-primary">+ Add new</a>
+                                <a href="{{route('role.create')}}" class="btn btn-primary">+ Add new</a>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -54,17 +54,17 @@
                                                 <td><strong>{{$d->name}}</strong></td>
                                                 <td>{{$d->identity}}</td>
                                                 <td>
-                                                    <a href="{{localeRoute('role.edit', encryptor('encrypt',$d->id))}}"
+                                                    <a href="{{route('role.edit', encryptor('encrypt',$d->id))}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
-                                                    <a href="{{localeRoute('permission.list', encryptor('encrypt',$d->id))}}"
+                                                    <a href="{{route('permission.list', encryptor('encrypt',$d->id))}}"
                                                         class="btn btn-sm btn-dark" title="Permissions"><i
                                                             class="la la-unlock"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$d->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$d->id}}"
-                                                        action="{{localeRoute('role.destroy', encryptor('encrypt',$d->id))}}"
+                                                        action="{{route('role.destroy', encryptor('encrypt',$d->id))}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')

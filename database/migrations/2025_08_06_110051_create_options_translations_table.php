@@ -7,14 +7,15 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('option_translations', function (Blueprint $table) {
+       Schema::create('options_translations', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('option_id')->constrained()->onDelete('cascade');
-    $table->string('locale', 5);
-    $table->text('option_text');
+    $table->unsignedBigInteger('option_id')->index();
+    $table->string('locale', 10);
+    $table->string('option_text');
     $table->timestamps();
 
     $table->unique(['option_id', 'locale']);
+    $table->foreign('option_id')->references('id')->on('options')->onDelete('cascade');
 });
 
     }

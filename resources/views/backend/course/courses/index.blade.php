@@ -26,7 +26,24 @@
                 </ol>
             </div>
         </div>
+        @php
+            // Список локалей (если нужно — вынеси в config)
+            $locales = ['en' => 'English', 'ru' => 'Русский', 'ka' => 'ქართული'];
+            $appLocale = app()->getLocale();
+        @endphp
 
+        <div class="row">
+            <div class="col-lg-12">
+                {{-- Переключатель языков для просмотра --}}
+                <ul class="nav nav-tabs" id="categoryLangTabs" role="tablist">
+                    @foreach($locales as $localeCode => $localeName)
+                        <li class="nav-item" role="presentation">
+                            <a href="#" class="nav-link lang-tab {{ $localeCode === $appLocale ? 'active' : '' }}"
+                               data-locale="{{ $localeCode }}">{{ $localeName }}</a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
         <div class="row">
             <div class="col-lg-12">
                 <div class="row tab-content">
@@ -65,7 +82,10 @@
                                                 <img src="{{asset('public/uploads/courses/'.$d->image)}}" class="w-100"
                                                     height="200" alt="">
                                             </div>
-                                            <h3 class="mt-4 mb-1">{{$d->title}}</h3>
+                                            {{-- Здесь выводим заголовок курса для всех языков --}}
+                    @foreach(['en', 'ru', 'ka'] as $lang)
+                        <h3 class="mt-4 mb-1">{{ $translation->title ?? 'No title' }}</h3>
+                    @endforeach
                                             <ul class="list-group mb-3 list-group-flush">
                                                 <li class="list-group-item px-0 d-flex justify-content-between">
                                                     <span>Difficulty</span>
@@ -130,8 +150,35 @@
 @endsection
 
 @push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const initialLocale = localStorage.getItem('courses_lang') || '{{ app()->getLocale() }}';
+
+    function setActiveLocale(locale) {
+        document.querySelectorAll('.lang-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.locale === locale);
+        });
+
+        document.querySelectorAll('.course-title').forEach(el => {
+            el.style.display = el.classList.contains('lang-' + locale) ? '' : 'none';
+        });
+    }
+
+    document.querySelectorAll('.lang-tab').forEach(tab => {
+        tab.addEventListener('click', function (e) {
+            e.preventDefault();
+            const locale = this.dataset.locale;
+            localStorage.setItem('courses_lang', locale);
+            setActiveLocale(locale);
+        });
+    });
+
+    setActiveLocale(initialLocale);
+});
+
+</script>
+
 <!-- Datatable -->
 <script src="{{asset('public/vendor/datatables/js/jquery.dataTables.min.js')}}"></script>
 <script src="{{asset('public/js/plugins-init/datatables.init.js')}}"></script>
-
 @endpush

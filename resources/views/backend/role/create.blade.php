@@ -1,7 +1,7 @@
 @extends('backend.layouts.app')
 @section('title', 'Add Role')
 
-@push('styles') 
+@push('styles')
 <!-- Pick date -->
 <link rel="stylesheet" href="{{asset('public/vendor/pickadate/themes/default.css')}}">
 <link rel="stylesheet" href="{{asset('public/vendor/pickadate/themes/default.date.css')}}">
@@ -21,9 +21,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('role.index')}}">Roles</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('role.create')}}">Add Role</a></li>
+                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{route('role.index')}}">Roles</a></li>
+                    <li class="breadcrumb-item active"><a href="{{route('role.create')}}">Add Role</a></li>
                 </ol>
             </div>
         </div>
@@ -35,7 +35,7 @@
                         <h5 class="card-title">Basic Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{localeRoute('role.store')}}" method="post" enctype="multipart/form-data">
+                        <form action="{{route('role.store')}}" method="post" enctype="multipart/form-data">
                             @csrf
                             <div class="row">
                                 <div class="col-lg-6 col-md-6 col-sm-12">

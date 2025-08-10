@@ -7,7 +7,6 @@ use App\Models\CourseCategory;
 use Illuminate\Http\Request;
 use App\Http\Requests\Backend\Course\CourseCategory\AddNewRequest;
 use App\Http\Requests\Backend\Course\CourseCategory\UpdateRequest;
-
 use Exception;
 use File;
 
@@ -16,9 +15,18 @@ class CourseCategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = CourseCategory::paginate(10);
+        $locale = app()->getLocale();
+
+        $query = CourseCategory::query();
+
+        if ($search = $request->input('search')) {
+            $query->where("category_name->{$locale}", 'like', "%{$search}%");
+        }
+
+        $data = $query->paginate(10);
+
         return view('backend.course.courseCategory.index', compact('data'));
     }
 
@@ -34,68 +42,66 @@ class CourseCategoryController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(AddNewRequest $request)
-    {
-        try {
-            $data = new CourseCategory;
-            $data->category_name = $request->category_name;
-            $data->category_status = $request->category_status;
+{
+    try {
+        $data = new CourseCategory;
+        $data->category_name = json_encode($request->category_name);
+        $data->category_status = $request->category_status;
 
-            if ($request->hasFile('category_image')) {
-                $imageName = rand(111, 999) . time() . '.' . $request->category_image->extension();
-                $request->category_image->move(public_path('uploads/courseCategories'), $imageName);
-                $data->category_image = $imageName;
-            }
-            if ($data->save())
-                return redirect()->route('courseCategory.index')->with('success', 'Data Saved');
-            else
-                return redirect()->back()->withInput()->with('error', 'Please try again');
-        } catch (Exception $e) {
-            // dd($e);
+        if ($request->hasFile('category_image')) {
+            $imageName = rand(111, 999) . time() . '.' . $request->category_image->extension();
+            $request->category_image->move(public_path('uploads/courseCategories'), $imageName);
+            $data->category_image = $imageName;
+        }
+        if ($data->save()) {
+            return redirect()->route('courseCategory.index')->with('success', 'Data Saved');
+        } else {
             return redirect()->back()->withInput()->with('error', 'Please try again');
         }
+    } catch (Exception $e) {
+        return redirect()->back()->withInput()->with('error', 'Please try again');
     }
+}
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(CourseCategory $courseCategory)
-    {
-        //
-    }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
-    {
-        $data = CourseCategory::findOrFail($id);
-        return view('backend.course.courseCategory.edit', compact('data'));
-    }
+public function edit($id)
+{
+    $data = CourseCategory::findOrFail($id);
+    $data->category_name = json_decode($data->category_name, true);
+    
+    return view('backend.course.courseCategory.edit', compact('data'));
+}
+
 
     /**
      * Update the specified resource in storage.
      */
     public function update(UpdateRequest $request, $id)
-    {
-        try {
-            $data = CourseCategory::findOrFail($id);
-            $data->category_name = $request->category_name;
-            $data->category_status = $request->category_status;
+{
+    try {
+        $data = CourseCategory::findOrFail($id);
+        // Кодируем массив в JSON для хранения
+        $data->category_name = json_encode($request->category_name);
+        $data->category_status = $request->category_status;
 
-            if ($request->hasFile('category_image')) {
-                $imageName = rand(111, 999) . time() . '.' . $request->category_image->extension();
-                $request->category_image->move(public_path('uploads/courseCategories'), $imageName);
-                $data->category_image = $imageName;
-            }
-            if ($data->save())
-                return redirect()->route('courseCategory.index')->with('success', 'Data Saved');
-            else
-                return redirect()->back()->withInput()->with('error', 'Please try again');
-        } catch (Exception $e) {
-            // dd($e);
+        if ($request->hasFile('category_image')) {
+            $imageName = rand(111, 999) . time() . '.' . $request->category_image->extension();
+            $request->category_image->move(public_path('uploads/courseCategories'), $imageName);
+            $data->category_image = $imageName;
+        }
+        if ($data->save()) {
+            return redirect()->route('courseCategory.index')->with('success', 'Data Saved');
+        } else {
             return redirect()->back()->withInput()->with('error', 'Please try again');
         }
+    } catch (Exception $e) {
+        return redirect()->back()->withInput()->with('error', 'Please try again');
     }
+}
+
 
     /**
      * Remove the specified resource from storage.
@@ -106,9 +112,9 @@ class CourseCategoryController extends Controller
         $image_path = public_path('uploads/courseCategories/') . $data->category_image;
 
         if ($data->delete()) {
-            if (File::exists($image_path))
+            if (File::exists($image_path)) {
                 File::delete($image_path);
-
+            }
             return redirect()->back();
         }
     }

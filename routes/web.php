@@ -44,15 +44,16 @@ Route::get('/debug', function () {
     ]);
 });
 
-// 🔐 Auth routes (не в локализованной группе)
+// 🔐 Auth routes
+// ==========================
+// 🔒 ADMIN routes (НЕ в locale)
 Route::get('/register', [auth::class, 'signUpForm'])->name('register');
 Route::post('/register', [auth::class, 'signUpStore'])->name('register.store');
 Route::get('/login', [auth::class, 'signInForm'])->name('login');
 Route::post('/login', [auth::class, 'signInCheck'])->name('login.check');
 Route::get('/logout', [auth::class, 'signOut'])->name('logOut');
 
-// ==========================
-// 🔒 ADMIN routes (НЕ в locale)
+
 // ==========================
 Route::middleware(['checkauth'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [dashboard::class, 'index'])->name('dashboard');

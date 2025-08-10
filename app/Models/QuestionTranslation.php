@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class QuestionTranslation extends Model
 {
-    protected $fillable = ['Question_id', 'locale', 'question_text'];
+    protected $fillable = ['question_id', 'locale', 'content', 'option_a', 'option_b', 'option_c', 'option_d', 'correct_answer'];
 
-    public function Question()
+    public function question()
     {
         return $this->belongsTo(Question::class);
     }

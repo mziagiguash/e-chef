@@ -1,14 +1,19 @@
 <?php
 
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class CourseCategoryTranslation extends Model
 {
-    protected $fillable = ['CourseCategory_id', 'locale', 'name', 'description'];
+    public $timestamps = false;
 
-    public function CourseCategory()
+    protected $table = 'course_categories_translations';
+
+    protected $fillable = ['course_category_id', 'locale', 'category_name'];
+
+    public function courseCategory()
     {
         return $this->belongsTo(CourseCategory::class);
     }

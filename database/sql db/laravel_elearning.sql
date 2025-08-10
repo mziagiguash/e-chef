@@ -1,11 +1,3 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Generation Time: Feb 22, 2024 at 06:59 PM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -38,6 +30,15 @@ CREATE TABLE `answers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
+CREATE TABLE `answers_translations` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `answer_id` BIGINT UNSIGNED NOT NULL,
+  `locale` VARCHAR(10) NOT NULL,
+  `answer` TEXT DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `answer_locale` (`answer_id`, `locale`),
+  FOREIGN KEY (`answer_id`) REFERENCES `answers`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Table structure for table `checkouts`
@@ -95,7 +96,6 @@ INSERT INTO `coupons` (`id`, `code`, `discount`, `valid_from`, `valid_until`, `c
 CREATE TABLE `courses` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `title` varchar(255) NOT NULL,
-  `title_bn` varchar(255) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `course_category_id` bigint(20) UNSIGNED NOT NULL,
   `instructor_id` bigint(20) UNSIGNED NOT NULL,
@@ -784,7 +784,6 @@ INSERT INTO `roles` (`id`, `name`, `identity`, `created_at`, `updated_at`) VALUE
 (2, 'Admin', 'admin', '2023-11-16 12:16:34', NULL),
 (3, 'Instructor', 'instructor', '2023-11-16 12:16:34', NULL),
 (4, 'Student', 'student', '2023-11-16 12:16:34', NULL),
-(5, 'Visitor', 'visitor', '2023-11-23 09:13:19', '2023-11-23 09:13:19');
 
 -- --------------------------------------------------------
 
@@ -802,7 +801,7 @@ CREATE TABLE `students` (
   `image` varchar(255) DEFAULT NULL,
   `bio` text DEFAULT NULL,
   `profession` varchar(255) DEFAULT NULL,
-  `nationality` varchar(255) DEFAULT 'Bangladeshi',
+  `nationality` varchar(255) DEFAULT 'Georgien',
   `address` text DEFAULT NULL,
   `city` varchar(255) DEFAULT NULL,
   `state` varchar(255) DEFAULT NULL,

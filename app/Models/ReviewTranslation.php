@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class ReviewTranslation extends Model
 {
-    protected $fillable = ['Review_id', 'locale', 'comment'];
+    protected $fillable = ['review_id', 'locale', 'comment'];
 
-    public function Review()
+    public function review()
     {
         return $this->belongsTo(Review::class);
     }

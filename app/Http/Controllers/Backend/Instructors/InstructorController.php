@@ -9,6 +9,7 @@ use App\Http\Requests\Backend\Instructors\AddNewRequest;
 use App\Http\Requests\Backend\Instructors\UpdateRequest;
 use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 use Exception;
 use File;
 use DB;
@@ -18,8 +19,10 @@ class InstructorController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $locale = $request->input('locale', app()->getLocale());
+
         $instructor = Instructor::paginate(10);
         return view('backend.instructor.index', compact('instructor'));
     }
@@ -36,52 +39,55 @@ class InstructorController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(AddNewRequest $request)
-    {
-        try {
-            DB::beginTransaction();
-            $instructor = new Instructor;
-            $instructor->name = $request->fullName;
-            $instructor->contact = $request->contactNumber;
-            $instructor->email = $request->emailAddress;
-            $instructor->role_id = $request->roleId;
-            $instructor->bio = $request->bio;
-            $instructor->designation = $request->designation;
-            $instructor->title = $request->title;
-            $instructor->status = $request->status;
-            $instructor->password = Hash::make($request->password);
-            $instructor->language = 'en';
-            $instructor->access_block = $request->access_block;
-            if ($request->hasFile('image')) {
-                $imageName = (Role::find($request->roleId)->name) . '_' .  $request->fullName_en . '_' . rand(999, 111) .  '.' . $request->image->extension();
-                $request->image->move(public_path('uploads/users'), $imageName);
-                $instructor->image = $imageName;
-            }
+public function store(AddNewRequest $request)
+{
+    try {
+        DB::beginTransaction();
 
-            if ($instructor->save()) {
-                $user = new User;
-                $user->instructor_id = $instructor->id;
-                $user->name = $request->fullName;
-                $user->email = $request->emailAddress;
-                $user->contact = $request->contactNumber;
-                $user->role_id = $request->roleId;
-                $user->status = $request->status;
-                $user->password = Hash::make($request->password);
-                if (isset($imageName)) {
-                    $user->image = $imageName; // Save the image name in the users table
-                }
-                if ($user->save()) {
-                    DB::commit();
-                    $this->notice::success('Successfully saved');
-                    return redirect()->route('instructor.index');
-                }
-            } else
-                return redirect()->back()->withInput()->with('error', 'Please try again');
-        } catch (Exception $e) {
-            dd($e);
-            return redirect()->back()->withInput()->with('error', 'Please try again');
+        // Instructor
+        $instructor = new Instructor;
+        $instructor->name = $request->name;
+        $instructor->contact = $request->contactNumber;
+        $instructor->email = $request->emailAddress;
+        $instructor->role_id = $request->roleId;
+        $instructor->title = $request->title;
+        $instructor->status = $request->status;
+        $instructor->password = Hash::make($request->password);
+        $instructor->language = app()->getLocale(); // например, текущая локаль
+        $instructor->access_block = $request->access_block; // просто строка или int
+
+        if ($request->hasFile('image')) {
+            $imageName = Role::find($request->roleId)->name . '_' .  $request->name . '_' . rand(999, 111) .  '.' . $request->image->extension();
+            $request->image->move(public_path('uploads/users'), $imageName);
+            $instructor->image = $imageName;
         }
+
+        $instructor->save();
+
+        // User
+        $user = new User;
+        $user->instructor_id = $instructor->id;
+        $user->name = $request->name;
+        $user->email = $request->emailAddress;
+        $user->contact = $request->contactNumber;
+        $user->role_id = $request->roleId;
+        $user->status = $request->status;
+        $user->password = Hash::make($request->password);
+        if (isset($imageName)) {
+            $user->image = $imageName;
+        }
+        $user->save();
+
+        DB::commit();
+
+        $this->notice::success('Successfully saved');
+        return redirect()->route('instructor.index');
+
+    } catch (Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->withInput()->with('error', 'Please try again');
     }
+}
 
     /**
      * Display the specified resource.

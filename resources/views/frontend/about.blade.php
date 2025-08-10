@@ -3,391 +3,397 @@
 @section('header-attr') class="nav-shadow" @endsection
 
 @section('content')
-<!-- Breadcrumb Starts Here -->
-<div class="py-0">
-    <div class="container">
-        <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="{{ url('/') }}" class="fs-6 text-secondary">{{ __('menu.home') }}</a>
-                </li>
-                <li class="breadcrumb-item active">
-                    <a href="{{ url('/about') }}" class="fs-6 text-secondary">{{ __('menu.about_us') }}</a>
-                </li>
-            </ol>
-        </nav>
-    </div>
-</div>
-<!-- Breadcrumb Ends Here -->
-
-<!-- About Intro Starts Here -->
-<section class="about-intro section">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6 position-relative mt-4 mt-lg-0" style="z-index: 0;">
-                <div class="about-intro__img-wrapper">
-                    <img src="{{asset('public/frontend/dist/images/about/intro.jpg')}}" alt="Intro Image"
-                        class="img-fluid rounded-2 ms-lg-5 position-relative intro-image" />
-                </div>
-                <div class="intro-shape">
-                    <img src="{{asset('public/frontend/dist/images/shape/rec04.png')}}" alt="Shape"
-                        class="img-fluid shape-01" />
-                    <img src="{{asset('public/frontend/dist/images/shape/dots/dots-img-09.png')}}" alt="Shape"
-                        class="img-fluid shape-02" />
-                </div>
-            </div>
-            <div class="col-lg-6">
-    <div class="about-intro__textContent">
-        <h2 class="font-title--md mb-3">{{ __('menu.about_title') }}</h2>
-        <p class="mt-2 mt-lg-1 mb-2 mb-lg-4 text-secondary">
-            {{ __('menu.about_text_1') }}
-        </p>
-        <p class="text-secondary">
-            {{ __('menu.about_text_2') }}
-        </p>
-    </div>
-</div>
-</section>
-<!-- About Intro Ends Here -->
-
-<!-- About Feature Starts Here -->
-<section class="section aboutFeature pb-0">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="about-feature dark-feature">
-                    <h5 class="text-white font-title--sm">{{ __('menu.about_feature_title_1') }}</h5>
-                    <p class="text-lowblack">
-                        {{ __('menu.about_feature_text_1') }}
-                    </p>
-                </div>
-            </div>
-            <div class="col-lg-6 mt-4 mt-lg-0">
-                <div class="about-feature">
-                    <h5 class="font-title--sm">{{ __('menu.about_feature_title_2') }}</h5>
-                    <p class="text-secondary">
-                        {{ __('menu.about_feature_text_2') }}
-                    </p>
-                </div>
-            </div>
+    <!-- Breadcrumb Starts Here -->
+    <div class="py-0">
+        <div class="container">
+            <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url('/') }}" class="fs-6 text-secondary">{{ __('menu.home') }}</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <a href="{{ url('/about') }}" class="fs-6 text-secondary">{{ __('menu.about_us') }}</a>
+                    </li>
+                </ol>
+            </nav>
         </div>
     </div>
-</section>
-<!-- About Feature Ends Here -->
+    <!-- Breadcrumb Ends Here -->
 
-
-<!-- Brands Starts Here -->
-<section class="section overflow-hidden brands pb-lg-0">
-    <div class="bg-secondary py-80">
-    <div class="container">
-        <div class="row mb-40">
-            <div class="col-lg-6 mx-auto text-center">
-                <div class="brands__titleContent">
-                    <h5 class="mb-2 dark-text font-title--sm">
-                        {{ __('menu.brands_title') }}
-                    </h5>
-                    <p class="font-para--lg">
-                        {{ __('menu.brands_text') }}
-                    </p>
+    <!-- About Intro Starts Here -->
+    <section class="about-intro section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 position-relative mt-4 mt-lg-0" style="z-index: 0;">
+                    <div class="about-intro__img-wrapper">
+                        <img src="{{ asset('public/frontend/dist/images/about/intro.jpg') }}" alt="Intro Image"
+                            class="img-fluid rounded-2 ms-lg-5 position-relative intro-image" />
+                    </div>
+                    <div class="intro-shape">
+                        <img src="{{ asset('public/frontend/dist/images/shape/rec04.png') }}" alt="Shape"
+                            class="img-fluid shape-01" />
+                        <img src="{{ asset('public/frontend/dist/images/shape/dots/dots-img-09.png') }}" alt="Shape"
+                            class="img-fluid shape-02" />
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="col-lg-6">
+                    <div class="about-intro__textContent">
+                        <h2 class="font-title--md mb-3">{{ __('menu.about_title') }}</h2>
+                        <p class="mt-2 mt-lg-1 mb-2 mb-lg-4 text-secondary">
+                            {{ __('menu.about_text_1') }}
+                        </p>
+                        <p class="text-secondary">
+                            {{ __('menu.about_text_2') }}
+                        </p>
+                    </div>
+                </div>
+    </section>
+    <!-- About Intro Ends Here -->
+
+    <!-- About Feature Starts Here -->
+    <section class="section aboutFeature pb-0">
+        <div class="container">
             <div class="row">
-                <div class="col-lg-12">
-                    <div class="brand-area">
-                        <div class="brand-area-image">
-                            <img src="{{asset('public/frontend/dist/images/versity/1.png')}}" alt="Brand"
-                                class="img-fluid" />
-                        </div>
-                        <div class="brand-area-image">
-                            <img src="{{asset('public/frontend/dist/images/versity/2.png')}}" alt="Brand"
-                                class="img-fluid" />
-                        </div>
-                        <div class="brand-area-image">
-                            <img src="{{asset('public/frontend/dist/images/versity/3.png')}}" alt="Brand"
-                                class="img-fluid" />
-                        </div>
-                        <div class="brand-area-image">
-                            <img src="{{asset('public/frontend/dist/images/versity/4.png')}}" alt="Brand"
-                                class="img-fluid" />
-                        </div>
-                        <div class="brand-area-image">
-                            <img src="{{asset('public/frontend/dist/images/versity/2.png')}}" alt="Brand"
-                                class="img-fluid" />
-                        </div>
-                        <div class="brand-area-image">
-                            <img src="{{asset('public/frontend/dist/images/versity/5.png')}}" alt="Brand"
-                                class="img-fluid" />
+                <div class="col-lg-6">
+                    <div class="about-feature dark-feature">
+                        <h5 class="text-white font-title--sm">{{ __('menu.about_feature_title_1') }}</h5>
+                        <p class="text-lowblack">
+                            {{ __('menu.about_feature_text_1') }}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-4 mt-lg-0">
+                    <div class="about-feature">
+                        <h5 class="font-title--sm">{{ __('menu.about_feature_title_2') }}</h5>
+                        <p class="text-secondary">
+                            {{ __('menu.about_feature_text_2') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- About Feature Ends Here -->
+
+
+    <!-- Brands Starts Here -->
+    <section class="section overflow-hidden brands pb-lg-0">
+        <div class="bg-secondary py-80">
+            <div class="container">
+                <div class="row mb-40">
+                    <div class="col-lg-6 mx-auto text-center">
+                        <div class="brands__titleContent">
+                            <h5 class="mb-2 dark-text font-title--sm">
+                                {{ __('menu.brands_title') }}
+                            </h5>
+                            <p class="font-para--lg">
+                                {{ __('menu.brands_text') }}
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
-<!-- Brands Ends Here -->
-
-<!-- Best Instructors Starts Here -->
-<section class="section best-instructor-featured overflow-hidden main-instructor-featured">
-    <div class="container">
         <div class="row">
-            <div class="col-lg-12 position-relative">
-               <h2 class="text-center mb-40 font-title--md">{{ __('menu.meet_instructors') }}</h2>
-                <div class="ourinstructor__wrapper mt-lg-5 mt-0">
-                    <div class="ourinstructor-active">
-                        <div class="mentor">
-                            <div class="mentor__img">
-                                <img src="{{asset('public/frontend/dist/images/instructor/03.jpg')}}"
-                                    alt="Mentor image" />
+            <div class="col-lg-12">
+                <div class="brand-area">
+                    <div class="brand-area-image">
+                        <img src="{{ asset('public/frontend/dist/images/versity/1.png') }}" alt="Brand"
+                            class="img-fluid" />
+                    </div>
+                    <div class="brand-area-image">
+                        <img src="{{ asset('public/frontend/dist/images/versity/2.png') }}" alt="Brand"
+                            class="img-fluid" />
+                    </div>
+                    <div class="brand-area-image">
+                        <img src="{{ asset('public/frontend/dist/images/versity/3.png') }}" alt="Brand"
+                            class="img-fluid" />
+                    </div>
+                    <div class="brand-area-image">
+                        <img src="{{ asset('public/frontend/dist/images/versity/4.png') }}" alt="Brand"
+                            class="img-fluid" />
+                    </div>
+                    <div class="brand-area-image">
+                        <img src="{{ asset('public/frontend/dist/images/versity/2.png') }}" alt="Brand"
+                            class="img-fluid" />
+                    </div>
+                    <div class="brand-area-image">
+                        <img src="{{ asset('public/frontend/dist/images/versity/5.png') }}" alt="Brand"
+                            class="img-fluid" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        </div>
+    </section>
+    <!-- Brands Ends Here -->
 
-                                <ul class="list-inline">
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-instagram"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-linkedin-in"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-twitter"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-youtube"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-facebook-f"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="mentor__title">
-                                <h6>
-    <a href="instructor-profile.html" tabindex="0">{{ __('menu.instructor_name_1') }}</a>
-</h6>
-<p>{{ __('menu.instructor_role') }}</p>
-                            </div>
-                        </div>
-                        <div class="mentor">
-                            <div class="mentor__img">
-                                <img src="{{asset('public/frontend/dist/images/instructor/02.jpg')}}"
-                                    alt="Mentor image" />
+    <!-- Best Instructors Starts Here -->
+    <section class="section best-instructor-featured overflow-hidden main-instructor-featured">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 position-relative">
+                    <h2 class="text-center mb-40 font-title--md">{{ __('menu.meet_instructors') }}</h2>
+                    <div class="ourinstructor__wrapper mt-lg-5 mt-0">
+                        <div class="ourinstructor-active">
+                            <div class="mentor">
+                                <div class="mentor__img">
+                                    <img src="{{ asset('public/frontend/dist/images/instructor/03.jpg') }}"
+                                        alt="Mentor image" />
 
-                                <ul class="list-inline">
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-instagram"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-linkedin-in"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-twitter"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-youtube"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-facebook-f"></i>
-                                        </a>
-                                    </li>
-                                </ul>
+                                    <ul class="list-inline">
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-instagram"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-linkedin-in"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-twitter"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-youtube"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-facebook-f"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="mentor__title">
+                                    <h6>
+                                        <a href="instructor-profile.html"
+                                            tabindex="0">{{ __('menu.instructor_name_1') }}</a>
+                                    </h6>
+                                    <p>{{ __('menu.instructor_role') }}</p>
+                                </div>
                             </div>
-                            <div class="mentor__title">
-                                <h6>
-    <a href="instructor-profile.html" tabindex="0">{{ __('menu.instructor_name_1') }}</a>
-</h6>
-<p>{{ __('menu.instructor_role') }}</p>
-                            </div>
-                        </div>
-                        <div class="mentor">
-                            <div class="mentor__img">
-                                <img src="{{asset('public/frontend/dist/images/instructor/3.jpg')}}"
-                                    alt="Mentor image" />
+                            <div class="mentor">
+                                <div class="mentor__img">
+                                    <img src="{{ asset('public/frontend/dist/images/instructor/02.jpg') }}"
+                                        alt="Mentor image" />
 
-                                <ul class="list-inline">
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-instagram"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-linkedin-in"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-twitter"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-youtube"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-facebook-f"></i>
-                                        </a>
-                                    </li>
-                                </ul>
+                                    <ul class="list-inline">
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-instagram"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-linkedin-in"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-twitter"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-youtube"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-facebook-f"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="mentor__title">
+                                    <h6>
+                                        <a href="instructor-profile.html"
+                                            tabindex="0">{{ __('menu.instructor_name_1') }}</a>
+                                    </h6>
+                                    <p>{{ __('menu.instructor_role') }}</p>
+                                </div>
                             </div>
-                            <div class="mentor__title">
-                                <h6>
-    <a href="instructor-profile.html" tabindex="0">{{ __('menu.instructor_name_2') }}</a>
-</h6>
-<p>{{ __('menu.instructor_role') }}</p>
-                            </div>
-                        </div>
-                        <div class="mentor">
-                            <div class="mentor__img">
-                                <img src="{{asset('public/frontend/dist/images/instructor/04.jpg')}}"
-                                    alt="Mentor image" />
+                            <div class="mentor">
+                                <div class="mentor__img">
+                                    <img src="{{ asset('public/frontend/dist/images/instructor/3.jpg') }}"
+                                        alt="Mentor image" />
 
-                                <ul class="list-inline">
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-instagram"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-linkedin-in"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-twitter"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-youtube"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-facebook-f"></i>
-                                        </a>
-                                    </li>
-                                </ul>
+                                    <ul class="list-inline">
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-instagram"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-linkedin-in"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-twitter"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-youtube"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-facebook-f"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="mentor__title">
+                                    <h6>
+                                        <a href="instructor-profile.html"
+                                            tabindex="0">{{ __('menu.instructor_name_2') }}</a>
+                                    </h6>
+                                    <p>{{ __('menu.instructor_role') }}</p>
+                                </div>
                             </div>
-                            <div class="mentor__title">
-                                <h6>
-    <a href="instructor-profile.html" tabindex="0">{{ __('menu.instructor_name_1') }}</a>
-</h6>
-<p>{{ __('menu.instructor_role') }}</p>
-                            </div>
-                        </div>
-                        <div class="mentor">
-                            <div class="mentor__img">
-                                <img src="{{asset('public/frontend/dist/images/instructor/1.png')}}"
-                                    alt="Mentor image" />
+                            <div class="mentor">
+                                <div class="mentor__img">
+                                    <img src="{{ asset('public/frontend/dist/images/instructor/04.jpg') }}"
+                                        alt="Mentor image" />
 
-                                <ul class="list-inline">
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-instagram"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-linkedin-in"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-twitter"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-youtube"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-facebook-f"></i>
-                                        </a>
-                                    </li>
-                                </ul>
+                                    <ul class="list-inline">
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-instagram"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-linkedin-in"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-twitter"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-youtube"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-facebook-f"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="mentor__title">
+                                    <h6>
+                                        <a href="instructor-profile.html"
+                                            tabindex="0">{{ __('menu.instructor_name_1') }}</a>
+                                    </h6>
+                                    <p>{{ __('menu.instructor_role') }}</p>
+                                </div>
                             </div>
-                            <div class="mentor__title">
-                                <h6>
-    <a href="instructor-profile.html" tabindex="0">{{ __('menu.instructor_name_1') }}</a>
-</h6>
-<p>{{ __('menu.instructor_role') }}</p>
-                            </div>
-                        </div>
-                        <div class="mentor">
-                            <div class="mentor__img">
-                                <img src="{{asset('public/frontend/dist/images/instructor/2.png')}}"
-                                    alt="Mentor image" />
+                            <div class="mentor">
+                                <div class="mentor__img">
+                                    <img src="{{ asset('public/frontend/dist/images/instructor/1.png') }}"
+                                        alt="Mentor image" />
 
-                                <ul class="list-inline">
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-instagram"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-linkedin-in"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-twitter"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-youtube"></i>
-                                        </a>
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <a href="#" tabindex="0">
-                                            <i class="fab fa-facebook-f"></i>
-                                        </a>
-                                    </li>
-                                </ul>
+                                    <ul class="list-inline">
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-instagram"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-linkedin-in"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-twitter"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-youtube"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-facebook-f"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="mentor__title">
+                                    <h6>
+                                        <a href="instructor-profile.html"
+                                            tabindex="0">{{ __('menu.instructor_name_1') }}</a>
+                                    </h6>
+                                    <p>{{ __('menu.instructor_role') }}</p>
+                                </div>
                             </div>
-                            <div class="mentor__title">
-                                <h6>
-                                    <a href="instructor-profile.html" tabindex="0">Zakir Hossain</a>
-                                </h6>
-                                <p>Adobe Instructor</p>
+                            <div class="mentor">
+                                <div class="mentor__img">
+                                    <img src="{{ asset('public/frontend/dist/images/instructor/2.png') }}"
+                                        alt="Mentor image" />
+
+                                    <ul class="list-inline">
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-instagram"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-linkedin-in"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-twitter"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-youtube"></i>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <a href="#" tabindex="0">
+                                                <i class="fab fa-facebook-f"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="mentor__title">
+                                    <h6>
+                                        <a href="instructor-profile.html" tabindex="0">Zakir Hossain</a>
+                                    </h6>
+                                    <p>Adobe Instructor</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="main-instructor-featured-shape">
-        <img src="{{asset('public/frontend/dist/images/shape/dots/dots-img-14.png')}}" alt="shape"
-            class="img-fluid shape01" />
-        <img src="{{asset('public/frontend/dist/images/shape/triangel2.png')}}" alt="shape" class="img-fluid shape02" />
-    </div>
-</section>
+        <div class="main-instructor-featured-shape">
+            <img src="{{ asset('public/frontend/dist/images/shape/dots/dots-img-14.png') }}" alt="shape"
+                class="img-fluid shape01" />
+            <img src="{{ asset('public/frontend/dist/images/shape/triangel2.png') }}" alt="shape"
+                class="img-fluid shape02" />
+        </div>
+    </section>
 @endsection
 
 @push('scripts')

@@ -49,25 +49,37 @@
         <h2 class="font-title--md text-center mb-0">Browse Course with Top Categories</h2>
         <div class="browse-categories__wrapper position-relative">
             <div class="categories--box">
-                @forelse ($category as $cat)
-                @php
-                // Fetch the count of courses for each category
-                $courseCount = $cat->course()->count();
-                @endphp
-                <div class="browse-categories-item default-item-one mb-2">
-                    <div class="browse-categories-item-icon">
-                        <div class="categories-one default-categories">
-                            <img src="{{asset('public/uploads/courseCategories/'.$cat->category_image)}}"
-                                class="rounded-circle" width="80" height="80" alt="">
-                        </div>
-                    </div>
-                    <div class="browse-categories-item-text">
-                        <h6 class="font-title--card"><a href="#">{{$cat->category_name}}</a></h6>
-                        <p>{{ $courseCount }} Courses</p>
-                    </div>
-                </div>
-                @empty
-                @endforelse
+               @php
+    $locale = app()->getLocale();
+@endphp
+
+@forelse ($category as $cat)
+    @php
+        $courseCount = $cat->courses()->count();
+
+        // Декодируем JSON с переводами category_name
+        $names = json_decode($cat->category_name, true);
+
+        // Берём название по текущей локали, если нет - fallback на 'en' или пустую строку
+        $categoryName = $names[$locale] ?? $names['en'] ?? '';
+    @endphp
+
+    <div class="browse-categories-item default-item-one mb-2">
+        <div class="browse-categories-item-icon">
+            <div class="categories-one default-categories">
+                <img src="{{ asset('public/uploads/courseCategories/' . $cat->category_image) }}"
+                     class="rounded-circle" width="80" height="80" alt="">
+            </div>
+        </div>
+        <div class="browse-categories-item-text">
+            <h6 class="font-title--card"><a href="#">{{ $categoryName }}</a></h6>
+            <p>{{ $courseCount }} Courses</p>
+        </div>
+    </div>
+@empty
+    <p>No categories found</p>
+@endforelse
+
             </div>
         </div>
         <div class="row">

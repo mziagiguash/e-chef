@@ -38,7 +38,7 @@
                     <li class="breadcrumb-item active"><a href="{{localeRoute('role.index')}}">All Permission</a></li>
                 </ol>
             </div>
-        </div> 
+        </div>
 
         <div class="row">
             <div class="col-lg-12">
@@ -61,7 +61,7 @@
                             foreach($permission as $perm){
                             $permissions[$perm->name]=$perm->name;
                             }
-                            @endphp 
+                            @endphp
                             @foreach(Illuminate\Support\Facades\Route::getRoutes() as $v)
                             @if($v->getPrefix()=="/admin")
                             @php
@@ -71,7 +71,7 @@
                             @endphp
                             @endif
                             @endforeach
-                            <form action="{{localeRoute('permission.save',encryptor('encrypt',$role->id))}}" method="post">
+                            <form action="{{localeRoute('permission.save', encryptor('encrypt',$role->id))}}" method="post">
                                 @csrf
                                 <div class="row p-2">
                                     @forelse($routes as $k=>$r)
@@ -96,7 +96,7 @@
                                         @endif
                                     </div>
                                     @empty
-                        
+
                                     @endforelse
                                 </div>
                                 <div class="row">
@@ -105,7 +105,7 @@
                                     </div>
                                 </div>
                             </form>
-                        
+
                         </div>
                     </div>
                 </div>

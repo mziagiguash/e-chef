@@ -248,7 +248,7 @@
                             <span class="nav-text">Coupons</span>
                         </a>
                     </li>
-                    {{-- <li><a class="has-arrow" href="javascript:void()" aria-expanded="false">
+                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false">
                             <i class="las la-tasks"></i>
                             <span class="nav-text">Quizzes</span>
                         </a>
@@ -287,7 +287,7 @@
                             <li><a href="javascript:void()"><i class="lab la-gg-circle"></i>Subscription Fees</a></li>
                             <li><a href="{{localeRoute('coupon.index')}}"><i class="las la-tags"></i>Coupons</a></li>
                         </ul>
-                    </li> --}}
+                    </li>
                 </ul>
             </div>
         </div>

@@ -2,20 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CourseTranslation extends Model
-{
-    use HasFactory;
 
-    protected $fillable = [
-        'course_id',
-        'locale',
-        'title',
-        'description',
-        'prerequisites',
-    ];
+{
+    protected $table = 'courses_translations';
+
+    protected $fillable = ['course_id', 'locale', 'title', 'description', 'prerequisites'];
 
     public function course()
     {

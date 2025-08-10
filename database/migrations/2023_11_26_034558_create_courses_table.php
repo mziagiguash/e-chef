@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('title')->nullable();
             $table->text('description')->nullable();
             $table->unsignedBigInteger('course_category_id')->index();
             $table->unsignedBigInteger('instructor_id')->index();

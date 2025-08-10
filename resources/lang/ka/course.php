@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'search_placeholder' => 'მოძებნეთ კურსი...',
+    'search' => 'ძებნა',
+    'category' => 'კატეგორია',
+    'all' => 'ყველა',
+    'apply_filter' => 'ფილტრის გამოყენება',
+    'level' => 'დონე',
+    'intermediate' => 'შუალედური',
+    'advanced' => 'გაწაფული',
+    'expert' => 'ექსპერტი',
+    'price' => 'ფასი',
+    'to' => 'მდე',
+    'rating' => 'შეფასება',
+    'stars_and_higher' => 'ვარსკვლავი და მეტი',
+    'duration' => 'ხანგრძლივობა',
+    'hours' => 'საათი',
+    'hours_150_plus' => '150+ საათი',
+    'most_viewed' => 'ყველაზე ნახული',
+    'nothing' => 'არაფერი',
+    'some_option' => 'ზოგიერთი ვარიანტი',
+    'another_option' => 'სხვა ვარიანტი',
+    'results_found' => 'ნაპოვნია: :count შედეგი.',
+    'filter' => 'ფილტრი',
+    'lesson_hours' => 'სასწავლო საათები',
+    'no_course_found' => 'კურსები არ მოიძებნა',
+];

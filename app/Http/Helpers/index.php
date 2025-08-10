@@ -69,6 +69,11 @@ function currencyRate()
 // Helper to build localized route
 function localeRoute($name, $parameters = [])
 {
+    if (!is_array($parameters)) {
+        // Если параметр передан как строка, превращаем в массив с одним элементом
+        $parameters = [$parameters];
+    }
     return route($name, array_merge(['locale' => app()->getLocale()], $parameters));
 }
+
 

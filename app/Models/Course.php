@@ -14,6 +14,10 @@ class Course extends Model
         'description',
         'prerequisites',
     ];
+    public function courses()
+{
+    return $this->hasMany(\App\Models\Course::class, 'course_category_id', 'id');
+}
 
     public function courseCategory()
     {
@@ -54,11 +58,15 @@ class Course extends Model
     {
         return $this->hasMany(Lesson::class);
     }
+public function getCurrentTranslationAttribute()
+{
+    return $this->translation();
+}
 
     // Все переводы
    public function translations()
 {
-    return $this->hasMany(CourseTranslation::class);
+    return $this->hasMany(CourseTranslation::class, 'course_id', 'id');
 }
 
 public function translation($locale = null)

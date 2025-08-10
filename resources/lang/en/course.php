@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'search_placeholder' => 'Search Course...',
+    'search' => 'Search',
+    'category' => 'Category',
+    'all' => 'All',
+    'apply_filter' => 'Apply Filter',
+    'level' => 'Level',
+    'intermediate' => 'Intermediate',
+    'advanced' => 'Advanced',
+    'expert' => 'Expert',
+    'price' => 'Price',
+    'to' => 'to',
+    'rating' => 'Rating',
+    'stars_and_higher' => 'Star and higher',
+    'duration' => 'Duration',
+    'hours' => 'hours',
+    'hours_150_plus' => '150+ hours',
+    'most_viewed' => 'Most Viewed',
+    'nothing' => 'Nothing',
+    'some_option' => 'Some option',
+    'another_option' => 'Another option',
+    'results_found' => ':count results found.',
+    'filter' => 'Filter',
+    'lesson_hours' => 'Lesson Hours',
+    'no_course_found' => 'No Course Found',
+];

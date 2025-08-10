@@ -22,12 +22,23 @@ class UpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'courseTitle' => 'required|max:255',
-            'categoryId' => 'required|max:3',
-            'instructorId' => 'required|max:3',
-            'thumbnail_video_url' => 'nullable|url',
-        'thumbnail_video_file' => 'nullable|mimes:mp4,webm,avi,mov|max:102400', // до 100MB
+           'title' => 'required|array',
 
+        'title.en' => 'required|string|max:255',
+        'title.ru' => 'required|string|max:255',
+        'title.ka' => 'required|string|max:255',
+
+        'description' => 'required|array',
+        'description.en' => 'nullable|string',
+        'description.ru' => 'nullable|string',
+        'description.ka' => 'nullable|string',
+
+        'prerequisites' => 'required|array',
+        'prerequisites.en' => 'nullable|string',
+        'prerequisites.ru' => 'nullable|string',
+        'prerequisites.ka' => 'nullable|string',
+
+        'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ];
     }
 }

@@ -2,19 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class LessonTranslation extends Model
 {
-    use HasFactory;
-
-    protected $fillable = [
-        'lesson_id',
-        'locale',
-        'title',
-        'content',
-    ];
+    protected $fillable = ['lesson_id', 'locale', 'title', 'description', 'notes'];
 
     public function lesson()
     {

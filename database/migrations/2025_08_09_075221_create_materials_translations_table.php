@@ -4,15 +4,16 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-    public function up(): void
+class CreateMaterialsTranslationsTable extends Migration
+{
+    public function up()
     {
-        Schema::create('material_translations', function (Blueprint $table) {
+        Schema::create('materials_translations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('material_id');
-            $table->string('locale')->index();
-            $table->string('title')->nullable();
-            $table->text('description')->nullable();
+            $table->string('locale', 10);
+            $table->string('title');
+            $table->string('content')->nullable();
             $table->timestamps();
 
             $table->unique(['material_id', 'locale']);
@@ -20,8 +21,8 @@ return new class extends Migration {
         });
     }
 
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('material_translations');
+        Schema::dropIfExists('materials_translations');
     }
-};
+}
