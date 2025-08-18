@@ -986,13 +986,25 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div class="mentor__title">
-                                <h6>
-                                    <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $i->id))}}"
-                                        tabindex="0">{{$i->name}}</a>
-                                </h6>
-                                <p>{{$i->designation}}</p>
-                            </div>
+                            @php
+    $locale = app()->getLocale();
+
+    $names = is_string($i->name) ? json_decode($i->name, true) : $i->name;
+    $designations = is_string($i->designation) ? json_decode($i->designation, true) : $i->designation;
+
+    $name = $names[$locale] ?? $names['en'] ?? '';
+    $designation = $designations[$locale] ?? $designations['en'] ?? '';
+@endphp
+
+<div class="mentor__title">
+    <h6>
+        <p href="{{ localeRoute('userProfile', encryptor('encrypt', $i->id)) }}" tabindex="0">
+            {{ $designation }}
+        </p>
+    </h6>
+    <p>{{ $name }}</p>
+</div>
+
                         </div>
                         @empty
                         @endforelse

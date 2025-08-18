@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Checkout;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Exception;
+
 
 class CheckoutController extends Controller
 {
@@ -28,23 +30,24 @@ class CheckoutController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        try {
-           $checkout = new Checkout;
-           $checkout->cart_data = $request->base64_encode(json_encode(session('cart')));
-           $checkout->payer_name = $request->payer_name;
-           $checkout->payment_option = $request->payment_option;
-           $checkout->status = $request->status;
-        
-            if ($checkout->save())
-                return redirect()->route('instructor.index')->with('success', 'Data Saved');
-            else
-                return redirect()->back()->withInput()->with('error', 'Please try again');
-        } catch (Exception $e) {
-            // dd($e);
+{
+    try {
+        $cartData = session('cart') ?? [];
+        $checkout = new Checkout;
+        $checkout->cart_data = base64_encode(json_encode($cartData));
+        $checkout->payer_name = $request->payer_name;
+        $checkout->payment_option = $request->payment_option;
+        $checkout->status = $request->status;
+
+        if ($checkout->save()) {
+            return redirect()->route('instructor.index')->with('success', 'Data Saved');
+        } else {
             return redirect()->back()->withInput()->with('error', 'Please try again');
         }
+    } catch (Exception $e) {
+        return redirect()->back()->withInput()->with('error', 'Please try again');
     }
+}
 
     /**
      * Display the specified resource.

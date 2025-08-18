@@ -9,6 +9,12 @@ class Instructor extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'bio',
+        'title',
+    ];
+
     public function role()
     {
         return $this->belongsTo(Role::class);
@@ -22,15 +28,22 @@ class Instructor extends Model
     public function courses(){
         return $this->hasMany(Course::class);
     }
-  public function translations()
+
+public function translations()
 {
-    return $this->hasMany(InstructorTranslation::class);
+    return $this->hasMany(InstructorTranslation::class, 'instructor_id');
 }
-
-
-public function translation($locale = null)
+public function getTranslationsDumpAttribute()
 {
-    $locale = $locale ?: app()->getLocale();
-    return $this->translations()->where('locale', $locale)->first();
+    return $this->translations->map(fn($t) => [
+        'locale' => $t->locale,
+        'name' => $t->name,
+    ]);
+}
+public function getNameAttribute($value)
+{
+    $names = json_decode($value, true);
+    $locale = app()->getLocale();
+    return $names[$locale] ?? '';
 }
 }

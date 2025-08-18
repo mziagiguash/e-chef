@@ -10,6 +10,7 @@
 @section('content')
 
 <div class="content-body">
+    <!-- row -->
     <div class="container-fluid">
 
         <div class="row page-titles mx-0">
@@ -20,138 +21,146 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('instructor.index')}}">Instructors</a></li>
+                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{route('instructor.index')}}">Instructors</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0);">Edit Instructor</a></li>
                 </ol>
             </div>
         </div>
 
-        @php
-            $locales = ['en' => 'English', 'ru' => 'Русский', 'ka' => 'ქართული'];
-        @endphp
-
-        <form action="{{localeRoute('instructor.update', encryptor('encrypt', $instructor->id))}}" method="post" enctype="multipart/form-data">
-            @csrf
-            @method('PATCH')
-
-            <ul class="nav nav-tabs mb-3" role="tablist">
-                @foreach($locales as $localeCode => $localeName)
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link {{ $loop->first ? 'active' : '' }}" id="tab-{{ $localeCode }}-tab" data-bs-toggle="tab" href="#tab-{{ $localeCode }}" role="tab">{{ $localeName }}</a>
-                    </li>
-                @endforeach
-            </ul>
-
-            <div class="tab-content mb-4">
-                @foreach($locales as $localeCode => $localeName)
-                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="tab-{{ $localeCode }}" role="tabpanel">
-                        <div class="form-group">
-                            <label>Name ({{ $localeName }})</label>
-                            <input type="text" name="name_{{ $localeCode }}" class="form-control" value="{{ old('name_'.$localeCode, $instructor->{'name_'.$localeCode}) }}">
-                            @error('name_'.$localeCode)
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div class="form-group">
-                            <label>Designation ({{ $localeName }})</label>
-                            <input type="text" name="designation_{{ $localeCode }}" class="form-control" value="{{ old('designation_'.$localeCode, $instructor->{'designation_'.$localeCode}) }}">
-                            @error('designation_'.$localeCode)
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div class="form-group">
-                            <label>Title ({{ $localeName }})</label>
-                            <input type="text" name="title_{{ $localeCode }}" class="form-control" value="{{ old('title_'.$localeCode, $instructor->{'title_'.$localeCode}) }}">
-                            @error('title_'.$localeCode)
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12 col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Basic Info</h5>
                     </div>
-                @endforeach
+                    <div class="card-body">
+                        <form action="{{route('instructor.update',encryptor('encrypt', $instructor->id))}}"
+                            method="post" enctype="multipart/form-data">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="uptoken" value="{{encryptor('encrypt',$instructor->id)}}">
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Name</label>
+                                        <input type="text" class="form-control" name="fullName"
+                                            value="{{old('fullName',$instructor->name)}}">
+                                    </div>
+                                    @if($errors->has('fullName'))
+                                    <span class="text-danger"> {{ $errors->first('fullName') }}</span>
+                                    @endif
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">নাম (বাংলায়)</label>
+                                        <input type="text" class="form-control" name="fullName_bn"
+                                            value="{{old('fullName_bn',$instructor->name_bn)}}">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" name="contactNumber"
+                                            value="{{old('contactNumber',$instructor->contact)}}">
+                                    </div>
+                                    @if($errors->has('contactNumber'))
+                                    <span class="text-danger"> {{ $errors->first('contactNumber') }}</span>
+                                    @endif
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">ফোন নাম্বার (বাংলায়)</label>
+                                        <input type="tel" class="form-control" name="contactNumber_bn"
+                                            value="{{old('contactNumber_bn',$instructor->contact_bn)}}">
+                                    </div>
+                                    @if($errors->has('contactNumber_bn'))
+                                    <span class="text-danger"> {{ $errors->first('contactNumber_bn') }}</span>
+                                    @endif
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" name="emailAddress"
+                                            value="{{old('emailAddress',$instructor->email)}}">
+                                    </div>
+                                    @if($errors->has('emailAddress'))
+                                    <span class="text-danger"> {{ $errors->first('emailAddress') }}</span>
+                                    @endif
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Role</label>
+                                        <select class="form-control" name="roleId">
+                                            @forelse ($role as $r)
+                                            <option value="{{$r->id}}" {{old('roleId', $instructor->
+                                                role_id)==$r->id?'selected':''}}>
+                                                {{$r->name}}</option>
+                                            @empty
+                                            <option value="">No Role Found</option>
+                                            @endforelse
+                                        </select>
+                                    </div>
+                                    @if($errors->has('roleId'))
+                                    <span class="text-danger"> {{ $errors->first('roleId') }}</span>
+                                    @endif
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Title</label>
+                                        <input type="text" class="form-control" name="title"
+                                            value="{{old('title',$instructor->title)}}">
+                                    </div>
+                                    @if($errors->has('title'))
+                                    <span class="text-danger"> {{ $errors->first('title') }}</span>
+                                    @endif
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Status</label>
+                                        <select class="form-control" name="status">
+                                            <option value="1" @if(old('status',$instructor->status)==1) selected
+                                                @endif>Active</option>
+                                            <option value="0" @if(old('status',$instructor->status)==0) selected
+                                                @endif>Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Password</label>
+                                        <input type="password" class="form-control" name="password">
+                                    </div>
+                                    @if($errors->has('password'))
+                                    <span class="text-danger"> {{ $errors->first('password') }}</span>
+                                    @endif
+                                </div>
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Bio</label>
+                                        <textarea class="form-control"
+                                            name="bio">{{old('bio',$instructor->bio)}}</textarea>
+                                    </div>
+                                    @if($errors->has('bio'))
+                                    <span class="text-danger"> {{ $errors->first('bio') }}</span>
+                                    @endif
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                    <label class="form-label">Image</label>
+                                    <div class="form-group fallback w-100">
+                                        <input type="file" class="dropify" data-default-file="" name="image">
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button type="submit" class="btn btn-light">Cencel</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-
-            <div class="row">
-                <!-- Остальные поля без перевода -->
-                <div class="col-lg-6 col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <input type="tel" name="contact" class="form-control" value="{{ old('contact', $instructor->contact) }}">
-                        @error('contact')
-                            <span class="text-danger">{{ $message }}</span>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="col-lg-6 col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" class="form-control" value="{{ old('email', $instructor->email) }}">
-                        @error('email')
-                            <span class="text-danger">{{ $message }}</span>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="col-lg-6 col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Role</label>
-                        <select name="role_id" class="form-control">
-                            @foreach($role as $r)
-                                <option value="{{ $r->id }}" {{ old('role_id', $instructor->role_id) == $r->id ? 'selected' : '' }}>{{ $r->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('role_id')
-                            <span class="text-danger">{{ $message }}</span>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="col-lg-6 col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select name="status" class="form-control">
-                            <option value="1" {{ old('status', $instructor->status) == 1 ? 'selected' : '' }}>Active</option>
-                            <option value="0" {{ old('status', $instructor->status) == 0 ? 'selected' : '' }}>Inactive</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Password (если менять)</label>
-                        <input type="password" name="password" class="form-control" placeholder="Оставьте пустым, если не менять">
-                        @error('password')
-                            <span class="text-danger">{{ $message }}</span>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="col-lg-6 col-md-6 col-sm-12">
-                    <div class="form-group">
-                        <label>Bio</label>
-                        <textarea name="bio" class="form-control">{{ old('bio', $instructor->bio) }}</textarea>
-                        @error('bio')
-                            <span class="text-danger">{{ $message }}</span>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="col-lg-12">
-                    <label>Image</label>
-                    <input type="file" name="image" class="dropify" data-default-file="{{ asset('public/uploads/users/' . $instructor->image) }}">
-                    @error('image')
-                        <span class="text-danger">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <div class="col-lg-12 mt-3">
-                    <button type="submit" class="btn btn-primary">Сохранить</button>
-                    <button type="button" onclick="window.history.back();" class="btn btn-light">Отмена</button>
-                </div>
-            </div>
-
-        </form>
+        </div>
 
     </div>
 </div>
@@ -163,5 +172,7 @@
 <script src="{{asset('public/vendor/pickadate/picker.js')}}"></script>
 <script src="{{asset('public/vendor/pickadate/picker.time.js')}}"></script>
 <script src="{{asset('public/vendor/pickadate/picker.date.js')}}"></script>
+
+<!-- Pickdate -->
 <script src="{{asset('public/js/plugins-init/pickadate-init.js')}}"></script>
 @endpush

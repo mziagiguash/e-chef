@@ -12,7 +12,7 @@ class CourseCategory extends Model
     use HasFactory;
 
     protected $fillable = ['category_status', 'category_image'];
-protected $casts = [
+    protected $casts = [
     'category_name' => 'array',
 ];
 
@@ -34,8 +34,5 @@ public function getTranslationsDumpAttribute()
         'category_name' => $t->category_name,
     ]);
 }
-
-
-
 
 }

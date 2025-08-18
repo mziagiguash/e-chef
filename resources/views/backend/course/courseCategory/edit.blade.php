@@ -41,7 +41,7 @@
                         <h5 class="card-title">Category Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ localeRoute('courseCategory.update', $data->id) }}" method="post" enctype="multipart/form-data">
+                        <form action="{{ route('courseCategory.update', $data->id) }}" method="post" enctype="multipart/form-data">
                             @csrf
                             @method('PATCH')
 

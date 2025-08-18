@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('locale', 5);
             $table->string('name');
             $table->text('bio')->nullable();
-            $table->text('description')->nullable();
+            $table->text('designation')->nullable();
             $table->timestamps();
 
             // Правильный способ указать внешний ключ

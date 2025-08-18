@@ -34,6 +34,11 @@ use App\Http\Controllers\Students\DashboardController as studashboard;
 use App\Http\Controllers\Students\ProfileController as stu_profile;
 use App\Http\Controllers\Students\sslController as sslcz;
 
+/*
+|--------------------------------------------------------------------------
+| Debug Route
+|--------------------------------------------------------------------------
+*/
 Route::get('/debug', function () {
     return response()->json([
         'php_version' => phpversion(),
@@ -44,20 +49,25 @@ Route::get('/debug', function () {
     ]);
 });
 
-// 🔐 Auth routes
-// ==========================
-// 🔒 ADMIN routes (НЕ в locale)
+/*
+|--------------------------------------------------------------------------
+| Admin Auth Routes (No locale)
+|--------------------------------------------------------------------------
+*/
 Route::get('/register', [auth::class, 'signUpForm'])->name('register');
 Route::post('/register', [auth::class, 'signUpStore'])->name('register.store');
 Route::get('/login', [auth::class, 'signInForm'])->name('login');
 Route::post('/login', [auth::class, 'signInCheck'])->name('login.check');
 Route::get('/logout', [auth::class, 'signOut'])->name('logOut');
 
-
-// ==========================
+/*
+|--------------------------------------------------------------------------
+| Admin Protected Routes
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['checkauth'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [dashboard::class, 'index'])->name('dashboard');
-    Route::get('userProfile', [auth::class, 'show'])->name('userProfile');
+    Route::get('/userProfile', [auth::class, 'show'])->name('userProfile');
 });
 
 Route::middleware(['checkrole'])->prefix('admin')->group(function () {
@@ -85,15 +95,14 @@ Route::middleware(['checkrole'])->prefix('admin')->group(function () {
     Route::post('permission/{role}', [permission::class, 'save'])->name('permission.save');
 });
 
-// =============================
-// 🌐 Set locale route
-// =============================
-
-// Установка локали
+/*
+|--------------------------------------------------------------------------
+| Set Locale
+|--------------------------------------------------------------------------
+*/
 Route::get('/set-locale/{locale}', function ($locale) {
     if (in_array($locale, ['en', 'ru', 'ka'])) {
         session(['locale' => $locale]);
-
         $previous = url()->previous();
 
         foreach (['en', 'ru', 'ka'] as $lang) {
@@ -108,29 +117,47 @@ Route::get('/set-locale/{locale}', function ($locale) {
     return redirect()->back();
 })->name('set.locale');
 
-// Переадресация с корня на текущую/дефолтную локаль
+/*
+|--------------------------------------------------------------------------
+| Redirect root to default/current locale
+|--------------------------------------------------------------------------
+*/
 Route::get('/', function () {
     return redirect(app()->getLocale());
 });
 
-// =============================
-// 🌐 LOCALIZED ROUTES
-// =============================
+/*
+|--------------------------------------------------------------------------
+| Localized Routes
+|--------------------------------------------------------------------------
+*/
 Route::prefix('{locale}')
     ->where(['locale' => 'en|ru|ka'])
     ->middleware('setlocale')
     ->group(function () {
 
-
-
-        // 🔐 Student auth
+        // 🔐 Student Auth
         Route::get('/student/register', [sauth::class, 'signUpForm'])->name('studentRegister');
-        Route::post('/student/register/{back_route}', [sauth::class, 'signUpStore'])->name('studentRegister.store');
+        Route::post('/student/register', [sauth::class, 'signUpStore'])->name('studentRegister.store');
+
         Route::get('/student/login', [sauth::class, 'signInForm'])->name('studentLogin');
-        Route::post('/student/login/{back_route}', [sauth::class, 'signInCheck'])->name('studentLogin.check');
+        Route::post('/student/login', [sauth::class, 'signInCheck'])->name('studentLogin.check');
+
         Route::get('/student/logout', [sauth::class, 'signOut'])->name('studentlogOut');
 
-        // 🏠 Frontend routes
+        // Protected Student Routes
+        Route::middleware(['checkstudent'])->prefix('students')->group(function () {
+            Route::get('/dashboard', [studashboard::class, 'index'])->name('studentdashboard');
+            Route::get('/profile', [stu_profile::class, 'index'])->name('student_profile');
+            Route::post('/profile/save', [stu_profile::class, 'save_profile'])->name('student_save_profile');
+            Route::post('/profile/savePass', [stu_profile::class, 'change_password'])->name('change_password');
+            Route::post('/change-image', [stu_profile::class, 'changeImage'])->name('change_image');
+
+            // SSL Payment
+            Route::post('/payment/ssl/submit', [sslcz::class, 'store'])->name('payment.ssl.submit');
+        });
+
+        // Frontend Routes
         Route::get('/', [HomeController::class, 'index'])->name('home');
         Route::get('/home', [HomeController::class, 'index']);
         Route::get('/searchCourse', [SearchCourseController::class, 'index'])->name('searchCourse');
@@ -151,24 +178,12 @@ Route::prefix('{locale}')
         // 🧾 Static pages
         Route::get('/about', fn() => view('frontend.about'))->name('about');
         Route::get('/contact', fn() => view('frontend.contact'))->name('contact');
-
-        Route::middleware(['checkstudent'])->prefix('students')->group(function () {
-    Route::get('/dashboard', [studashboard::class, 'index'])->name('studentdashboard');
-    Route::get('/profile', [stu_profile::class, 'index'])->name('student_profile');
-    Route::post('/profile/save', [stu_profile::class, 'save_profile'])->name('student_save_profile');
-    Route::post('/profile/savePass', [stu_profile::class, 'change_password'])->name('change_password');
-    Route::post('/change-image', [stu_profile::class, 'changeImage'])->name('change_image');
-
-    // 💳 ssl payment
-    Route::post('/payment/ssl/submit', [sslcz::class, 'store'])->name('payment.ssl.submit');
-
     });
 
-// =============================
-// 👩‍🎓 Student dashboard (non-localized)
-// =============================
-});
-
-// 🌐 SSL notify routes
+/*
+|--------------------------------------------------------------------------
+| SSL Notify Routes (Non-localized)
+|--------------------------------------------------------------------------
+*/
 Route::post('/payment/ssl/notify', [sslcz::class, 'notify'])->name('payment.ssl.notify');
 Route::post('/payment/ssl/cancel', [sslcz::class, 'cancel'])->name('payment.ssl.cancel');
