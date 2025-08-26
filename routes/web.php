@@ -7,7 +7,7 @@ use App\Http\Controllers\Backend\Setting\DashboardController as dashboard;
 use App\Http\Controllers\Backend\Setting\RoleController as role;
 use App\Http\Controllers\Backend\Setting\PermissionController as permission;
 use App\Http\Controllers\Backend\Students\StudentController as student;
-use App\Http\Controllers\Backend\Instructors\InstructorController as instructor;
+use App\Http\Controllers\Backend\Instructors\InstructorController;
 use App\Http\Controllers\Backend\Courses\CourseCategoryController as courseCategory;
 use App\Http\Controllers\Backend\Courses\CourseController as course;
 use App\Http\Controllers\Backend\Courses\MaterialController as material;
@@ -27,7 +27,7 @@ use App\Http\Controllers\WatchCourseController as watchCourse;
 use App\Http\Controllers\LessonController as lesson;
 use App\Http\Controllers\EnrollmentController as enrollment;
 use App\Http\Controllers\EventController as event;
-
+use App\Models\Instructor;
 /* students */
 use App\Http\Controllers\Students\AuthController as sauth;
 use App\Http\Controllers\Students\DashboardController as studashboard;
@@ -74,7 +74,22 @@ Route::middleware(['checkrole'])->prefix('admin')->group(function () {
     Route::resource('user', user::class);
     Route::resource('role', role::class);
     Route::resource('student', student::class);
-    Route::resource('instructor', instructor::class);
+    // Edit
+    Route::get('instructor/{id}/edit', [InstructorController::class, 'edit'])
+        ->name('instructor.edit');
+
+    // Update
+    Route::put('instructor/{id}', [InstructorController::class, 'update'])
+        ->name('instructor.update');
+
+    // Destroy
+    Route::delete('instructor/{id}', [InstructorController::class, 'destroy'])
+        ->name('instructor.destroy');
+
+    // Остальные маршруты resource без edit/update/destroy
+    Route::resource('instructor', InstructorController::class)
+        ->except(['edit','update','destroy']);
+        
     Route::resource('courseCategory', courseCategory::class);
     Route::resource('course', course::class);
     Route::get('/courseList', [course::class, 'indexForAdmin'])->name('courseList');

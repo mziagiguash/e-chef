@@ -29,7 +29,10 @@
             <div class="col-lg-4">
                 <div class="instructor-courses-instructor">
                     <div class="instructor-image mx-auto text-center">
-                        <img src="{{asset('public/uploads/users/'.$instructor->image)}}" alt="Instructor" />
+                        <img src="{{ $instructor->image
+    ? asset('uploads/users/' . $instructor->image)
+    : asset('images/default.png') }}"
+    alt="{{ $instructor->getTranslation('name', app()->getLocale()) }}">
                     </div>
                     <div class="instructor-info text-center">
                         <h5 class="font-title--sm">{{$instructor->name}}</h5>

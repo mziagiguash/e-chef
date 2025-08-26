@@ -40,11 +40,8 @@ class UpdateRequest extends FormRequest
             'title.ka' => 'nullable|string|max:255',
 
             // При обновлении игнорируем уникальность для текущей записи
-            'contactNumber' => 'required|string|max:255|unique:instructors,contact,' . $id,
-            'emailAddress' => 'required|email|unique:instructors,email,' . $id,
-            'roleId' => 'required|integer|exists:roles,id',
-            'status' => 'required|boolean',
-            'image' => 'nullable|image|max:2048',
+            'contact' => 'required|string|max:255|unique:instructors,contact,' . $id,
+            'email' => 'required|email|unique:instructors,email,' . $id,
         ];
     }
 }

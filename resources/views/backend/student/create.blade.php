@@ -41,11 +41,11 @@
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Name</label>
-                                        <input type="text" class="form-control" name="fullName"
-                                            value="{{old('fullName')}}">
+                                        <input type="text" class="form-control" name="name
+                                            value="{{old('name')}}">
                                     </div>
-                                    @if($errors->has('fullName'))
-                                    <span class="text-danger"> {{ $errors->first('fullName') }}</span>
+                                    @if($errors->has('name'))
+                                    <span class="text-danger"> {{ $errors->first('name') }}</span>
                                     @endif
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
@@ -61,27 +61,27 @@
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Email</label>
-                                        <input type="email" class="form-control" name="emailAddress"
-                                            value="{{old('emailAddress')}}">
+                                        <input type="email" class="form-control" name="email"
+                                            value="{{old('email')}}">
                                     </div>
-                                    @if($errors->has('emailAddress'))
-                                    <span class="text-danger"> {{ $errors->first('emailAddress') }}</span>
+                                    @if($errors->has('email'))
+                                    <span class="text-danger"> {{ $errors->first('email') }}</span>
                                     @endif
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Role</label>
-                                        <select class="form-control" name="roleId">
+                                        <select class="form-control" name="role_id">
                                             @forelse ($role as $r)
-                                            <option value="{{$r->id}}" {{old('roleId')==$r->id?'selected':''}}>
+                                            <option value="{{$r->id}}" {{old('role_id')==$r->id?'selected':''}}>
                                                 {{$r->name}}</option>
                                             @empty
                                             <option value="">No Role Found</option>
                                             @endforelse
                                         </select>
                                     </div>
-                                    @if($errors->has('roleId'))
-                                    <span class="text-danger"> {{ $errors->first('roleId') }}</span>
+                                    @if($errors->has('role_id'))
+                                    <span class="text-danger"> {{ $errors->first('role_id') }}</span>
                                     @endif
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">

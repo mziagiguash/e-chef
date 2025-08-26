@@ -74,9 +74,9 @@
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Role</label>
-                                        <select class="form-control" name="roleId">
+                                        <select class="form-control" name="role_id">
                                             @forelse ($role as $r)
-                                            <option value="{{$r->id}}" {{old('roleId', $student->
+                                            <option value="{{$r->id}}" {{old('role_id', $student->
                                                 role_id)==$r->id?'selected':''}}>
                                                 {{$r->name}}</option>
                                             @empty
@@ -84,8 +84,8 @@
                                             @endforelse
                                         </select>
                                     </div>
-                                    @if($errors->has('roleId'))
-                                    <span class="text-danger"> {{ $errors->first('roleId') }}</span>
+                                    @if($errors->has('role_id'))
+                                    <span class="text-danger"> {{ $errors->first('role_id') }}</span>
                                     @endif
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">

@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>{{ENV('APP_NAME')}} | @yield('title', 'Home')</title>
-    <link rel="stylesheet" href="{{asset('public/frontend/dist/main.css')}}" />
-    <link rel="icon" type="image/png" href="{{asset('public/frontend/dist/images/favicon/favicon.png')}}" />
-    <link rel="stylesheet" href="{{asset('public/frontend/fontawesome-free-5.15.4-web/css/all.min.css')}}">
+    <link rel="stylesheet" href="{{asset('frontend/dist/main.css')}}" />
+    <link rel="icon" type="image/png" href="{{asset('frontend/dist/images/favicon/favicon.png')}}" />
+    <link rel="stylesheet" href="{{asset('frontend/fontawesome-free-5.15.4-web/css/all.min.css')}}">
     <style>
         .dropdown {
             position: relative;
@@ -85,7 +85,7 @@
 <body @yield('body-attr')>
 
    <body @yield('body-attr')>
-    
+
 @stack('scripts')
 <!-- Header Starts Here -->
 <header @yield('header-attr')>
@@ -124,7 +124,7 @@
 
             <!-- Logo -->
             <a class="navbar-brand" href="{{ localeRoute('home') }}">
-                <img src="{{ asset('public/frontend/dist/images/logo/logo.png') }}" alt="Logo" class="img-fluid" />
+                <img src="{{ asset('frontend/dist/images/logo/logo.png') }}" alt="Logo" class="img-fluid" />
             </a>
 
             <button class="menu-icon-container">
@@ -190,7 +190,7 @@
  @if(request()->session()->get('studentLogin'))
                         <div class="dropdown user-image ms-3" id="imageDropdown">
                             <a href="{{localeRoute('studentdashboard')}}" onclick="toggleDropdown(event)">
-                                <img src="{{asset('public/uploads/students/'.request()->session()->get('image'))}}"
+                                <img src="{{asset('uploads/students/'.request()->session()->get('image'))}}"
                                     alt="Student Profile" height="48" width="48"/>
                             </a>
                             <div class="dropdown-content">
@@ -212,7 +212,7 @@
     <div>
         <div class="navbar-mobile__top">
             <a href="{{ localeRoute('home') }}">
-                <img src="{{ asset('public/frontend/dist/images/logo/logo.png') }}" alt="brand"
+                <img src="{{ asset('frontend/dist/images/logo/logo.png') }}" alt="brand"
                      class="img-fluid" />
             </a>
             <div>
@@ -367,7 +367,7 @@
             <div class="col-lg-6">
                 <div class="footer__wrapper">
                     <div class="footer__wrapper_logo">
-                        <img src="{{ asset('public/frontend/dist/images/logo/footerlogo.png') }}" alt="logo" class="img-fluid" />
+                        <img src="{{ asset('frontend/dist/images/logo/footerlogo.png') }}" alt="logo" class="img-fluid" />
                     </div>
                     <p>Professional School "Interservise"</p>
 
@@ -586,18 +586,18 @@
 </script>
 
 <!-- Core JS Files -->
-<script src="{{ asset('public/frontend/src/js/jquery.min.js') }}"></script>
-<script src="{{ asset('public/frontend/src/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('frontend/src/js/jquery.min.js') }}"></script>
+<script src="{{ asset('frontend/src/js/bootstrap.bundle.min.js') }}"></script>
 
 <!-- Plugin JS Files -->
-<script src="{{ asset('public/frontend/src/scss/vendors/plugin/js/isotope.pkgd.min.js') }}"></script>
-<script src="{{ asset('public/frontend/src/scss/vendors/plugin/js/jquery.magnific-popup.min.js') }}"></script>
-<script src="{{ asset('public/frontend/src/scss/vendors/plugin/js/slick.min.js') }}"></script>
-<script src="{{ asset('public/frontend/src/scss/vendors/plugin/js/jquery.nice-select.min.js') }}"></script>
+<script src="{{ asset('frontend/src/scss/vendors/plugin/js/isotope.pkgd.min.js') }}"></script>
+<script src="{{ asset('frontend/src/scss/vendors/plugin/js/jquery.magnific-popup.min.js') }}"></script>
+<script src="{{ asset('frontend/src/scss/vendors/plugin/js/slick.min.js') }}"></script>
+<script src="{{ asset('frontend/src/scss/vendors/plugin/js/jquery.nice-select.min.js') }}"></script>
 
 <!-- App & Compiled JS -->
-<script src="{{ asset('public/frontend/src/js/app.js') }}"></script>
-<script src="{{ asset('public/frontend/dist/main.js') }}"></script>
+<script src="{{ asset('frontend/src/js/app.js') }}"></script>
+<script src="{{ asset('frontend/dist/main.js') }}"></script>
 
 <!-- Dropdown Toggle Script -->
 <script>

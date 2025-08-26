@@ -24,8 +24,8 @@ class UpdateRequest extends FormRequest
     {
         $id = encryptor('decrypt', $r->uptoken);
         return [
-            'fullName_en' => 'required|max:255',
-            'emailAddress' => 'required|unique:instructors,email,'.$id,
+            'name' => 'required|max:255',
+            'email' => 'required|unique:instructors,email,'.$id,
             'contact' => 'required|unique:instructors,contact,',$id,
         ];
     }

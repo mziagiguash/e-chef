@@ -37,11 +37,12 @@ class AddNewRequest extends FormRequest
             'title.ru' => 'nullable|string|max:255',
             'title.ka' => 'nullable|string|max:255',
 
-            'contactNumber' => 'required|string|max:255|unique:instructors,contact',
-            'emailAddress' => 'required|email|unique:instructors,email',
-            'roleId' => 'required|integer|exists:roles,id',
+            'contact' => 'required|string|max:255|unique:instructors,contact',
+            'email' => 'required|email|unique:instructors,email',
+            'role_id' => 'required|max:3',
             'status' => 'required|boolean',
             'image' => 'nullable|image|max:2048',
+            'password' => 'required',
         ];
     }
 }

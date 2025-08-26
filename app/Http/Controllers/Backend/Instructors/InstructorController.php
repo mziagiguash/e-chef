@@ -4,176 +4,207 @@ namespace App\Http\Controllers\Backend\Instructors;
 
 use App\Http\Controllers\Controller;
 use App\Models\Instructor;
+use App\Models\InstructorTranslation;
+use App\Models\Role;
 use App\Models\User;
+
 use App\Http\Requests\Backend\Instructors\AddNewRequest;
 use App\Http\Requests\Backend\Instructors\UpdateRequest;
-use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Exception;
-use File;
-use DB;
 
 class InstructorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $instructor = Instructor::paginate(10);
-        return view('backend.instructor.index', compact('instructor'));
+        $instructors = Instructor::with('translations', 'role')->get();
+        return view('backend.instructor.index', [
+            'instructor' => $instructors,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $role = Role::get();
         return view('backend.instructor.create', compact('role'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(AddNewRequest $request)
     {
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
-            $instructor = new Instructor;
-            $instructor->name_en = $request->fullName_en;
-            $instructor->name_bn = $request->fullName_bn;
-            $instructor->contact_en = $request->contactNumber_en;
-            $instructor->contact_bn = $request->contactNumber_bn;
-            $instructor->email = $request->emailAddress;
-            $instructor->role_id = $request->roleId;
-            $instructor->bio = $request->bio;
-            $instructor->designation = $request->designation;
-            $instructor->title = $request->title;
+            $instructor = new Instructor();
+            $instructor->contact = $request->contact;
+            $instructor->email = $request->email;
+            $instructor->role_id = $request->role_id;
             $instructor->status = $request->status;
-            $instructor->password = Hash::make($request->password);
             $instructor->language = 'en';
             $instructor->access_block = $request->access_block;
+            $instructor->password = Hash::make($request->password);
+
             if ($request->hasFile('image')) {
-                $imageName = (Role::find($request->roleId)->name) . '_' .  $request->fullName_en . '_' . rand(999, 111) .  '.' . $request->image->extension();
+                $imageName = 'instructor_' . time() . '.' . $request->image->extension();
                 $request->image->move(public_path('uploads/users'), $imageName);
                 $instructor->image = $imageName;
             }
 
-            if ($instructor->save()) {
-                $user = new User;
-                $user->instructor_id = $instructor->id;
-                $user->name_en = $request->fullName_en;
-                $user->email = $request->emailAddress;
-                $user->contact_en = $request->contactNumber_en;
-                $user->role_id = $request->roleId;
-                $user->status = $request->status;
-                $user->password = Hash::make($request->password);
-                if (isset($imageName)) {
-                    $user->image = $imageName; // Save the image name in the users table
-                }
-                if ($user->save()) {
-                    DB::commit();
-                    $this->notice::success('Successfully saved');
-                    return redirect()->route('instructor.index');
-                }
-            } else
-                return redirect()->back()->withInput()->with('error', 'Please try again');
+            // Сохраняем все переводы как JSON
+            $instructor->name = json_encode([
+    'en' => $request->name['en'] ?? null,
+    'ru' => $request->name['ru'] ?? null,
+    'ka' => $request->name['ka'] ?? null,
+]);
+            $instructor->designation = json_encode([
+    'en' => $request->designation['en'] ?? null,
+    'ru' => $request->designation['ru'] ?? null,
+    'ka' => $request->designation['ka'] ?? null,
+]);
+            $instructor->title = json_encode([
+    'en' => $request->title['en'] ?? null,
+    'ru' => $request->title['ru'] ?? null,
+    'ka' => $request->title['ka'] ?? null,
+]);
+            $instructor->bio = json_encode([
+    'en' => $request->bio['en'] ?? null,
+    'ru' => $request->bio['ru'] ?? null,
+    'ka' => $request->bio['ka'] ?? null,
+]);
+
+            $instructor->save();
+
+            // Создаём пользователя
+            $user = new User();
+            $user->instructor_id = $instructor->id;
+            $user->name = $request->name['en'] ?? '';
+            $user->email = $request->email;
+            $user->contact = $request->contact;
+            $user->role_id = $request->role_id;
+            $user->status = $request->status;
+            $user->password = Hash::make($request->password);
+            if (isset($imageName)) $user->image = $imageName;
+            $user->save();
+
+            DB::commit();
+            return redirect()->route('instructor.index')->with('success', 'Instructor created successfully.');
         } catch (Exception $e) {
-            dd($e);
-            return redirect()->back()->withInput()->with('error', 'Please try again');
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Error: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Instructor $instructor)
+public function edit($id)
+{
+    $id = encryptor('decrypt', $id); // расшифровка
+    $instructor = Instructor::find($id);
+
+    if (!$instructor) {
+        abort(404, "Instructor not found for id={$id}");
+    }
+
+    // Декодируем JSON-поля
+    $instructor->name = json_decode($instructor->name, true);
+    $instructor->designation = json_decode($instructor->designation, true);
+    $instructor->title = json_decode($instructor->title, true);
+    $instructor->bio = json_decode($instructor->bio, true);
+
+    $role = Role::all();
+
+    return view('backend.instructor.edit', compact('instructor','role'));
+}
+
+
+
+    public function update(UpdateRequest $request, $id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $id = encryptor('decrypt', $id);
+            $instructor = Instructor::findOrFail($id);
+            $instructor->contact = $request->contact;
+            $instructor->email = $request->email;
+            $instructor->role_id = $request->role_id;
+            $instructor->status = $request->status;
+            $instructor->access_block = $request->access_block;
+            $instructor->language = 'en';
+            if ($request->password) {
+                $instructor->password = Hash::make($request->password);
+            }
+
+            if ($request->hasFile('image')) {
+                if ($instructor->image && File::exists(public_path('uploads/users/' . $instructor->image))) {
+                    File::delete(public_path('uploads/users/' . $instructor->image));
+                }
+                $imageName = 'instructor_' . time() . '.' . $request->image->extension();
+                $request->image->move(public_path('uploads/users'), $imageName);
+                $instructor->image = $imageName;
+            }
+
+            // Обновляем JSON-поля
+            $instructor->name = json_encode([
+    'en' => $request->name['en'] ?? null,
+    'ru' => $request->name['ru'] ?? null,
+    'ka' => $request->name['ka'] ?? null,
+]);
+            $instructor->designation = json_encode([
+    'en' => $request->designation['en'] ?? null,
+    'ru' => $request->designation['ru'] ?? null,
+    'ka' => $request->designation['ka'] ?? null,
+]);
+            $instructor->title = json_encode([
+    'en' => $request->title['en'] ?? null,
+    'ru' => $request->title['ru'] ?? null,
+    'ka' => $request->title['ka'] ?? null,
+]);
+            $instructor->bio = json_encode([
+    'en' => $request->bio['en'] ?? null,
+    'ru' => $request->bio['ru'] ?? null,
+    'ka' => $request->bio['ka'] ?? null,
+]);
+
+            $instructor->save();
+
+            // Обновляем пользователя
+            $user = User::where('instructor_id', $instructor->id)->first();
+            if ($user) {
+                $user->name = $request->name['en'] ?? $user->name;
+                $user->email = $request->email;
+                $user->contact = $request->contact;
+                $user->role_id = $request->role_id;
+                $user->status = $request->status;
+                if ($request->password) $user->password = Hash::make($request->password);
+                if (isset($imageName)) $user->image = $imageName;
+                $user->save();
+            }
+
+            DB::commit();
+            return redirect()->route('instructor.index')->with('success', 'Instructor updated successfully.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
+
+    public function destroy($id)
+    {
+        $instructor = Instructor::findOrFail($id);
+
+        if ($instructor->image && File::exists(public_path('uploads/users/' . $instructor->image))) {
+            File::delete(public_path('uploads/users/' . $instructor->image));
+        }
+
+        $instructor->delete();
+
+        $user = User::where('instructor_id', $instructor->id)->first();
+        if ($user) $user->delete();
+
+        return redirect()->back()->with('success', 'Instructor deleted successfully.');
     }
 
     public function frontShow($id)
     {
-        $instructor = Instructor::findOrFail(encryptor('decrypt', $id));
-        // dd($course);
+        $instructor = Instructor::with('translations')->findOrFail($id);
         return view('frontend.instructorProfile', compact('instructor'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        $role = Role::get();
-        $instructor = Instructor::findOrFail(encryptor('decrypt', $id));
-        return view('backend.instructor.edit', compact('role', 'instructor'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateRequest $request, $id)
-    {
-        try {
-            $instructor = Instructor::findOrFail(encryptor('decrypt', $id));
-            $instructor->name_en = $request->fullName_en;
-            $instructor->name_bn = $request->fullName_bn;
-            $instructor->contact_en = $request->contactNumber_en;
-            $instructor->contact_bn = $request->contactNumber_bn;
-            $instructor->email = $request->emailAddress;
-            $instructor->role_id = $request->roleId;
-            $instructor->bio = $request->bio;
-            $instructor->designation = $request->designation;
-            $instructor->title = $request->title;
-            $instructor->status = $request->status;
-            $instructor->password = Hash::make($request->password);
-            $instructor->language = 'en';
-            $instructor->access_block = $request->access_block;
-            if ($request->hasFile('image')) {
-                $imageName = (Role::find($request->roleId)->name) . '_' .  $request->fullName_en . '_' . rand(999, 111) .  '.' . $request->image->extension();
-                $request->image->move(public_path('uploads/users'), $imageName);
-                $instructor->image = $imageName;
-            }
-
-            if ($instructor->save()) {
-                $user = User::where('instructor_id', $instructor->id)->first();
-                $user->instructor_id = $instructor->id;
-                $user->name_en = $request->fullName_en;
-                $user->email = $request->emailAddress;
-                $user->contact_en = $request->contactNumber_en;
-                $user->role_id = $request->roleId;
-                $user->status = $request->status;
-                $user->password = Hash::make($request->password);
-                if (isset($imageName)) {
-                    $user->image = $imageName; // Save the image name in the users table
-                }
-                if ($user->save()) {
-                    DB::commit();
-                    $this->notice::success('Successfully saved');
-                    return redirect()->route('instructor.index');
-                }
-            }
-            return redirect()->back()->withInput()->with('error', 'Please try again');
-        } catch (Exception $e) {
-            // dd($e);
-            return redirect()->back()->withInput()->with('error', 'Please try again');
-        }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        $data = Instructor::findOrFail(encryptor('decrypt', $id));
-        $image_path = public_path('uploads/instructors') . $data->image;
-
-        if ($data->delete()) {
-            if (File::exists($image_path))
-                File::delete($image_path);
-
-            return redirect()->back();
-        }
     }
 }

@@ -22,10 +22,10 @@ class AddNewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fullName_en' => 'required|max:255',
-            'emailAddress' => 'required|unique:instructors,email',
+            'name' => 'required|max:255',
+            'email' => 'required|unique:instructors,email',
             'contact' => 'required|unique:instructors,contact',
-            'roleId' => 'required|max:3',
+            'role_id' => 'required|max:3',
             'password' => 'required',
         ];
     }

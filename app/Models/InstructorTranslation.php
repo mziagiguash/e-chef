@@ -2,20 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class InstructorTranslation extends Model
 {
-    public $timestamps = false;
+    use HasFactory;
 
-    protected $table = 'course_categories_translations';
-    protected $fillable = ['instructor_id', 'locale', 'name', 'bio', 'designation'];
-
-    
+    protected $fillable = [
+        'instructor_id', 'locale', 'name', 'designation', 'title', 'bio'
+    ];
 
     public function instructor()
-{
-    return $this->belongsTo(Instructor::class);
-}
-
+    {
+        return $this->belongsTo(Instructor::class, 'instructor_id');
+    }
 }
