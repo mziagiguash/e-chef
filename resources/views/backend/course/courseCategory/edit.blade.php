@@ -2,9 +2,8 @@
 @section('title', 'Edit Category')
 
 @push('styles')
-<!-- Pick date -->
-<link rel="stylesheet" href="{{ asset('public/vendor/pickadate/themes/default.css') }}">
-<link rel="stylesheet" href="{{ asset('public/vendor/pickadate/themes/default.date.css') }}">
+<link rel="stylesheet" href="{{ asset('vendor/pickadate/themes/default.css') }}">
+<link rel="stylesheet" href="{{ asset('vendor/pickadate/themes/default.date.css') }}">
 @endpush
 
 @section('content')
@@ -12,6 +11,7 @@
 <div class="content-body">
     <div class="container-fluid">
 
+        <!-- Breadcrumb -->
         <div class="row page-titles mx-0">
             <div class="col-sm-6 p-md-0">
                 <div class="welcome-text">
@@ -26,12 +26,11 @@
                 </ol>
             </div>
         </div>
+
         @php
-            $categoryNames = old('category_name', [
-                'en' => $category->category_name['en'] ?? '',
-                'ru' => $category->category_name['ru'] ?? '',
-                'ka' => $category->category_name['ka'] ?? '',
-            ]);
+            $locales = ['en' => 'English', 'ru' => 'Русский', 'ka' => 'ქართული'];
+            // Подставляем старые значения или текущие
+            $categoryNames = old('category_name', $data->category_name ?? ['en' => '', 'ru' => '', 'ka' => '']);
         @endphp
 
         <div class="row">
@@ -45,25 +44,25 @@
                             @csrf
                             @method('PATCH')
 
-                            @php
-                                $categoryNames = old('category_name') ?? $data->category_name ?? ['en' => '', 'ru' => '', 'ka' => ''];
-                            @endphp
-
+                            <!-- Tabs для локалей -->
                             <ul class="nav nav-tabs mb-3" role="tablist">
-                                 @foreach(['en' => 'English', 'ru' => 'Русский', 'ka' => 'ქართული'] as $locale => $lang)
+                                @foreach($locales as $localeCode => $localeName)
                                     <li class="nav-item">
-                                        <a class="nav-link {{ $loop->first ? 'active' : '' }}" data-bs-toggle="tab" href="#tab-{{ $locale }}" role="tab">{{ $lang }}</a>
+                                        <a class="nav-link {{ $loop->first ? 'active' : '' }}" data-bs-toggle="tab" href="#tab-{{ $localeCode }}" role="tab">{{ $localeName }}</a>
                                     </li>
                                 @endforeach
                             </ul>
 
                             <div class="tab-content mb-4">
-                               @foreach(['en' => 'English', 'ru' => 'Русский', 'ka' => 'ქართული'] as $locale => $lang)
-                                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="tab-{{ $locale }}" role="tabpanel">
+                                @foreach ($locales as $localeCode => $localeName)
+                                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="tab-{{ $localeCode }}" role="tabpanel">
                                         <div class="form-group">
-                                            <label class="form-label">Category Name ({{ $lang }})</label>
-                                            <input type="text" class="form-control" name="category_name[{{ $locale }}]" value="{{ $categoryNames[$locale] ?? '' }}">
-                                            @error('category_name.' . $locale)
+                                            <label class="form-label">Category Name ({{ $localeName }})</label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   name="category_name[{{ $localeCode }}]"
+                                                   value="{{ $categoryNames[$localeCode] ?? '' }}">
+                                            @error('category_name.' . $localeCode)
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
@@ -71,6 +70,7 @@
                                 @endforeach
                             </div>
 
+                            <!-- Статус и изображение -->
                             <div class="row">
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
@@ -88,14 +88,16 @@
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <label class="form-label">Image</label>
                                     <div class="form-group fallback w-100">
-                                        <input type="file" class="dropify" data-default-file="{{ asset('public/uploads/courseCategories/' . $data->category_image) }}" name="category_image">
+                                        <input type="file" class="dropify"
+                                               data-default-file="{{ $data->category_image ? asset('uploads/courseCategories/' . $data->category_image) : '' }}"
+                                               name="category_image">
                                         @error('category_image')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     @if($data->category_image)
                                         <div class="mt-2">
-                                            <img src="{{ asset('public/uploads/courseCategories/' . $data->category_image) }}" alt="Category Image" style="max-width: 200px;">
+                                            <img src="{{ asset('uploads/courseCategories/' . $data->category_image) }}" alt="Category Image" style="max-width: 200px;">
                                         </div>
                                     @endif
                                 </div>
@@ -118,10 +120,10 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('public/vendor/pickadate/picker.js') }}"></script>
-<script src="{{ asset('public/vendor/pickadate/picker.time.js') }}"></script>
-<script src="{{ asset('public/vendor/pickadate/picker.date.js') }}"></script>
-<script src="{{ asset('public/js/plugins-init/pickadate-init.js') }}"></script>
+<script src="{{ asset('vendor/pickadate/picker.js') }}"></script>
+<script src="{{ asset('vendor/pickadate/picker.time.js') }}"></script>
+<script src="{{ asset('vendor/pickadate/picker.date.js') }}"></script>
+<script src="{{ asset('js/plugins-init/pickadate-init.js') }}"></script>
 @endpush
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>

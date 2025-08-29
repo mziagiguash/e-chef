@@ -4,108 +4,102 @@ namespace App\Http\Controllers;
 
 use App\Models\Lesson;
 use App\Models\Course;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class LessonController extends Controller
 {
-    /** 
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $lesson = Lesson::paginate(10);
-        return view('backend.course.lesson.index', compact('lesson'));
+        $lessons = Lesson::with('course')->paginate(10);
+
+        $locale = app()->getLocale();
+        foreach ($lessons as $lesson) {
+            $lesson->display_title = $lesson->displayTitle($locale);
+            $lesson->display_course = $lesson->course ? $lesson->course->getTranslation('title', $locale) : 'No Course';
+        }
+
+        return view('backend.course.lesson.index', compact('lessons'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        $course = Course::get();
-        return view('backend.course.lesson.create', compact('course'));
+        $courses = Course::all();
+        return view('backend.course.lesson.create', compact('courses'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        try {
-            $lesson = new Lesson;
-            $lesson->title = $request->lessonTitle;
-            $lesson->course_id = $request->courseId;
-            $lesson->description = $request->lessonDescription;
-            $lesson->notes = $request->lessonNotes;
+   public function store(Request $request)
+{
+    $request->validate([
+        'lessonTitle' => 'required|array',
+        'lessonTitle.*' => 'required|string|max:255',
+        'courseId' => 'required|exists:courses,id',
+        'lessonDescription' => 'nullable|array',
+        'lessonNotes' => 'nullable|array',
+    ]);
 
-            if ($lesson->save()) {
-                $this->notice::success('Data Saved');
-                return redirect()->route('lesson.index');
-            } else {
-                $this->notice::error('Please try again');
-                return redirect()->back()->withInput();
-            }
-        } catch (Exception $e) {
-            // dd($e);
-            $this->notice::error('Please try again');
-            return redirect()->back()->withInput();
-        }
+    try {
+        Lesson::create([
+            'title' => $request->lessonTitle,
+            'course_id' => $request->courseId,
+            'description' => $request->lessonDescription ?? [],
+            'notes' => $request->lessonNotes ?? [],
+        ]);
+
+        $this->notice::success('Data Saved');
+        return redirect()->route('lesson.index');
+    } catch (\Exception $e) {
+        $this->notice::error('Please try again');
+        return redirect()->back()->withInput();
     }
+}
+public function edit($id)
+{
+    $lesson = Lesson::findOrFail(encryptor('decrypt', $id));
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Lesson $lesson)
-    {
-        //
-    }
+    // Приводим массивы к пустым массивам, если вдруг NULL
+    $lesson->title = (array) $lesson->title;
+    $lesson->description = (array) $lesson->description;
+    $lesson->notes = (array) $lesson->notes;
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        $course = Course::get();
+    $courses = Course::all();
+
+    return view('backend.course.lesson.edit', compact('lesson', 'courses'));
+}
+
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'lessonTitle' => 'required|array',
+        'lessonTitle.*' => 'required|string|max:255',
+        'courseId' => 'required|exists:courses,id',
+        'lessonDescription' => 'nullable|array',
+        'lessonNotes' => 'nullable|array',
+    ]);
+
+    try {
         $lesson = Lesson::findOrFail(encryptor('decrypt', $id));
-        return view('backend.course.lesson.edit', compact('course', 'lesson'));
+
+        $lesson->update([
+            'title' => $request->lessonTitle,
+            'course_id' => $request->courseId,
+            'description' => $request->lessonDescription ?? [],
+            'notes' => $request->lessonNotes ?? [],
+        ]);
+
+        $this->notice::success('Data Saved');
+        return redirect()->route('lesson.index');
+    } catch (\Exception $e) {
+        $this->notice::error('Please try again');
+        return redirect()->back()->withInput();
     }
+}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
-    {
-        try {
-            $lesson = Lesson::findOrFail(encryptor('decrypt', $id));
-            $lesson->title = $request->lessonTitle;
-            $lesson->course_id = $request->courseId;
-            $lesson->description = $request->lessonDescription;
-            $lesson->notes = $request->lessonNotes;
-
-            if ($lesson->save()) {
-                $this->notice::success('Data Saved');
-                return redirect()->route('lesson.index');
-            } else {
-                $this->notice::error('Please try again');
-                return redirect()->back()->withInput();
-            }
-        } catch (Exception $e) {
-            // dd($e);
-            $this->notice::error('Please try again');
-            return redirect()->back()->withInput();
-        }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
-        $data = Lesson::findOrFail(encryptor('decrypt', $id));
-        if ($data->delete()) {
-            $this->notice::error('Data Deleted!');
-            return redirect()->back();
-        }
+        $lesson = Lesson::findOrFail(encryptor('decrypt', $id));
+        $lesson->delete();
+
+        $this->notice::success('Data Deleted!');
+        return redirect()->back();
     }
 }

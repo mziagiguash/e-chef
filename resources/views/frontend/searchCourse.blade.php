@@ -3,7 +3,7 @@
 @section('body-attr') style="background-color: #ebebf2;" @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{asset('public/frontend/src/scss/vendors/plugin/css/jquery-ui.css')}}" />
+<link rel="stylesheet" href="{{asset('frontend/src/scss/vendors/plugin/css/jquery-ui.css')}}" />
 @endpush
 
 @section('content')
@@ -50,52 +50,58 @@
         <div class="row">
             <div class="col-lg-4 d-none d-lg-block">
                 <div class="accordion sidebar-filter" id="sidebarFilter">
-                    <!-- Search by Category  -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="categoryAcc">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-        data-bs-target="#categoryCollapse" aria-expanded="true" aria-controls="categoryCollapse">
-    {{ __('course.category') }}
-</button>
-                        </h2>
-                        <div id="categoryCollapse" class="accordion-collapse collapse show"
-                            aria-labelledby="categoryAcc" data-bs-parent="#sidebarFilter">
-                            <div class="accordion-body">
-                                <form action="{{localeRoute('searchCourse')}}" method="get">
-                                    @csrf
-                                    <div class="accordion-body__item">
-                                        <div class="check-box">
-                                            <input type="checkbox" class="checkbox-primary" name="category" value=""
-                                                {{!$selectedCategories ? 'checked' : '' }}>
-                                            <label>{{ __('course.all') }}</label>
-                                        </div>
-                                        <p class="check-details">
-                                            {{$allCourse->count()}}
-                                        </p>
-                                    </div>
-                                    @forelse($category as $cat)
-                                    @php
-                                    $courseCount = $cat->courses()->where('status', 2)->count();
-                                    @endphp
-                                    <div class="accordion-body__item">
-                                        <div class="check-box">
-                                            <input type="checkbox" class="checkbox-primary" name="categories[]" value="{{ $cat->id }}" {{ in_array($cat->id,
-                                            (array)$selectedCategories) ? 'checked' : '' }}>
-                                            <label> {{$cat->category_name}} </label>
-                                        </div>
-                                        <p class="check-details">
-                                            {{$courseCount}}
-                                        </p>
-                                    </div>
-                                    @empty
-                                    @endforelse
-                                    <button type="submit" class="btn btn-primary">
-    {{ __('course.apply_filter') }}
-</button>
-                                </form>
-                            </div>
-                        </div>
+@php
+    $appLocale = app()->getLocale();
+@endphp
+
+<!-- Search by Category  -->
+<div class="accordion-item">
+    <h2 class="accordion-header" id="categoryAcc">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                data-bs-target="#categoryCollapse" aria-expanded="true" aria-controls="categoryCollapse">
+            {{ __('course.category') }}
+        </button>
+    </h2>
+
+    <div id="categoryCollapse" class="accordion-collapse collapse show"
+         aria-labelledby="categoryAcc" data-bs-parent="#sidebarFilter">
+
+        <div class="accordion-body">
+            <form action="{{ localeRoute('searchCourse') }}" method="get">
+                @csrf
+
+                <!-- All Categories -->
+                <div class="accordion-body__item">
+                    <div class="check-box">
+                        <input type="checkbox" class="checkbox-primary" name="categories[]"
+                               value="0" {{ empty($selectedCategories) ? 'checked' : '' }}>
+                        <label>{{ __('course.all') }}</label>
                     </div>
+                    <p class="check-details">{{ $allCourse->count() }}</p>
+                </div>
+
+                <!-- Individual Categories -->
+                @forelse($category as $cat)
+                    @php
+                        $courseCount = $cat->courses()->where('status', 2)->count();
+                    @endphp
+                    <div class="accordion-body__item">
+                        <div class="check-box">
+                            <input type="checkbox" class="checkbox-primary" name="categories[]"
+                                   value="{{ $cat->id }}" {{ in_array($cat->id, (array)$selectedCategories) ? 'checked' : '' }}>
+                            <label>{{ $cat->localized_name }}</label>
+                        </div>
+                        <p class="check-details">{{ $courseCount }}</p>
+                    </div>
+                @empty
+                    <p>{{ __('course.no_categories') }}</p>
+                @endforelse
+
+                <button type="submit" class="btn btn-primary mt-3">{{ __('course.apply_filter') }}</button>
+            </form>
+        </div>
+    </div>
+</div>
                     <!-- Search by Level  -->
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="levelAcc">
@@ -373,7 +379,7 @@
                         <div class="contentCard contentCard--course">
                             <div class="contentCard-top">
                                 <a href="{{localeRoute('courseDetails', encryptor('encrypt', $c->id))}}"><img
-                                        src="{{asset('public/uploads/courses/'.$c->image)}}" alt="images"
+                                        src="{{asset('uploads/courses/'.$c->image)}}" alt="images"
                                         class="img-fluid" /></a>
                             </div>
                             <div class="contentCard-bottom">
@@ -384,9 +390,9 @@
                                 <div class="contentCard-info d-flex align-items-center justify-content-between">
                                     <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $c->instructor?->id))}}"
                                         class="contentCard-user d-flex align-items-center">
-                                        <img src="{{asset('public/uploads/users/'.$c->instructor?->image)}}"
+                                        <img src="{{asset('uploads/users/'.$c->instructor?->image)}}"
                                             alt="Instructor Image" class="rounded-circle" height="34" width="34" />
-                                        <p class="font-para--md">{{$c->instructor?->name}}</p>
+                                        <p class="font-para--md">{{ $c->instructor ? $c->instructor->getTranslation('name') : 'No Instructor' }}</p>
                                     </a>
                                     <div class="price">
     <span>
@@ -400,28 +406,28 @@
                                 <div class="contentCard-more">
                                     <div class="d-flex align-items-center">
                                         <div class="icon">
-                                            <img src="{{asset('public/frontend/dist/images/icon/star.png')}}"
+                                            <img src="{{asset('frontend/dist/images/icon/star.png')}}"
                                                 alt="star" />
                                         </div>
                                         <span>4.5</span>
                                     </div>
                                     <div class="eye d-flex align-items-center">
                                         <div class="icon">
-                                            <img src="{{asset('public/frontend/dist/images/icon/eye.png')}}"
+                                            <img src="{{asset('frontend/dist/images/icon/eye.png')}}"
                                                 alt="eye" />
                                         </div>
                                         <span>24,517</span>
                                     </div>
                                     <div class="book d-flex align-items-center">
                                         <div class="icon">
-                                            <img src="{{asset('public/frontend/dist/images/icon/book.png')}}"
+                                            <img src="{{asset('frontend/dist/images/icon/book.png')}}"
                                                 alt="location" />
                                         </div>
                                         <span>{{$c->lesson}} Lesson</span>
                                     </div>
                                     <div class="clock d-flex align-items-center">
                                         <div class="icon">
-                                            <img src="{{asset('public/frontend/dist/images/icon/Clock.png')}}"
+                                            <img src="{{asset('frontend/dist/images/icon/Clock.png')}}"
                                                 alt="clock" />
                                         </div>
                                         <span>{{$c->duration}} Hours</span>
@@ -468,9 +474,32 @@
 
 
 @push('scripts')
-<script src="{{asset('public/frontend/src/scss/vendors/plugin/js/price_range_script.js')}}"></script>
-<script src="{{asset('public/frontend/src/scss/vendors/plugin/js/jquery-ui.min.js')}}"></script>
+<script src="{{asset('frontend/src/scss/vendors/plugin/js/price_range_script.js')}}"></script>
+<script src="{{asset('frontend/src/scss/vendors/plugin/js/jquery-ui.min.js')}}"></script>
 <script>
+     document.addEventListener('DOMContentLoaded', function() {
+        const initialLocale = '{{ $appLocale }}';
+
+        function setActiveLocale(locale) {
+            document.querySelectorAll('.lang-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.locale === locale);
+            });
+            document.querySelectorAll('.category-locale').forEach(container => {
+                container.classList.toggle('d-none', !container.classList.contains('lang-' + locale));
+            });
+        }
+
+        document.querySelectorAll('.lang-tab').forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                const locale = this.dataset.locale;
+                setActiveLocale(locale);
+            });
+        });
+
+        setActiveLocale(initialLocale);
+    });
+
     const filterBtn = document.querySelector("#filter");
             const cross = document.querySelector(".filter--cross");
 

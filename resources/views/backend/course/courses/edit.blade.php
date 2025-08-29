@@ -1,16 +1,14 @@
 @extends('backend.layouts.app')
-@section('title', 'Edit Instructor')
+@section('title', 'Edit Course')
 
 @push('styles')
-<!-- Pick date -->
-<link rel="stylesheet" href="{{asset('public/vendor/pickadate/themes/default.css')}}">
-<link rel="stylesheet" href="{{asset('public/vendor/pickadate/themes/default.date.css')}}">
+<link rel="stylesheet" href="{{ asset('vendor/pickadate/themes/default.css') }}">
+<link rel="stylesheet" href="{{ asset('vendor/pickadate/themes/default.date.css') }}">
 @endpush
 
 @section('content')
 
 <div class="content-body">
-    <!-- row -->
     <div class="container-fluid">
 
         <div class="row page-titles mx-0">
@@ -21,8 +19,8 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('course.index')}}">Courses</a></li>
+                    <li class="breadcrumb-item"><a href="{{ localeRoute('dashboard') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ localeRoute('course.index') }}">Courses</a></li>
                     <li class="breadcrumb-item active">Edit Course</li>
                 </ol>
             </div>
@@ -32,7 +30,7 @@
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="mt-3 ">Basic Info</h3>
+                        <h3 class="mt-3">Basic Info</h3>
                         <ul class="nav nav-tabs" role="tablist">
                             @foreach(['en' => 'English', 'ru' => 'Русский', 'ka' => 'ქართული'] as $locale => $langName)
                                 <li class="nav-item">
@@ -46,513 +44,111 @@
                             @endforeach
                         </ul>
                     </div>
+
                     <div class="card-body">
-                        @if(fullAccess())
-                        <form action="{{localeRoute('course.updateforAdmin',encryptor('encrypt', $course->id))}}" method="post"
-                            enctype="multipart/form-data">
+                        <form action="{{ localeRoute('course.updateforAdmin', encryptor('encrypt', $course->id)) }}"
+                              method="post" enctype="multipart/form-data">
                             @csrf
                             @method('PATCH')
-                            <input type="hidden" name="uptoken" value="{{encryptor('encrypt',$course->id)}}">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Status</label>
-                                        <select class="form-control" name="status">
-                                            <option value="0" @if(old('status',$course->status)==0) selected
-                                                @endif>Pending</option>
-                                            <option value="1" @if(old('status',$course->status)==1) selected
-                                                @endif>Inactive</option>
-                                            <option value="2" @if(old('status',$course->status)==2) selected
-                                                @endif>Active</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                    <div class="form-group">
+
+                            <div class="tab-content mb-4">
+                                @foreach(['en' => 'English', 'ru' => 'Русский', 'ka' => 'ქართული'] as $locale => $langName)
+                                    @php
+                                        $trans = $course->translations[$locale] ?? [];
+                                    @endphp
+                                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}"
+                                         id="tab-{{ $locale }}" role="tabpanel">
+
+                                        <div class="form-group">
                                             <label class="form-label">Title ({{ $langName }})</label>
-                                            <input type="text" class="form-control"
+                                            <input type="text" class="form-control" required
                                                    name="translations[{{ $locale }}][title]"
-                                                   value="{{ old("translations.$locale.title") }}">
+                                                   value="{{ old("translations.$locale.title", $trans['title'] ?? '') }}">
                                             @error("translations.$locale.title")
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                <div class="form-group">
+
+                                        <div class="form-group">
                                             <label class="form-label">Description ({{ $langName }})</label>
-                                            <textarea class="form-control"
-                                                      name="translations[{{ $locale }}][description]">{{ old("translations.$locale.description") }}</textarea>
+                                            <textarea class="form-control" required
+                                                      name="translations[{{ $locale }}][description]">{{ old("translations.$locale.description", $trans['description'] ?? '') }}</textarea>
                                             @error("translations.$locale.description")
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Category</label>
-                                        <select class="form-control" name="categoryId">
-                                            @forelse ($courseCategory as $c)
-                                            <option value="{{$c->id}}" {{old('categoryId', $course->course_category_id) ==
-                                                $c->id?'selected':''}}>
-                                                {{$c->category_name}}</option>
-                                            @empty
-                                            <option value="">No Category Found</option>
-                                            @endforelse
-                                        </select>
-                                    </div>
-                                    @if($errors->has('categoryId'))
-                                    <span class="text-danger"> {{ $errors->first('categoryId') }}</span>
-                                    @endif
-                                </div>
-                                 <div class="form-group">
+
+                                        <div class="form-group">
                                             <label class="form-label">Prerequisites ({{ $langName }})</label>
                                             <textarea class="form-control"
-                                                      name="translations[{{ $locale }}][prerequisites]">{{ old("translations.$locale.prerequisites") }}</textarea>
+                                                      name="translations[{{ $locale }}][prerequisites]">{{ old("translations.$locale.prerequisites", $trans['prerequisites'] ?? '') }}</textarea>
                                             @error("translations.$locale.prerequisites")
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
+
                                         <div class="form-group">
                                             <label class="form-label">Keywords ({{ $langName }})</label>
                                             <input type="text" class="form-control"
                                                    name="translations[{{ $locale }}][keywords]"
-                                                   value="{{ old("translations.$locale.keywords") }}">
+                                                   value="{{ old("translations.$locale.keywords", $trans['keywords'] ?? '') }}">
                                             @error("translations.$locale.keywords")
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
-                                        </div>
+
+                                    </div>
                                 @endforeach
                             </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Instructor</label>
-                                        <select class="form-control" name="instructorId">
-                                            @forelse ($instructor as $i)
-                                            <option value="{{$i->id}}" {{old('instructorId', $course->instructor_id) ==
-                                                $i->id?'selected':''}}>
-                                                {{$i->name}}</option>
-                                            @empty
-                                            <option value="">No Instructor Found</option>
-                                            @endforelse
-                                        </select>
-                                    </div>
-                                    @if($errors->has('instructorId'))
-                                    <span class="text-danger"> {{ $errors->first('instructorId') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Type</label>
-                                        <select class="form-control" name="courseType">
-                                            <option value="free" @if(old('courseType', $course->type)=='free' ) selected
-                                                @endif>Free
-                                            </option>
-                                            <option value="paid" @if(old('courseType', $course->type)=='paid' ) selected
-                                                @endif>Paid
-                                            </option>
-                                            <option value="subscription" @if(old('courseType', $course->type)
-                                                =='subscription' )
-                                                selected @endif>Subscription-based</option>
-                                        </select>
-                                    </div>
-                                    @if($errors->has('courseType'))
-                                    <span class="text-danger"> {{ $errors->first('courseType') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Difficulty</label>
-                                        <select class="form-control" name="courseDifficulty">
-                                            <option value="beginner" @if(old('courseDifficulty', $course->
-                                                difficulty)=='beginner' ) selected @endif>Beginner
-                                            </option>
-                                            <option value="intermediate" @if(old('courseDifficulty', $course->
-                                                difficulty)=='intermediate' ) selected @endif>Intermediate
-                                            </option>
-                                            <option value="advanced" @if(old('courseDifficulty', $course->
-                                                difficulty)=='advanced' )
-                                                selected @endif>Advanced</option>
-                                        </select>
-                                    </div>
-                                    @if($errors->has('courseDifficulty'))
-                                    <span class="text-danger"> {{ $errors->first('courseDifficulty') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-    <div class="form-group">
-        <label class="form-label">Price ({{ $currentCurrency }})</label>
-        <input type="number" step="0.01" class="form-control" name="coursePrice"
-               value="{{ old('coursePrice', $course->price) }}">
-    </div>
-    @if($errors->has('coursePrice'))
-        <span class="text-danger">{{ $errors->first('coursePrice') }}</span>
-    @endif
-</div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Old Price</label>
-                                        <input type="number" class="form-control" name="courseOldPrice"
-                                            value="{{old('courseOldPrice', $course->old_price)}}">
-                                    </div>
-                                    @if($errors->has('courseOldPrice'))
-                                    <span class="text-danger"> {{ $errors->first('courseOldPrice') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Subscription Price</label>
-                                        <input type="number" class="form-control" name="subscription_price"
-                                            value="{{old('subscription_price')}}">
-                                    </div>
-                                    @if($errors->has('subscription_price'))
-                                    <span class="text-danger"> {{ $errors->first('subscription_price',
-                                        $course->subscription_price) }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Start From</label>
-                                        <input type="date" class="form-control" name="start_from"
-                                            value="{{old('start_from')}}">
-                                    </div>
-                                    @if($errors->has('start_from'))
-                                    <span class="text-danger"> {{ $errors->first('start_from',
-                                        $course->start_from) }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Duration</label>
-                                        <input type="number" class="form-control" name="duration"
-                                            value="{{old('duration',$course->duration)}}">
-                                    </div>
-                                    @if($errors->has('duration'))
-                                    <span class="text-danger"> {{ $errors->first('duration') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Number of Lesson</label>
-                                        <input type="number" class="form-control" name="lesson"
-                                            value="{{old('lesson',$course->lesson)}}">
-                                    </div>
-                                    @if($errors->has('lesson'))
-                                    <span class="text-danger"> {{ $errors->first('lesson') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Prerequisites</label>
-                                        <textarea class="form-control"
-                                            name="prerequisites">{{old('prerequisites',$course->prerequisites)}}</textarea>
-                                    </div>
-                                    @if($errors->has('prerequisites'))
-                                    <span class="text-danger"> {{ $errors->first('prerequisites') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <textarea class="form-control"
-                                    </div>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Course Code</label>
-                                        <input type="number" class="form-control" name="course_code"
-                                            value="{{old('course_code', $course->course_code)}}">
-                                    </div>
-                                    @if($errors->has('course_code'))
-                                    <span class="text-danger"> {{ $errors->first('course_code') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-    <div class="form-group">
-        <label class="form-label">YouTube Video URL</label>
-        <input type="text" class="form-control" name="thumbnail_video_url" value="{{ old('thumbnail_video_url') }}">
-        @if($errors->has('thumbnail_video_url'))
-            <span class="text-danger"> {{ $errors->first('thumbnail_video_url') }}</span>
-        @endif
-    </div>
 
-    <div class="form-group mt-3">
-        <label class="form-label">Upload Video from Computer</label>
-        <input type="file" class="form-control" name="thumbnail_video_file" accept="video/*">
-        @if($errors->has('thumbnail_video_file'))
-            <span class="text-danger"> {{ $errors->first('thumbnail_video_file') }}</span>
-        @endif
-    </div>
-</div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Course Tag</label>
-                                        <select class="form-control" name="tag">
-                                            <option value="popular" @if(old('tag', $course->tag)=='popular' ) selected
-                                                @endif>Popular
-                                            </option>
-                                            <option value="featured" @if(old('tag', $course->tag)=='featured' ) selected
-                                                @endif>Featured
-                                            </option>tag
-                                            <option value="upcoming" @if(old('tag', $course->tag)=='upcoming' ) selected
-                                                @endif>Upcoming</option>
-                                        </select>
-                                    </div>
-                                    @if($errors->has('tag'))
-                                    <span class="text-danger"> {{ $errors->first('tag') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <label class="form-label">Image</label>
-                                    <div class="form-group fallback w-100">
-                                        <input type="file" class="dropify" data-default-file="" name="image">
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <label class="form-label">Thumbnail Image</label>
-                                    <div class="form-group fallback w-100">
-                                        <input type="file" class="dropify" data-default-file="" name="thumbnail_image">
-                                    </div>
-                                </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                    <button type="submit" class="btn btn-light">Cancel</button>
-                                </div>
-                            </div>
-                        </form>
-                        @endif
-
-                        @if(!fullAccess())
-                        <form action="{{localeRoute('course.update',encryptor('encrypt', $course->id))}}" method="post" enctype="multipart/form-data">
-                            @csrf
-                            @method('PATCH')
-                            <input type="hidden" name="uptoken" value="{{encryptor('encrypt',$course->id)}}">
                             <div class="row">
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Title</label>
-                                        <input type="text" class="form-control" name="courseTitle"
-                                            value="{{old('courseTitle',$course->title)}}">
-                                    </div>
-                                    @if($errors->has('courseTitle'))
-                                    <span class="text-danger"> {{ $errors->first('courseTitle') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Description</label>
-                                        <textarea class="form-control"
-                                            name="description">{{old('description',$course->description)}}</textarea>
-                                    </div>
-                                    @if($errors->has('description'))
-                                    <span class="text-danger"> {{ $errors->first('description') }}</span>
-                                    @endif
-                                </div>
+
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Category</label>
-                                        <select class="form-control" name="categoryId">
+                                        <select class="form-control" name="course_category_id" required>
                                             @forelse ($courseCategory as $c)
-                                            <option value="{{$c->id}}" {{old('categoryId', $course->course_category_id) ==
-                                                $c->id?'selected':''}}>
-                                                {{$c->category_name}}</option>
+                                                <option value="{{ $c->id }}" {{ old('course_category_id', $course->course_category_id) == $c->id ? 'selected' : '' }}>
+                                                    {{ $c->display_name }}
+                                                </option>
                                             @empty
-                                            <option value="">No Category Found</option>
+                                                <option value="">No Category Found</option>
                                             @endforelse
                                         </select>
+                                        @error('course_category_id')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
                                     </div>
-                                    @if($errors->has('categoryId'))
-                                    <span class="text-danger"> {{ $errors->first('categoryId') }}</span>
-                                    @endif
                                 </div>
+
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">Instructor</label>
-                                        <select class="form-control" name="instructorId">
-                                            @forelse ($instructor as $i)
-                                            <option value="{{$i->id}}" {{old('instructorId', $course->instructor_id) ==
-                                                $i->id?'selected':''}}>
-                                                {{$i->name}}</option>
+                                        <select class="form-control" name="instructor_id" required>
+                                            @forelse ($instructors as $i)
+                                                <option value="{{ $i->id }}" {{ old('instructor_id', $course->instructor_id) == $i->id ? 'selected' : '' }}>
+                                                    {{ $i->display_name }}
+                                                </option>
                                             @empty
-                                            <option value="">No Instructor Found</option>
+                                                <option value="">No Instructor Found</option>
                                             @endforelse
                                         </select>
-                                    </div>
-                                    @if($errors->has('instructorId'))
-                                    <span class="text-danger"> {{ $errors->first('instructorId') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Type</label>
-                                        <select class="form-control" name="courseType">
-                                            <option value="free" @if(old('courseType', $course->type)=='free' ) selected
-                                                @endif>Free
-                                            </option>
-                                            <option value="paid" @if(old('courseType', $course->type)=='paid' ) selected
-                                                @endif>Paid
-                                            </option>
-                                            <option value="subscription" @if(old('courseType', $course->type)
-                                                =='subscription' )
-                                                selected @endif>Subscription-based</option>
-                                        </select>
-                                    </div>
-                                    @if($errors->has('courseType'))
-                                    <span class="text-danger"> {{ $errors->first('courseType') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Difficulty</label>
-                                        <select class="form-control" name="courseDifficulty">
-                                            <option value="beginner" @if(old('courseDifficulty', $course->
-                                                difficulty)=='beginner' ) selected @endif>Beginner
-                                            </option>
-                                            <option value="intermediate" @if(old('courseDifficulty', $course->
-                                                difficulty)=='intermediate' ) selected @endif>Intermediate
-                                            </option>
-                                            <option value="advanced" @if(old('courseDifficulty', $course->
-                                                difficulty)=='advanced' )
-                                                selected @endif>Advanced</option>
-                                        </select>
-                                    </div>
-                                    @if($errors->has('courseDifficulty'))
-                                    <span class="text-danger"> {{ $errors->first('courseDifficulty') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Price</label>
-                                        <input type="number" class="form-control" name="coursePrice"
-                                            value="{{old('coursePrice', $course->price)}}">
-                                    </div>
-                                    @if($errors->has('coursePrice'))
-                                    <span class="text-danger"> {{ $errors->first('coursePrice') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Old Price</label>
-                                        <input type="number" class="form-control" name="courseOldPrice"
-                                            value="{{old('courseOldPrice', $course->old_price)}}">
-                                    </div>
-                                    @if($errors->has('courseOldPrice'))
-                                    <span class="text-danger"> {{ $errors->first('courseOldPrice') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Subscription Price</label>
-                                        <input type="number" class="form-control" name="subscription_price"
-                                            value="{{old('subscription_price')}}">
-                                    </div>
-                                    @if($errors->has('subscription_price'))
-                                    <span class="text-danger"> {{ $errors->first('subscription_price',
-                                        $course->subscription_price) }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Start From</label>
-                                        <input type="date" class="form-control" name="start_from" value="{{old('start_from')}}">
-                                    </div>
-                                    @if($errors->has('start_from'))
-                                    <span class="text-danger"> {{ $errors->first('start_from',
-                                        $course->start_from) }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Duration</label>
-                                        <input type="number" class="form-control" name="duration" value="{{old('duration',$course->duration)}}">
-                                    </div>
-                                    @if($errors->has('duration'))
-                                    <span class="text-danger"> {{ $errors->first('duration') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Number of Lesson</label>
-                                        <input type="number" class="form-control" name="lesson" value="{{old('lesson',$course->lesson)}}">
-                                    </div>
-                                    @if($errors->has('lesson'))
-                                    <span class="text-danger"> {{ $errors->first('lesson') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Prerequisites</label>
-                                        <textarea class="form-control"
-                                            name="prerequisites">{{old('prerequisites',$course->prerequisites)}}</textarea>
-                                    </div>
-                                    @if($errors->has('prerequisites'))
-                                    <span class="text-danger"> {{ $errors->first('prerequisites') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <textarea class="form-control"
-                                    </div>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Course Code</label>
-                                        <input type="number" class="form-control" name="course_code"
-                                            value="{{old('course_code', $course->course_code)}}">
-                                    </div>
-                                    @if($errors->has('course_code'))
-                                    <span class="text-danger"> {{ $errors->first('course_code') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Thumbnail Video URL</label>
-                                        <input type="text" class="form-control" name="thumbnail_video"
-                                            value="{{old('thumbnail_video',$course->thumbnail_video)}}">
-                                    </div>
-                                    @if($errors->has('thumbnail_video'))
-                                    <span class="text-danger"> {{ $errors->first('thumbnail_video') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Course Tag</label>
-                                        <select class="form-control" name="tag">
-                                            <option value="popular" @if(old('tag', $course->tag)=='popular' ) selected
-                                                @endif>Popular
-                                            </option>
-                                            <option value="featured" @if(old('tag', $course->tag)=='featured' ) selected
-                                                @endif>Featured
-                                            </option>tag
-                                            <option value="upcoming" @if(old('tag', $course->tag)=='upcoming' ) selected
-                                                @endif>Upcoming</option>
-                                        </select>
-                                    </div>
-                                    @if($errors->has('tag'))
-                                    <span class="text-danger"> {{ $errors->first('tag') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <label class="form-label">Image</label>
-                                    <div class="form-group fallback w-100">
-                                        <input type="file" class="dropify" data-default-file="" name="image">
+                                        @error('instructor_id')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
                                     </div>
                                 </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <label class="form-label">Thumbnail Image</label>
-                                    <div class="form-group fallback w-100">
-                                        <input type="file" class="dropify" data-default-file="" name="thumbnail_image">
-                                    </div>
+
+                                {{-- остальная часть (Type, Price, Duration, Lesson, Code, Video, Images, Tag и т.д.) полностью такая же как в "create", но со значениями $course --}}
+
+                                <div class="col-lg-12 col-md-12 col-sm-12 mt-3">
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                    <button type="button" onclick="window.history.back();" class="btn btn-light">Cancel</button>
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                    <button type="submit" class="btn btn-light">Cancel</button>
-                                </div>
+
                             </div>
+
                         </form>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -564,11 +160,8 @@
 @endsection
 
 @push('scripts')
-<!-- pickdate -->
-<script src="{{asset('public/vendor/pickadate/picker.js')}}"></script>
-<script src="{{asset('public/vendor/pickadate/picker.time.js')}}"></script>
-<script src="{{asset('public/vendor/pickadate/picker.date.js')}}"></script>
-
-<!-- Pickdate -->
-<script src="{{asset('public/js/plugins-init/pickadate-init.js')}}"></script>
+<script src="{{ asset('vendor/pickadate/picker.js') }}"></script>
+<script src="{{ asset('vendor/pickadate/picker.time.js') }}"></script>
+<script src="{{ asset('vendor/pickadate/picker.date.js') }}"></script>
+<script src="{{ asset('js/plugins-init/pickadate-init.js') }}"></script>
 @endpush

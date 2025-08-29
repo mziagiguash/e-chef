@@ -45,7 +45,7 @@ class CourseCategoryController extends Controller
 {
     try {
         $data = new CourseCategory;
-        $data->category_name = json_encode($request->category_name);
+        $data->category_name = $request->category_name; // массив ['en'=>..., 'ru'=>..., 'ka'=>...]
         $data->category_status = $request->category_status;
 
         if ($request->hasFile('category_image')) {
@@ -71,7 +71,7 @@ public function edit($id)
 {
     $data = CourseCategory::findOrFail($id);
     $data->category_name = json_decode($data->category_name, true);
-    
+
     return view('backend.course.courseCategory.edit', compact('data'));
 }
 
@@ -118,4 +118,14 @@ public function edit($id)
             return redirect()->back();
         }
     }
+
+    public function frontIndex()
+{
+    // Берём все категории с курсами
+    $categories = CourseCategory::withCount(['courses' => function($q) {
+        $q->where('status', 2);
+    }])->get();
+
+    return view('frontend.categories.index', compact('categories'));
+}
 }

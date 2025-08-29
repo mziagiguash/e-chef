@@ -89,7 +89,7 @@ Route::middleware(['checkrole'])->prefix('admin')->group(function () {
     // Остальные маршруты resource без edit/update/destroy
     Route::resource('instructor', InstructorController::class)
         ->except(['edit','update','destroy']);
-        
+
     Route::resource('courseCategory', courseCategory::class);
     Route::resource('course', course::class);
     Route::get('/courseList', [course::class, 'indexForAdmin'])->name('courseList');

@@ -49,39 +49,35 @@
         <h2 class="font-title--md text-center mb-0">Browse Course with Top Categories</h2>
         <div class="browse-categories__wrapper position-relative">
             <div class="categories--box">
-               @php
-    $locale = app()->getLocale();
-@endphp
+                @forelse ($category as $cat)
+                    @php
+                        $courseCount = $cat->courses()->count();
+                        $categoryName = $cat->getTranslation('category_name');
+                    @endphp
 
-@forelse ($category as $cat)
-    @php
-        $courseCount = $cat->courses()->count();
+                    <div class="browse-categories-item default-item-one mb-2">
+                        <div class="browse-categories-item-icon">
+                            <div class="categories-one default-categories">
+                                <img src="{{ asset('uploads/courseCategories/' . $cat->category_image) }}"
+                                     class="rounded-circle" width="80" height="80" alt="{{ $categoryName }}">
+                            </div>
+                        </div>
+                        <div class="browse-categories-item-text">
+                            <h6 class="font-title--card">
+                                <a href="{{ route('courseDetails', ['locale' => app()->getLocale(), 'id' => $cat->id]) }}">
+                                    {{ $categoryName }}
+                                </a>
+                            </h6>
+                            <p>{{ $courseCount }} {{ Str::plural('Course', $courseCount) }}</p>
+                        </div>
+                    </div>
 
-        // Декодируем JSON с переводами category_name
-        $names = json_decode($cat->category_name, true);
-
-        // Берём название по текущей локали, если нет - fallback на 'en' или пустую строку
-        $categoryName = $names[$locale] ?? $names['en'] ?? '';
-    @endphp
-
-    <div class="browse-categories-item default-item-one mb-2">
-        <div class="browse-categories-item-icon">
-            <div class="categories-one default-categories">
-                <img src="{{ asset('uploads/courseCategories/' . $cat->category_image) }}"
-                     class="rounded-circle" width="80" height="80" alt="">
+                @empty
+                    <p>No categories found</p>
+                @endforelse
             </div>
-        </div>
-        <div class="browse-categories-item-text">
-            <h6 class="font-title--card"><a href="#">{{ $categoryName }}</a></h6>
-            <p>{{ $courseCount }} Courses</p>
         </div>
     </div>
-@empty
-    <p>No categories found</p>
-@endforelse
-
-            </div>
-        </div>
         <div class="row">
             <div class="col-lg-12 text-center">
                 <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary mt-5">Browse all Courses</a>
@@ -159,16 +155,20 @@
                                 </div>
                                 <div class="contentCard-bottom">
                                     <h5>
-                                        <a href="{{localeRoute('courseDetails', ['id' => encryptor('encrypt', $pc->id)])}}"
-                                            class="font-title--card">{{$pc->title}}</a>
-                                    </h5>
+    <a href="{{ localeRoute('courseDetails', ['id' => encryptor('encrypt', $pc->id)]) }}"
+       class="font-title--card">
+       {{ $pc->getTranslation('title') ?: 'No Title' }}
+    </a>
+</h5>
                                     <div class="contentCard-info d-flex align-items-center justify-content-between">
                                         <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $pc->instructor?->id))}}"
                                             class="contentCard-user d-flex align-items-center">
                                             <img src="{{asset('uploads/users/'.$pc?->instructor->image)}}"
                                                 alt="client-image" class="rounded-circle" height="34" width="34" />
-                                            <p class="font-para--md">{{$pc?->instructor->name}}</p>
-                                        </a>
+                                            <p class="font-para--md">
+    {{ $pc->instructor ? $pc->instructor->getTranslation('name') : 'No Instructor' }}
+</p>
+</a>
                                         <div class="price">
                                              <del>$95</del>
                                              <span>$12</span>

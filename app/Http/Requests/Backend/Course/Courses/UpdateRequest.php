@@ -20,25 +20,25 @@ class UpdateRequest extends FormRequest
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
-    {
-        return [
-           'title' => 'required|array',
+{
+    return [
+        'translations' => 'required|array',
+        'translations.*.title' => 'required|string|max:255',
+        'translations.*.description' => 'nullable|string',
+        'translations.*.prerequisites' => 'nullable|string',
+        'translations.*.keywords' => 'nullable|string',
 
-        'title.en' => 'required|string|max:255',
-        'title.ru' => 'required|string|max:255',
-        'title.ka' => 'required|string|max:255',
+        'course_category_id' => 'required|exists:course_categories,id',
+        'instructor_id' => 'required|exists:instructors,id',
+        'courseType' => 'required|in:free,paid,subscription',
+        'coursePrice' => 'required|numeric|min:0',
+        'start_from' => 'required|date',
+        'duration' => 'required|integer|min:1',
+        'lesson' => 'required|integer|min:1',
+        'course_code' => 'required|string',
+        'image' => 'required|image|max:2048',
+        'thumbnail_image' => 'nullable|image|max:2048',
+    ];
+}
 
-        'description' => 'required|array',
-        'description.en' => 'nullable|string',
-        'description.ru' => 'nullable|string',
-        'description.ka' => 'nullable|string',
-
-        'prerequisites' => 'required|array',
-        'prerequisites.en' => 'nullable|string',
-        'prerequisites.ru' => 'nullable|string',
-        'prerequisites.ka' => 'nullable|string',
-
-        'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
-        ];
-    }
 }

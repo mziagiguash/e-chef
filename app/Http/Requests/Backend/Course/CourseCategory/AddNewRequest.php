@@ -19,10 +19,9 @@ class AddNewRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+public function rules(): array
 {
     return [
-        'category_name' => 'required|array',
         'category_name.en' => 'required|string|max:255',
         'category_name.ru' => 'required|string|max:255',
         'category_name.ka' => 'required|string|max:255',
@@ -30,5 +29,6 @@ class AddNewRequest extends FormRequest
         'category_image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
     ];
 }
+
 
 }

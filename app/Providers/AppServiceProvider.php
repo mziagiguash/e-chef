@@ -20,6 +20,7 @@ public function boot(): void
     View::share('currentCurrency', $currencyConfig['symbol']);
     View::share('currencyRate', $currencyConfig['rate']);
     View::share('locales', config('app.available_locales')); // 💡 берем из конфига
+    View::share('appLocale', app()->getLocale());
 }
 
 }

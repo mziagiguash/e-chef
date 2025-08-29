@@ -1,115 +1,95 @@
 @extends('backend.layouts.app')
-@section('title', 'Edit Course Lesson')
+@section('title', 'Edit Lesson')
 
 @push('styles')
-<!-- Pick date -->
-<link rel="stylesheet" href="{{asset('public/vendor/pickadate/themes/default.css')}}">
-<link rel="stylesheet" href="{{asset('public/vendor/pickadate/themes/default.date.css')}}">
+<link href="{{ asset('vendor/summernote/summernote-bs4.css') }}" rel="stylesheet">
 @endpush
 
 @section('content')
-
 <div class="content-body">
-    <!-- row -->
     <div class="container-fluid">
-
-        <div class="row page-titles mx-0">
-            <div class="col-sm-6 p-md-0">
-                <div class="welcome-text">
-                    <h4>Edit Course Lesson</h4>
-                </div>
-            </div>
-            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('lesson.index')}}">Course Lessons</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0);">Edit Course Lesson</a></li>
-                </ol>
+        <div class="row mb-3">
+            <div class="col-lg-12">
+                <h4>Edit Lesson</h4>
+                <a href="{{ localeRoute('lesson.index') }}" class="btn btn-secondary mb-3">Back to List</a>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-xl-12 col-xxl-12 col-sm-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">Basic Info</h5>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{localeRoute('lesson.update',encryptor('encrypt', $lesson->id))}}" method="post"
-                            enctype="multipart/form-data">
-                            @csrf
-                            @method('PATCH')
-                            <input type="hidden" name="uptoken" value="{{encryptor('encrypt',$lesson->id)}}">
-                            <div class="row">
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Title</label>
-                                        <input type="text" class="form-control" name="lessonTitle"
-                                            value="{{old('lessonTitle',$lesson->title)}}">
-                                    </div>
-                                    @if($errors->has('lessonTitle'))
-                                    <span class="text-danger"> {{ $errors->first('lessonTitle') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Course</label>
-                                        <select class="form-control" name="courseId">
-                                            @forelse ($course as $c)
-                                            <option value="{{$c->id}}" {{old('courseId', $lesson->course_id) ==
-                                                $c->id?'selected':''}}>
-                                                {{$c->title}}</option>
-                                            @empty
-                                            <option value="">No Course Lesson Lesson Found</option>
-                                            @endforelse
-                                        </select>
-                                    </div>
-                                    @if($errors->has('courseId'))
-                                    <span class="text-danger"> {{ $errors->first('courseId') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Lesson Description</label>
-                                        <textarea class="form-control"
-                                            name="lessonDescription">{{old('lessonDescription',$lesson->description)}}</textarea>
-                                    </div>
-                                    @if($errors->has('lessonDescription'))
-                                    <span class="text-danger"> {{ $errors->first('lessonDescription') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Lesson Notes</label>
-                                        <textarea class="form-control"
-                                            name="lessonNotes">{{old('lessonNotes',$lesson->notes)}}</textarea>
-                                    </div>
-                                    @if($errors->has('lessonNotes'))
-                                    <span class="text-danger"> {{ $errors->first('lessonNotes') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                    <button type="submit" class="btn btn-light">Cancel</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @php
+            $locales = ['en' => 'English', 'ru' => 'Русский', 'ka' => 'ქართული'];
+            $appLocale = app()->getLocale();
+        @endphp
 
+        <form action="{{ localeRoute('lesson.update', encryptor('encrypt', $lesson->id)) }}" method="POST">
+            @csrf
+            @method('PUT')
+
+            {{-- Language Tabs --}}
+            <ul class="nav nav-tabs mb-3" id="lessonLangTabs" role="tablist">
+                @foreach($locales as $localeCode => $localeName)
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link {{ $localeCode === $appLocale ? 'active' : '' }}"
+                           id="tab-{{ $localeCode }}" data-toggle="tab" href="#locale-{{ $localeCode }}" role="tab">
+                           {{ $localeName }}
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+
+            {{-- Tab Contents --}}
+            <div class="tab-content">
+                @foreach($locales as $localeCode => $localeName)
+                    @php
+                        $title = old('lessonTitle.'.$localeCode, $lesson->title[$localeCode] ?? '');
+                        $description = old('lessonDescription.'.$localeCode, $lesson->description[$localeCode] ?? '');
+                        $notes = old('lessonNotes.'.$localeCode, $lesson->notes[$localeCode] ?? '');
+                    @endphp
+                    <div class="tab-pane fade {{ $localeCode === $appLocale ? 'show active' : '' }}" id="locale-{{ $localeCode }}" role="tabpanel">
+                        <div class="form-group">
+                            <label>Title ({{ $localeName }})</label>
+                            <input type="text" name="lessonTitle[{{ $localeCode }}]" class="form-control" value="{{ $title }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Description ({{ $localeName }})</label>
+                            <textarea name="lessonDescription[{{ $localeCode }}]" class="form-control summernote">{{ $description }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Notes ({{ $localeName }})</label>
+                            <textarea name="lessonNotes[{{ $localeCode }}]" class="form-control summernote">{{ $notes }}</textarea>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Course Selector --}}
+            <div class="form-group">
+                <label>Course</label>
+                <select name="courseId" class="form-control" required>
+                    <option value="">Select Course</option>
+                    @foreach($courses as $course)
+                        <option value="{{ $course->id }}" {{ old('courseId', $lesson->course_id) == $course->id ? 'selected' : '' }}>
+                            {{ $course->getTranslation('title', app()->getLocale()) }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update Lesson</button>
+        </form>
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
-<!-- pickdate -->
-<script src="{{asset('public/vendor/pickadate/picker.js')}}"></script>
-<script src="{{asset('public/vendor/pickadate/picker.time.js')}}"></script>
-<script src="{{asset('public/vendor/pickadate/picker.date.js')}}"></script>
+<script src="{{ asset('vendor/summernote/summernote-bs4.min.js') }}"></script>
+<script>
+$(document).ready(function(){
+    $('.summernote').summernote({height: 150});
 
-<!-- Pickdate -->
-<script src="{{asset('public/js/plugins-init/pickadate-init.js')}}"></script>
+    $('#lessonLangTabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        let target = $(e.target).attr('href');
+        $(target+' .summernote').summernote({height:150});
+    });
+});
+</script>
 @endpush

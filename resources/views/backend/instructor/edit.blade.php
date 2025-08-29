@@ -35,17 +35,18 @@
                         <h5 class="card-title">Instructor Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('instructor.update', encryptor('encrypt', $instructor->id)) }}" method="POST" enctype="multipart/form-data">
+                        @php
+                            $d = $instructor; // используем единый объект
+                            $locales = ['en' => 'English', 'ru' => 'Русский', 'ka' => 'ქართული'];
+                            $name = $d->name ?? [];
+                            $designation = $d->designation ?? [];
+                            $title = $d->title ?? [];
+                            $bio = $d->bio ?? [];
+                        @endphp
+
+                        <form action="{{ route('instructor.update', encryptor('encrypt', $d->id)) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
-
-                            @php
-                                $locales = ['en' => 'English', 'ru' => 'Русский', 'ka' => 'ქართული'];
-                                $name = json_decode($instructor->name, true);
-                                $designation = json_decode($instructor->designation, true);
-                                $title = json_decode($instructor->title, true);
-                                $bio = json_decode($instructor->bio, true);
-                            @endphp
 
                             @foreach ($locales as $localeCode => $localeName)
                                 <div class="row">
@@ -84,13 +85,13 @@
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label>Email</label>
-                                        <input type="email" name="email" class="form-control" value="{{ old('email', $instructor->email) }}">
+                                        <input type="email" name="email" class="form-control" value="{{ old('email', $d->email) }}">
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label>Phone Number</label>
-                                        <input type="tel" name="contact" class="form-control" value="{{ old('contact', $instructor->contact) }}">
+                                        <input type="tel" name="contact" class="form-control" value="{{ old('contact', $d->contact) }}">
                                     </div>
                                 </div>
                             </div>
@@ -100,11 +101,11 @@
                                     <div class="form-group">
                                         <label>Role</label>
                                         <select name="role_id" class="form-control selectpicker">
-                                            @foreach($role as $r)
-                                                <option value="{{ $r->id }}" {{ old('role_id', $instructor->role_id) == $r->id ? 'selected' : '' }}>
-                                                    {{ $r->name }}
-                                                </option>
-                                            @endforeach
+                                          @foreach($role as $r)
+    <option value="{{ $r->id }}" {{ old('role_id', $d->role_id) == $r->id ? 'selected' : '' }}>
+    {{ $r->name }}
+</option>
+@endforeach
                                         </select>
                                     </div>
                                 </div>
@@ -113,8 +114,8 @@
                                     <div class="form-group">
                                         <label>Status</label>
                                         <select name="status" class="form-control">
-                                            <option value="1" {{ old('status', $instructor->status) == 1 ? 'selected' : '' }}>Active</option>
-                                            <option value="0" {{ old('status', $instructor->status) == 0 ? 'selected' : '' }}>Inactive</option>
+                                            <option value="1" {{ old('status', $d->status) == 1 ? 'selected' : '' }}>Active</option>
+                                            <option value="0" {{ old('status', $d->status) == 0 ? 'selected' : '' }}>Inactive</option>
                                         </select>
                                     </div>
                                 </div>
@@ -130,7 +131,7 @@
                                 <div class="col-lg-6">
                                     <label>Image</label>
                                     <div class="form-group fallback w-100">
-                                        <input type="file" class="dropify" data-default-file="{{ $instructor->image ? asset('uploads/users/'.$instructor->image) : '' }}" name="image">
+                                        <input type="file" class="dropify" data-default-file="{{ $d->image ? asset('uploads/users/'.$d->image) : '' }}" name="image">
                                     </div>
                                 </div>
                             </div>
