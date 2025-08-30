@@ -2,14 +2,11 @@
 @section('title', 'Course Material List')
 
 @push('styles')
-<!-- Datatable -->
 <link href="{{asset('vendor/datatables/css/jquery.dataTables.min.css')}}" rel="stylesheet">
 @endpush
 
 @section('content')
-
 <div class="content-body">
-    <!-- row -->
     <div class="container-fluid">
 
         <div class="row page-titles mx-0">
@@ -22,8 +19,7 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
                     <li class="breadcrumb-item active"><a href="{{localeRoute('material.index')}}">Course Materials</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('material.index')}}">All Course Material</a>
-                    </li>
+                    <li class="breadcrumb-item active">All Course Material</li>
                 </ol>
             </div>
         </div>
@@ -34,8 +30,7 @@
                     <li class="nav-item"><a href="#list-view" data-toggle="tab"
                             class="nav-link btn-primary mr-1 show active">List View</a></li>
                     <li class="nav-item"><a href="javascript:void(0);" data-toggle="tab"
-                            class="nav-link btn-primary">Grid
-                            View</a></li>
+                            class="nav-link btn-primary">Grid View</a></li>
                 </ul>
             </div>
             <div class="col-lg-12">
@@ -43,7 +38,7 @@
                     <div id="list-view" class="tab-pane fade active show col-lg-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="card-title">All Course Materials List </h4>
+                                <h4 class="card-title">All Course Materials List</h4>
                                 <a href="{{localeRoute('material.create')}}" class="btn btn-primary">+ Add new</a>
                             </div>
                             <div class="card-body">
@@ -51,38 +46,37 @@
                                     <table id="example3" class="display" style="min-width: 845px">
                                         <thead>
                                             <tr>
-                                                <th>{{__('#')}}</th>
-                                                <th>{{__('Title')}}</th>
-                                                <th>{{__('Lesson')}}</th>
-                                                <th>{{__('Material Type')}}</th>
-                                                <th>{{__('Content')}}</th>
-                                                <th>{{__('Content Url')}}</th>
-                                                <th>{{__('Action')}}</th>
+                                                <th>#</th>
+                                                <th>Title</th>
+                                                <th>Lesson</th>
+                                                <th>Material Type</th>
+                                                <th>Video / Document</th>
+                                                <th>Text Content</th>
+                                                <th>Content URL</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @forelse ($material as $m)
+                                            @forelse ($materials as $m)
                                             <tr>
                                                 <td>{{$m->id}}</td>
                                                 <td>{{$m->title}}</td>
-                                                <td>{{$m->lesson?->title}}</td>
+                                                <td>{{$m->lesson?->displayTitle()}}</td>
                                                 <td>
-                                                    {{ $m->type == 'video' ? __('Video') : ($m->type == 'document' ?
-                                                    __('Document') : __('Quiz')) }}
+                                                    {{ ucfirst($m->type) }}
                                                 </td>
                                                 <td>
-                                                    <embed
-                                                        src="{{asset('uploads/courses/contents/'.$m->content)}}"
-                                                        width="200px" height="100px" />
+                                                    @if($m->type === 'video' || $m->type === 'document')
+                                                        <embed src="{{ asset('uploads/courses/contents/'.$m->content) }}" width="200px" height="100px" />
+                                                    @endif
                                                 </td>
+                                                <td>{{ $m->content_text }}</td>
                                                 <td>{{$m->content_url}}</td>
                                                 <td>
                                                     <a href="{{localeRoute('material.edit', encryptor('encrypt',$m->id))}}"
-                                                        class="btn btn-sm btn-primary" title="Edit"><i
-                                                            class="la la-pencil"></i></a>
+                                                        class="btn btn-sm btn-primary" title="Edit"><i class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
-                                                        title="Delete" onclick="$('#form{{$m->id}}').submit()"><i
-                                                            class="la la-trash-o"></i></a>
+                                                        title="Delete" onclick="$('#form{{$m->id}}').submit()"><i class="la la-trash-o"></i></a>
                                                     <form id="form{{$m->id}}"
                                                         action="{{localeRoute('material.destroy', encryptor('encrypt',$m->id))}}"
                                                         method="post">
@@ -93,11 +87,12 @@
                                             </tr>
                                             @empty
                                             <tr>
-                                                <th colspan="6" class="text-center">No Course Material Found</th>
+                                                <td colspan="8" class="text-center">No Course Material Found</td>
                                             </tr>
                                             @endforelse
                                         </tbody>
                                     </table>
+                                    {{ $materials->links() }} <!-- Пагинация -->
                                 </div>
                             </div>
                         </div>
@@ -108,12 +103,9 @@
 
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
-<!-- Datatable -->
 <script src="{{asset('vendor/datatables/js/jquery.dataTables.min.js')}}"></script>
 <script src="{{asset('js/plugins-init/datatables.init.js')}}"></script>
-
 @endpush
