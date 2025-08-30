@@ -59,7 +59,7 @@
                     <div>
                         <div class="students-info-intro-start">
                             <div class="image">
-                                <img src="{{ asset('public/uploads/students/' . $student_info->image) }}" alt="Student" />
+                                <img src="{{ asset('uploads/students/' . $student_info->image) }}" alt="Student" />
                             </div>
                             <div class="text">
                                 <h5>{{ $student_info->name }}</h5>
@@ -330,7 +330,7 @@
                                 <div class="white-bg">
                                     <div class="change-image-wizard">
                                         <div class="image mx-auto">
-                                            <img src="{{ asset('public/uploads/students/' . $student_info->image) }}"
+                                            <img src="{{ asset('uploads/students/' . $student_info->image) }}"
                                                 alt="User" height="200" width="200">
                                         </div>
                                         <form id="changeImageForm" action="{{ localeRoute('change_image') }}"

@@ -67,8 +67,8 @@
                 <select name="courseId" class="form-control" required>
                     <option value="">Select Course</option>
                     @foreach($courses as $course)
-                        <option value="{{ $course->id }}" {{ old('courseId', $lesson->course_id) == $course->id ? 'selected' : '' }}>
-                            {{ $course->getTranslation('title', app()->getLocale()) }}
+                        <option value="{{ $course->id }}" {{ $lesson->course_id == $course->id ? 'selected' : '' }}>
+                            {{ $course->localized_title }}
                         </option>
                     @endforeach
                 </select>

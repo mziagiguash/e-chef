@@ -26,13 +26,13 @@
             <div class="row align-items-center">
                 <div class="col-lg-6 position-relative mt-4 mt-lg-0" style="z-index: 0;">
                     <div class="about-intro__img-wrapper">
-                        <img src="{{ asset('public/frontend/dist/images/about/intro.jpg') }}" alt="Intro Image"
+                        <img src="{{ asset('frontend/dist/images/about/intro.jpg') }}" alt="Intro Image"
                             class="img-fluid rounded-2 ms-lg-5 position-relative intro-image" />
                     </div>
                     <div class="intro-shape">
-                        <img src="{{ asset('public/frontend/dist/images/shape/rec04.png') }}" alt="Shape"
+                        <img src="{{ asset('frontend/dist/images/shape/rec04.png') }}" alt="Shape"
                             class="img-fluid shape-01" />
-                        <img src="{{ asset('public/frontend/dist/images/shape/dots/dots-img-09.png') }}" alt="Shape"
+                        <img src="{{ asset('frontend/dist/images/shape/dots/dots-img-09.png') }}" alt="Shape"
                             class="img-fluid shape-02" />
                     </div>
                 </div>
@@ -98,27 +98,27 @@
             <div class="col-lg-12">
                 <div class="brand-area">
                     <div class="brand-area-image">
-                        <img src="{{ asset('public/frontend/dist/images/versity/1.png') }}" alt="Brand"
+                        <img src="{{ asset('frontend/dist/images/versity/1.png') }}" alt="Brand"
                             class="img-fluid" />
                     </div>
                     <div class="brand-area-image">
-                        <img src="{{ asset('public/frontend/dist/images/versity/2.png') }}" alt="Brand"
+                        <img src="{{ asset('frontend/dist/images/versity/2.png') }}" alt="Brand"
                             class="img-fluid" />
                     </div>
                     <div class="brand-area-image">
-                        <img src="{{ asset('public/frontend/dist/images/versity/3.png') }}" alt="Brand"
+                        <img src="{{ asset('frontend/dist/images/versity/3.png') }}" alt="Brand"
                             class="img-fluid" />
                     </div>
                     <div class="brand-area-image">
-                        <img src="{{ asset('public/frontend/dist/images/versity/4.png') }}" alt="Brand"
+                        <img src="{{ asset('frontend/dist/images/versity/4.png') }}" alt="Brand"
                             class="img-fluid" />
                     </div>
                     <div class="brand-area-image">
-                        <img src="{{ asset('public/frontend/dist/images/versity/2.png') }}" alt="Brand"
+                        <img src="{{ asset('frontend/dist/images/versity/2.png') }}" alt="Brand"
                             class="img-fluid" />
                     </div>
                     <div class="brand-area-image">
-                        <img src="{{ asset('public/frontend/dist/images/versity/5.png') }}" alt="Brand"
+                        <img src="{{ asset('frontend/dist/images/versity/5.png') }}" alt="Brand"
                             class="img-fluid" />
                     </div>
                 </div>
@@ -139,7 +139,7 @@
                         <div class="ourinstructor-active">
                             <div class="mentor">
                                 <div class="mentor__img">
-                                    <img src="{{ asset('public/frontend/dist/images/instructor/03.jpg') }}"
+                                    <img src="{{ asset('frontend/dist/images/instructor/03.jpg') }}"
                                         alt="Mentor image" />
 
                                     <ul class="list-inline">
@@ -180,7 +180,7 @@
                             </div>
                             <div class="mentor">
                                 <div class="mentor__img">
-                                    <img src="{{ asset('public/frontend/dist/images/instructor/02.jpg') }}"
+                                    <img src="{{ asset('frontend/dist/images/instructor/02.jpg') }}"
                                         alt="Mentor image" />
 
                                     <ul class="list-inline">
@@ -221,7 +221,7 @@
                             </div>
                             <div class="mentor">
                                 <div class="mentor__img">
-                                    <img src="{{ asset('public/frontend/dist/images/instructor/3.jpg') }}"
+                                    <img src="{{ asset('frontend/dist/images/instructor/3.jpg') }}"
                                         alt="Mentor image" />
 
                                     <ul class="list-inline">
@@ -262,7 +262,7 @@
                             </div>
                             <div class="mentor">
                                 <div class="mentor__img">
-                                    <img src="{{ asset('public/frontend/dist/images/instructor/04.jpg') }}"
+                                    <img src="{{ asset('frontend/dist/images/instructor/04.jpg') }}"
                                         alt="Mentor image" />
 
                                     <ul class="list-inline">
@@ -303,7 +303,7 @@
                             </div>
                             <div class="mentor">
                                 <div class="mentor__img">
-                                    <img src="{{ asset('public/frontend/dist/images/instructor/1.png') }}"
+                                    <img src="{{ asset('frontend/dist/images/instructor/1.png') }}"
                                         alt="Mentor image" />
 
                                     <ul class="list-inline">
@@ -344,7 +344,7 @@
                             </div>
                             <div class="mentor">
                                 <div class="mentor__img">
-                                    <img src="{{ asset('public/frontend/dist/images/instructor/2.png') }}"
+                                    <img src="{{ asset('frontend/dist/images/instructor/2.png') }}"
                                         alt="Mentor image" />
 
                                     <ul class="list-inline">
@@ -388,9 +388,9 @@
             </div>
         </div>
         <div class="main-instructor-featured-shape">
-            <img src="{{ asset('public/frontend/dist/images/shape/dots/dots-img-14.png') }}" alt="shape"
+            <img src="{{ asset('frontend/dist/images/shape/dots/dots-img-14.png') }}" alt="shape"
                 class="img-fluid shape01" />
-            <img src="{{ asset('public/frontend/dist/images/shape/triangel2.png') }}" alt="shape"
+            <img src="{{ asset('frontend/dist/images/shape/triangel2.png') }}" alt="shape"
                 class="img-fluid shape02" />
         </div>
     </section>

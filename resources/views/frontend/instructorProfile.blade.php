@@ -3,7 +3,7 @@
 @section('body-attr') style="background-color: #ebebf2;" @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{asset('public/frontend/src/scss/vendors/plugin/css/star-rating-svg.css')}}" />
+<link rel="stylesheet" href="{{asset('frontend/src/scss/vendors/plugin/css/star-rating-svg.css')}}" />
 @endpush
 
 @section('content')
@@ -253,7 +253,7 @@
                                     <div class="contentCard contentCard--course">
                                         <div class="contentCard-top">
                                             <a href="#"><img
-                                                    src="{{asset('public/frontend/dist/images/courses/demo-img-01.png')}}"
+                                                    src="{{asset('frontend/dist/images/courses/demo-img-01.png')}}"
                                                     alt="images" class="img-fluid" /></a>
                                         </div>
                                         <div class="contentCard-bottom">
@@ -265,7 +265,7 @@
                                                 class="contentCard-info d-flex align-items-center justify-content-between">
                                                 <a href="instructor-profile.html"
                                                     class="contentCard-user d-flex align-items-center">
-                                                    <img src="{{asset('public/frontend/dist/images/courses/7.png')}}"
+                                                    <img src="{{asset('frontend/dist/images/courses/7.png')}}"
                                                         alt="client-image" class="rounded-circle" />
                                                     <p class="font-para--md">Brandon Dias</p>
                                                 </a>
@@ -277,28 +277,28 @@
                                             <div class="contentCard-more">
                                                 <div class="d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/star.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/star.png')}}"
                                                             alt="star" />
                                                     </div>
                                                     <span>4.5</span>
                                                 </div>
                                                 <div class="eye d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/eye.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/eye.png')}}"
                                                             alt="eye" />
                                                     </div>
                                                     <span>24,517</span>
                                                 </div>
                                                 <div class="book d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/book.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/book.png')}}"
                                                             alt="location" />
                                                     </div>
                                                     <span>37 Lesson</span>
                                                 </div>
                                                 <div class="clock d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/Clock.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/Clock.png')}}"
                                                             alt="clock" />
                                                     </div>
                                                     <span>3 Hours</span>
@@ -311,7 +311,7 @@
                                     <div class="contentCard contentCard--course">
                                         <div class="contentCard-top">
                                             <a href="#"><img
-                                                    src="{{asset('public/frontend/dist/images/courses/demo-img-02.png')}}"
+                                                    src="{{asset('frontend/dist/images/courses/demo-img-02.png')}}"
                                                     alt="images" class="img-fluid" /></a>
                                         </div>
                                         <div class="contentCard-bottom">
@@ -323,7 +323,7 @@
                                                 class="contentCard-info d-flex align-items-center justify-content-between">
                                                 <a href="instructor-profile.html"
                                                     class="contentCard-user d-flex align-items-center">
-                                                    <img src="{{asset('public/frontend/dist/images/courses/7.png')}}"
+                                                    <img src="{{asset('frontend/dist/images/courses/7.png')}}"
                                                         alt="client-image" class="rounded-circle" />
                                                     <p class="font-para--md">Brandon Dias</p>
                                                 </a>
@@ -335,28 +335,28 @@
                                             <div class="contentCard-more">
                                                 <div class="d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/star.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/star.png')}}"
                                                             alt="star" />
                                                     </div>
                                                     <span>4.5</span>
                                                 </div>
                                                 <div class="eye d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/eye.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/eye.png')}}"
                                                             alt="eye" />
                                                     </div>
                                                     <span>24,517</span>
                                                 </div>
                                                 <div class="book d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/book.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/book.png')}}"
                                                             alt="location" />
                                                     </div>
                                                     <span>37 Lesson</span>
                                                 </div>
                                                 <div class="clock d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/Clock.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/Clock.png')}}"
                                                             alt="clock" />
                                                     </div>
                                                     <span>3 Hours</span>
@@ -369,7 +369,7 @@
                                     <div class="contentCard contentCard--course">
                                         <div class="contentCard-top">
                                             <a href="#"><img
-                                                    src="{{asset('public/frontend/dist/images/courses/demo-img-03.png')}}"
+                                                    src="{{asset('frontend/dist/images/courses/demo-img-03.png')}}"
                                                     alt="images" class="img-fluid" /></a>
                                         </div>
                                         <div class="contentCard-bottom">
@@ -381,7 +381,7 @@
                                                 class="contentCard-info d-flex align-items-center justify-content-between">
                                                 <a href="instructor-profile.html"
                                                     class="contentCard-user d-flex align-items-center">
-                                                    <img src="{{asset('public/frontend/dist/images/courses/7.png')}}"
+                                                    <img src="{{asset('frontend/dist/images/courses/7.png')}}"
                                                         alt="client-image" class="rounded-circle" />
                                                     <p class="font-para--md">Brandon Dias</p>
                                                 </a>
@@ -393,28 +393,28 @@
                                             <div class="contentCard-more">
                                                 <div class="d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/star.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/star.png')}}"
                                                             alt="star" />
                                                     </div>
                                                     <span>4.5</span>
                                                 </div>
                                                 <div class="eye d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/eye.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/eye.png')}}"
                                                             alt="eye" />
                                                     </div>
                                                     <span>24,517</span>
                                                 </div>
                                                 <div class="book d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/book.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/book.png')}}"
                                                             alt="location" />
                                                     </div>
                                                     <span>37 Lesson</span>
                                                 </div>
                                                 <div class="clock d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/Clock.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/Clock.png')}}"
                                                             alt="clock" />
                                                     </div>
                                                     <span>3 Hours</span>
@@ -427,7 +427,7 @@
                                     <div class="contentCard contentCard--course">
                                         <div class="contentCard-top">
                                             <a href="#"><img
-                                                    src="{{asset('public/frontend/dist/images/courses/demo-img-04.png')}}"
+                                                    src="{{asset('frontend/dist/images/courses/demo-img-04.png')}}"
                                                     alt="images" class="img-fluid" /></a>
                                         </div>
                                         <div class="contentCard-bottom">
@@ -439,7 +439,7 @@
                                                 class="contentCard-info d-flex align-items-center justify-content-between">
                                                 <a href="instructor-profile.html"
                                                     class="contentCard-user d-flex align-items-center">
-                                                    <img src="{{asset('public/frontend/dist/images/courses/7.png')}}"
+                                                    <img src="{{asset('frontend/dist/images/courses/7.png')}}"
                                                         alt="client-image" class="rounded-circle" />
                                                     <p class="font-para--md">Brandon Dias</p>
                                                 </a>
@@ -451,28 +451,28 @@
                                             <div class="contentCard-more">
                                                 <div class="d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/star.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/star.png')}}"
                                                             alt="star" />
                                                     </div>
                                                     <span>4.5</span>
                                                 </div>
                                                 <div class="eye d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/eye.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/eye.png')}}"
                                                             alt="eye" />
                                                     </div>
                                                     <span>24,517</span>
                                                 </div>
                                                 <div class="book d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/book.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/book.png')}}"
                                                             alt="location" />
                                                     </div>
                                                     <span>37 Lesson</span>
                                                 </div>
                                                 <div class="clock d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/Clock.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/Clock.png')}}"
                                                             alt="clock" />
                                                     </div>
                                                     <span>3 Hours</span>
@@ -485,7 +485,7 @@
                                     <div class="contentCard contentCard--course">
                                         <div class="contentCard-top">
                                             <a href="#"><img
-                                                    src="{{asset('public/frontend/dist/images/courses/demo-img-05.png')}}"
+                                                    src="{{asset('frontend/dist/images/courses/demo-img-05.png')}}"
                                                     alt="images" class="img-fluid" /></a>
                                         </div>
                                         <div class="contentCard-bottom">
@@ -497,7 +497,7 @@
                                                 class="contentCard-info d-flex align-items-center justify-content-between">
                                                 <a href="instructor-profile.html"
                                                     class="contentCard-user d-flex align-items-center">
-                                                    <img src="{{asset('public/frontend/dist/images/courses/7.png')}}"
+                                                    <img src="{{asset('frontend/dist/images/courses/7.png')}}"
                                                         alt="client-image" class="rounded-circle" />
                                                     <p class="font-para--md">Brandon Dias</p>
                                                 </a>
@@ -509,28 +509,28 @@
                                             <div class="contentCard-more">
                                                 <div class="d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/star.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/star.png')}}"
                                                             alt="star" />
                                                     </div>
                                                     <span>4.5</span>
                                                 </div>
                                                 <div class="eye d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/eye.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/eye.png')}}"
                                                             alt="eye" />
                                                     </div>
                                                     <span>24,517</span>
                                                 </div>
                                                 <div class="book d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/book.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/book.png')}}"
                                                             alt="location" />
                                                     </div>
                                                     <span>37 Lesson</span>
                                                 </div>
                                                 <div class="clock d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/Clock.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/Clock.png')}}"
                                                             alt="clock" />
                                                     </div>
                                                     <span>3 Hours</span>
@@ -543,7 +543,7 @@
                                     <div class="contentCard contentCard--course">
                                         <div class="contentCard-top">
                                             <a href="#"><img
-                                                    src="{{asset('public/frontend/dist/images/courses/demo-img-01.png')}}"
+                                                    src="{{asset('frontend/dist/images/courses/demo-img-01.png')}}"
                                                     alt="images" class="img-fluid" /></a>
                                         </div>
                                         <div class="contentCard-bottom">
@@ -555,7 +555,7 @@
                                                 class="contentCard-info d-flex align-items-center justify-content-between">
                                                 <a href="instructor-profile.html"
                                                     class="contentCard-user d-flex align-items-center">
-                                                    <img src="{{asset('public/frontend/dist/images/courses/7.png')}}"
+                                                    <img src="{{asset('frontend/dist/images/courses/7.png')}}"
                                                         alt="client-image" class="rounded-circle" />
                                                     <p class="font-para--md">Brandon Dias</p>
                                                 </a>
@@ -567,28 +567,28 @@
                                             <div class="contentCard-more">
                                                 <div class="d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/star.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/star.png')}}"
                                                             alt="star" />
                                                     </div>
                                                     <span>4.5</span>
                                                 </div>
                                                 <div class="eye d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/eye.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/eye.png')}}"
                                                             alt="eye" />
                                                     </div>
                                                     <span>24,517</span>
                                                 </div>
                                                 <div class="book d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/book.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/book.png')}}"
                                                             alt="location" />
                                                     </div>
                                                     <span>37 Lesson</span>
                                                 </div>
                                                 <div class="clock d-flex align-items-center">
                                                     <div class="icon">
-                                                        <img src="{{asset('public/frontend/dist/images/icon/Clock.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/icon/Clock.png')}}"
                                                             alt="clock" />
                                                     </div>
                                                     <span>3 Hours</span>
@@ -1030,7 +1030,7 @@
                                             <div class="feedback-rating">
                                                 <div class="feedback-rating-start">
                                                     <div class="image">
-                                                        <img src="{{asset('public/frontend/dist/images/ellipse/user.jpg')}}"
+                                                        <img src="{{asset('frontend/dist/images/ellipse/user.jpg')}}"
                                                             alt="Image" />
                                                     </div>
                                                     <div class="text">
@@ -1052,7 +1052,7 @@
                                             <div class="feedback-rating">
                                                 <div class="feedback-rating-start">
                                                     <div class="image">
-                                                        <img src="{{asset('public/frontend/dist/images/ellipse/1.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/ellipse/1.png')}}"
                                                             alt="Image" />
                                                     </div>
                                                     <div class="text">
@@ -1073,7 +1073,7 @@
                                             <div class="feedback-rating">
                                                 <div class="feedback-rating-start">
                                                     <div class="image">
-                                                        <img src="{{asset('public/frontend/dist/images/ellipse/2.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/ellipse/2.png')}}"
                                                             alt="Image" />
                                                     </div>
                                                     <div class="text">
@@ -1095,7 +1095,7 @@
                                             <div class="feedback-rating">
                                                 <div class="feedback-rating-start">
                                                     <div class="image">
-                                                        <img src="{{asset('public/frontend/dist/images/ellipse/3.png')}}"
+                                                        <img src="{{asset('frontend/dist/images/ellipse/3.png')}}"
                                                             alt="Image" />
                                                     </div>
                                                     <div class="text">
@@ -1142,7 +1142,7 @@
 @endsection
 
 @push('scripts')
-<script src="{{asset('public/frontend/src/scss/vendors/plugin/js/jquery.star-rating-svg.js')}}"></script>
+<script src="{{asset('frontend/src/scss/vendors/plugin/js/jquery.star-rating-svg.js')}}"></script>
 <script>
     // Toggle Menu
             const toggleMenu = document.querySelector(".menu-icon-container");

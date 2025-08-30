@@ -62,7 +62,7 @@
                     <option value="">Select Course</option>
                     @foreach($courses as $course)
                         <option value="{{ $course->id }}" {{ old('courseId') == $course->id ? 'selected' : '' }}>
-                            {{ $course->getTranslation('title', app()->getLocale()) }}
+                            {{ $course->localized_title }}
                         </option>
                     @endforeach
                 </select>

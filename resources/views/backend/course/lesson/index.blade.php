@@ -71,7 +71,7 @@
                                             data-courses='@json((array) ($lesson->course?->title ?? []))'>
                                             <td>{{ $lesson->id }}</td>
                                             <td class="lesson-title">{{ $lesson->display_title ?? 'No Title' }}</td>
-                                            <td class="lesson-course">{{ $lesson->display_course ?? 'No Course' }}</td>
+                                            <td class="lesson-course">{{ $lesson->localized_title ?? 'No Course' }}</td>
                                             <td>
                                                 <a href="{{localeRoute('lesson.edit', encryptor('encrypt',$lesson->id))}}" class="btn btn-sm btn-primary" title="Edit"><i class="la la-pencil"></i></a>
                                                 <a href="javascript:void(0);" class="btn btn-sm btn-danger" title="Delete" onclick="$('#form{{$lesson->id}}').submit()"><i class="la la-trash-o"></i></a>
@@ -103,7 +103,9 @@
                                  data-courses='@json((array) ($lesson->course?->title ?? []))'>
                                 <div class="card-body text-center">
                                     <h5 class="card-title lesson-title">{{ $lesson->display_title ?? 'No Title' }}</h5>
-                                    <p class="mb-1"><strong>Course:</strong> <span class="lesson-course">{{ $lesson->display_course ?? 'No Course' }}</span></p>
+                                    <p class="mb-1"><strong>Course:</strong>
+                                        <span class="lesson-course">{{ $lesson->localized_title ?? 'No Course' }}</span>
+                                    </p>
                                     <div class="mt-3">
                                         <a href="{{localeRoute('lesson.edit', encryptor('encrypt',$lesson->id))}}" class="btn btn-sm btn-primary" title="Edit"><i class="la la-pencil"></i></a>
                                         <a href="javascript:void(0);" class="btn btn-sm btn-danger" title="Delete" onclick="$('#form{{$lesson->id}}').submit()"><i class="la la-trash-o"></i></a>
