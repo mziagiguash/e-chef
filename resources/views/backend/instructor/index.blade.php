@@ -66,12 +66,13 @@
 @forelse($instructor as $d)
     @php
         $locale = app()->getLocale();
+        $translation = $d->translate($locale); // получаем текущий перевод
 
-        // Декодируем переводы (name и designation)
-        $names = is_string($d->name) ? json_decode($d->name, true) : $d->name;
-        $designations = is_string($d->designation) ? json_decode($d->designation, true) : $d->designation;
+        // fallback если нет перевода
+        $name = $translation?->name ?? '';
+        $designation = $translation?->designation ?? '';
 
-        // Картинка: ищем по ID с разными расширениями или дефолт
+        // картинка
         $imagePath = public_path('uploads/users');
         $extensions = ['jpg','jpeg','png','gif','webp'];
         $foundImage = null;
@@ -94,8 +95,9 @@
         <td><strong>{{ $d->id }}</strong></td>
         <td>
             @foreach($locales as $code => $localeName)
+                @php $tr = $d->translate($code); @endphp
                 <span class="lang-{{ $code }}" style="{{ $code == $locale ? '' : 'display:none' }}">
-                    {{ $names[$code] ?? '' }}
+                    {{ $tr?->name ?? '' }}
                 </span>
             @endforeach
         </td>
@@ -103,8 +105,9 @@
         <td>{{ $d->contact }}</td>
         <td>
             @foreach($locales as $code => $localeName)
+                @php $tr = $d->translate($code); @endphp
                 <span class="lang-{{ $code }}" style="{{ $code == $locale ? '' : 'display:none' }}">
-                    {{ $designations[$code] ?? '' }}
+                    {{ $tr?->designation ?? '' }}
                 </span>
             @endforeach
         </td>
@@ -114,29 +117,30 @@
             </span>
         </td>
         <td>
-    <img class="rounded-circle" width="35" src="{{ $foundImage }}" alt="Instructor">
-</td>
-<td>
-    <a href="{{ route('instructor.edit', $d->id) }}"
-       class="btn btn-sm btn-primary" title="Edit">
-        <i class="la la-pencil"></i>
-    </a>
+            <img class="rounded-circle" width="35" src="{{ $foundImage }}" alt="Instructor">
+        </td>
+        <td>
+            <a href="{{ route('instructor.edit', $d->id) }}"
+               class="btn btn-sm btn-primary" title="Edit">
+                <i class="la la-pencil"></i>
+            </a>
 
-    <a href="javascript:void(0);" class="btn btn-sm btn-danger" title="Delete"
-       onclick="$('#form{{ $d->id }}').submit()">
-        <i class="la la-trash-o"></i>
-    </a>
-    <form id="form{{ $d->id }}"
-          action="{{ route('instructor.destroy', $d->id) }}"
-          method="POST" style="display:none;">
-        @csrf
-        @method('DELETE')
-    </form>
-</td>
+            <a href="javascript:void(0);" class="btn btn-sm btn-danger" title="Delete"
+               onclick="$('#form{{ $d->id }}').submit()">
+                <i class="la la-trash-o"></i>
+            </a>
+            <form id="form{{ $d->id }}"
+                  action="{{ route('instructor.destroy', $d->id) }}"
+                  method="POST" style="display:none;">
+                @csrf
+                @method('DELETE')
+            </form>
+        </td>
     </tr>
 @empty
     <tr><td colspan="8" class="text-center">No Instructor Found</td></tr>
 @endforelse
+
 </tbody>
 
                             </table>

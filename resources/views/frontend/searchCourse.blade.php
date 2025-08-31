@@ -392,8 +392,10 @@
                                         class="contentCard-user d-flex align-items-center">
                                         <img src="{{asset('uploads/users/'.$c->instructor?->image)}}"
                                             alt="Instructor Image" class="rounded-circle" height="34" width="34" />
-                                        <p class="font-para--md">{{ $c->instructor ? $c->instructor->getTranslation('name') : 'No Instructor' }}</p>
-                                    </a>
+                                        <p class="font-para--md">
+    {{ $c->instructor ? ($c->instructor->translate()?->name ?? 'No Instructor') : 'No Instructor' }}
+</p>
+</a>
                                     <div class="price">
     <span>
         {{ $c->price === null ? 'Free' : $currencySymbol . number_format($c->price * $currencyRate, 2) }}

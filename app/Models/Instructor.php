@@ -9,34 +9,10 @@ class Instructor extends Model
 {
     use HasFactory;
 
-    protected $casts = [
-        'name'        => 'array',
-        'designation' => 'array',
-        'title'       => 'array',
-        'bio'         => 'array',
+ protected $fillable = [
+        // здесь реальные поля таблицы instructors
+        'email','contact','role_id','status','access_block','password','image'
     ];
-
-    public function getImageUrlAttribute()
-    {
-        $imagePath = public_path('uploads/users');
-        $extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
-        if ($this->image) {
-            $file = $imagePath . '/' . $this->image;
-            if (file_exists($file)) {
-                return asset('uploads/users/' . $this->image);
-            }
-        }
-
-        foreach ($extensions as $ext) {
-            $file = $imagePath . '/instructor_' . $this->id . '.' . $ext;
-            if (file_exists($file)) {
-                return asset('uploads/users/instructor_' . $this->id . '.' . $ext);
-            }
-        }
-
-        return asset('uploads/users/default-instructor.jpg');
-    }
 
     public function role()
     {
@@ -53,30 +29,20 @@ class Instructor extends Model
         return $this->hasMany(InstructorTranslation::class, 'instructor_id');
     }
 
-    public function translate($locale = null)
+    public function getTranslation($locale = null)
     {
         $locale = $locale ?? app()->getLocale();
-        return $this->translations->where('locale', $locale)->first();
+        return $this->translations->firstWhere('locale', $locale);
     }
 
 
-    /**
-     * Автоматически возвращаем локализованное имя
-     */
-    public function getLocalizedNameAttribute()
-    {
-        if (is_array($this->name)) {
-            return $this->name[app()->getLocale()]
-                ?? $this->name['en']
-                ?? '';
-        }
-        return $this->name ?? '';
-    }
-public function getTranslation($field, $locale = null)
+public function frontShow(): string
 {
-    $locale = $locale ?: app()->getLocale();
-    $decoded = is_array($this->$field) ? $this->$field : json_decode($this->$field, true);
-    return $decoded[$locale] ?? reset($decoded) ?? '';
+    $name = $this->getTranslation()?->name ?? 'No Instructor';
+    $designation = $this->getTranslation()?->designation ?? '';
+
+    return $designation ? "$name — $designation" : $name;
 }
 
 }
+

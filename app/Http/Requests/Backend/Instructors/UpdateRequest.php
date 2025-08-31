@@ -11,37 +11,26 @@ class UpdateRequest extends FormRequest
         return true; // по желанию, добавь проверку
     }
 
-    public function rules()
-    {
-        $id = $this->route('instructor'); // id из роута (шифрованный)
+    public function rules(): array
+{
+    return [
+        'email'       => 'nullable|email|max:255',
+        'contact'     => 'nullable|string|max:255',
+        'role_id'     => 'required|exists:roles,id',
+        'status'      => 'required|in:0,1',
+        'access_block'=> 'nullable|in:0,1',
+        'password'    => 'nullable|string|min:6',
+        'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
 
-        // Расшифровываем, если нужно, иначе просто $id
-        // $id = decrypt($id); // если используешь шифрование в роутинге
+        'name'           => 'array',
+        'name.*'         => 'nullable|string|max:255',
+        'designation'    => 'array',
+        'designation.*'  => 'nullable|string|max:255',
+        'title'          => 'array',
+        'title.*'        => 'nullable|string|max:255',
+        'bio'            => 'array',
+        'bio.*'          => 'nullable|string',
+    ];
+}
 
-        return [
-            'name' => 'required|array',
-            'name.en' => 'required|string|max:255',
-            'name.ru' => 'nullable|string|max:255',
-            'name.ka' => 'nullable|string|max:255',
-
-            'designation' => 'required|array',
-            'designation.en' => 'required|string|max:255',
-            'designation.ru' => 'nullable|string|max:255',
-            'designation.ka' => 'nullable|string|max:255',
-
-            'bio' => 'nullable|array',
-            'bio.en' => 'nullable|string',
-            'bio.ru' => 'nullable|string',
-            'bio.ka' => 'nullable|string',
-
-            'title' => 'nullable|array',
-            'title.en' => 'nullable|string|max:255',
-            'title.ru' => 'nullable|string|max:255',
-            'title.ka' => 'nullable|string|max:255',
-
-            // При обновлении игнорируем уникальность для текущей записи
-            'contact' => 'required|string|max:255|unique:instructors,contact,' . $id,
-            'email' => 'required|email|unique:instructors,email,' . $id,
-        ];
-    }
 }

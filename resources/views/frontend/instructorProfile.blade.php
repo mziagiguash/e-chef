@@ -29,14 +29,14 @@
             <div class="col-lg-4">
                 <div class="instructor-courses-instructor">
                     <div class="instructor-image mx-auto text-center">
-                        <img src="{{ $instructor->image
-    ? asset('uploads/users/' . $instructor->image)
-    : asset('images/default.png') }}"
-    alt="{{ $instructor->getTranslation('name', app()->getLocale()) }}">
-                    </div>
+        <img src="{{ $instructor->image
+            ? asset('uploads/users/' . $instructor->image)
+            : asset('images/default.png') }}"
+             alt="{{ $instructor->translate()?->name ?? 'Instructor' }}">
+    </div>
                     <div class="instructor-info text-center">
-                        <h5 class="font-title--sm">{{$instructor->name}}</h5>
-                        <p class="text-secondary mb-3">{{$instructor->designation}}</p>
+                        <h5 class="font-title--sm">{{ $instructor->translate()?->name ?? 'No Instructor' }}</h5>
+        <p class="text-secondary mb-3">{{ $instructor->translate()?->designation ?? '' }}</p>
                         <ul class="list-inline social-links">
                             <li class="list-inline-item">
                                 <a href="#">
@@ -174,7 +174,7 @@
                     </div>
                     <div class="about-instructor">
                         <h6>About Me</h6>
-                        <p>{{$instructor->bio}}</p>
+                        <p>{{ $instructor->translate()?->bio ?? '' }}</p>
                     </div>
                     <div class="instructor-qualification">
                         <h6>Education</h6>
