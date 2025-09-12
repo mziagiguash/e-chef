@@ -4,28 +4,58 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Option extends Model
 {
-    use HasFactory;
-    protected $fillable = ['option_text', 'question_id'];
+    use HasFactory; // Убираем SoftDeletes
 
+    protected $table = 'options';
 
+    protected $fillable = [
+        'question_id',
+        'is_correct',
+        'order'
+    ];
 
-    public function question()
+    // Убираем deleted_at, так как его нет в таблице
+    // protected $dates = ['deleted_at'];
+
+    public function question(): BelongsTo
     {
         return $this->belongsTo(Question::class);
     }
 
-    // Translations
-    public function translations()
+    public function translations(): HasMany
     {
-        return $this->hasMany(OptionTranslation::class);
+        return $this->hasMany(OptionTranslation::class, 'option_id');
     }
 
-    public function translation($locale = null)
+    // Accessor для получения перевода
+    public function getTranslatedAttribute($locale = null)
     {
-        $locale = $locale ?: app()->getLocale();
-        return $this->hasOne(OptionTranslation::class)->where('locale', $locale);
+        $locale = $locale ?? app()->getLocale();
+        $defaultLocale = config('app.fallback_locale', 'en');
+
+        if (!$this->relationLoaded('translations')) {
+            $this->load('translations');
+        }
+
+        $translation = $this->translations->where('locale', $locale)->first();
+
+        if (!$translation && $locale !== $defaultLocale) {
+            $translation = $this->translations->where('locale', $defaultLocale)->first();
+        }
+
+        return $translation ?: new OptionTranslation();
     }
+
+
+    public function getTranslation(string $locale, string $field = 'option_text'): ?string
+    {
+        $translation = $this->translations->where('locale', $locale)->first();
+        return $translation ? $translation->{$field} : null;
+    }
+
 }

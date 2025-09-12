@@ -1,5 +1,7 @@
 @extends('backend.layouts.app')
-@section('title', 'Edit Option')
+@section('title', __('Edit Option'))
+
+
 
 @push('styles')
 <!-- Pick date -->
@@ -16,15 +18,36 @@
         <div class="row page-titles mx-0">
             <div class="col-sm-6 p-md-0">
                 <div class="welcome-text">
-                    <h4>Edit Option</h4>
+                    <h4>{{ __('Edit Option') }}</h4>
                 </div>
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('option.index')}}">Options</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0);">Edit Option</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('Home') }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('option.index') }}">{{ __('Options') }}</a></li>
+                    <li class="breadcrumb-item active">{{ __('Edit Option') }}</li>
                 </ol>
+            </div>
+        </div>
+
+<!-- Языковые табы Bootstrap -->
+        <div class="row mb-3">
+            <div class="col-lg-12">
+                <ul class="nav nav-tabs" id="optionLangTabs" role="tablist">
+                    @foreach($locales as $localeCode => $localeName)
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ $localeCode === $currentLocale ? 'active' : '' }}"
+                                id="tab-{{ $localeCode }}"
+                                data-bs-toggle="tab"
+                                data-bs-target="#content-{{ $localeCode }}"
+                                type="button" role="tab"
+                                aria-controls="content-{{ $localeCode }}"
+                                aria-selected="{{ $localeCode === $currentLocale ? 'true' : 'false' }}">
+                            {{ $localeName }}
+                        </button>
+                    </li>
+                    @endforeach
+                </ul>
             </div>
         </div>
 
@@ -32,54 +55,103 @@
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="card-title">Basic Info</h5>
+                        <h5 class="card-title">{{ __('Basic Information') }}</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{localeRoute('option.update',encryptor('encrypt', $option->id))}}" method="post"
-                            enctype="multipart/form-data">
+                        <form action="{{ route('option.update', $option->id) }}" method="post" enctype="multipart/form-data">
                             @csrf
-                            @method('PATCH')
-                            <input type="hidden" name="uptoken" value="{{encryptor('encrypt',$option->id)}}">
+                            @method('PUT')
+                            <input type="hidden" name="current_locale" value="{{ $currentLocale }}">
+
+                            <!-- Основные поля (не зависят от языка) -->
                             <div class="row">
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
-                                        <label class="form-label">Question</label>
-                                        <select class="form-control" name="questionId">
-                                            @forelse ($question as $q)
-                                            <option value="{{$q->id}}" {{old('questionId', $option->question_id) ==
-                                                $q->id?'selected':''}}>
-                                                {{$q->content}}</option>
+                                        <label class="form-label">{{ __('Question') }}</label>
+                                        <select class="form-control @error('question_id') is-invalid @enderror" name="question_id">
+                                            <option value="">{{ __('Select Question') }}</option>
+                                            @forelse ($questions as $question)
+                                            <option value="{{ $question->id }}" {{ old('question_id', $option->question_id) == $question->id ? 'selected' : '' }}>
+                                                {{ $question->text }}
+                                                @if($question->quiz)
+                                                    ({{ __('Quiz') }}: {{ $question->quiz->title }})
+                                                @endif
+                                            </option>
                                             @empty
-                                            <option value="">No Question Found</option>
+                                            <option value="">{{ __('No Questions Found') }}</option>
                                             @endforelse
                                         </select>
+                                        @error('question_id')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
                                     </div>
-                                    @if($errors->has('questionId'))
-                                    <span class="text-danger"> {{ $errors->first('questionId') }}</span>
-                                    @endif
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
-                                        <label class="form-label">Option</label>
-                                        <input type="text" class="form-control" name="optionText" value="{{old('optionText',$option->option_text)}}">
+                                        <label class="form-label">{{ __('Order') }}</label>
+                                        <input type="number" class="form-control @error('order') is-invalid @enderror"
+                                               name="order" value="{{ old('order', $option->order) }}" min="0">
+                                        @error('order')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
                                     </div>
-                                    @if($errors->has('optionText'))
-                                    <span class="text-danger"> {{ $errors->first('optionText') }}</span>
-                                    @endif
-                                </div>
-                               <div class="col-lg-6 col-md-6 col-sm-12">
-                                <div class="form-group">
-                                    <label class="form-label">Is Correct</label>
-                                    <select class="form-control" name="is_correct">
-                                        <option value="1" @if(old('is_correct',$option->is_correct)==1) selected @endif>Correct</option>
-                                        <option value="0" @if(old('is_correct',$option->is_correct)==0) selected @endif>Wrong</option>
-                                    </select>
                                 </div>
                             </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                    <button type="submit" class="btn btn-light">Cencel</button>
+
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ __('Is Correct') }}</label>
+                                        <select class="form-control @error('is_correct') is-invalid @enderror" name="is_correct">
+                                            <option value="1" {{ old('is_correct', $option->is_correct) == 1 ? 'selected' : '' }}>{{ __('Correct') }}</option>
+                                            <option value="0" {{ old('is_correct', $option->is_correct) == 0 ? 'selected' : '' }}>{{ __('Wrong') }}</option>
+                                        </select>
+                                        @error('is_correct')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
                                 </div>
+                            </div>
+
+                            <!-- Содержимое табов -->
+                            <div class="tab-content" id="optionTabContent">
+                                @foreach($locales as $localeCode => $localeName)
+                                <div class="tab-pane fade {{ $localeCode === $currentLocale ? 'show active' : '' }}"
+                                     id="content-{{ $localeCode }}" role="tabpanel"
+                                     aria-labelledby="tab-{{ $localeCode }}">
+
+                                    <h6 class="text-primary mt-4">{{ $localeName }} {{ __('Translation') }}</h6>
+
+                                    @php
+                                        $translation = $option->translations->firstWhere('locale', $localeCode);
+                                    @endphp
+
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12">
+                                            <div class="form-group">
+                                                <label class="form-label">{{ __('Option Text') }}</label>
+                                                <textarea class="form-control @error('translations.'.$localeCode.'.option_text') is-invalid @enderror"
+                                                          name="translations[{{ $localeCode }}][option_text]"
+                                                          rows="3"
+                                                          placeholder="{{ __('Enter option text') }}">{{ old('translations.'.$localeCode.'.option_text', $translation->option_text ?? '') }}</textarea>
+                                                @error('translations.'.$localeCode.'.option_text')
+                                                <span class="invalid-feedback">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" name="translations[{{ $localeCode }}][locale]" value="{{ $localeCode }}">
+                                    @if($translation)
+                                    <input type="hidden" name="translations[{{ $localeCode }}][id]" value="{{ $translation->id }}">
+                                    @endif
+                                </div>
+                                @endforeach
+                            </div>
+
+                            <div class="col-lg-12 col-md-12 col-sm-12 mt-3">
+                                <button type="submit" class="btn btn-primary">{{ __('Update') }}</button>
+                                <a href="{{ route('option.index') }}" class="btn btn-light">{{ __('Cancel') }}</a>
                             </div>
                         </form>
                     </div>
@@ -93,11 +165,67 @@
 @endsection
 
 @push('scripts')
-<!-- pickdate -->
-<script src="{{asset('vendor/pickadate/picker.js')}}"></script>
-<script src="{{asset('vendor/pickadate/picker.time.js')}}"></script>
-<script src="{{asset('vendor/pickadate/picker.date.js')}}"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Pickdate -->
-<script src="{{asset('js/plugins-init/pickadate-init.js')}}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обновляем hidden поле при переключении табов
+    const optionTabs = document.querySelectorAll('#optionLangTabs .nav-link');
+    optionTabs.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function (event) {
+            const target = event.target;
+            const locale = target.id.replace('tab-', '');
+            document.querySelector('input[name="current_locale"]').value = locale;
+        });
+    });
+
+    // Валидация формы
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const questionSelect = document.querySelector('select[name="question_id"]');
+
+        if (!questionSelect.value) {
+            questionSelect.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            questionSelect.classList.remove('is-invalid');
+        }
+
+        // Проверка, что хотя бы один перевод заполнен
+        const hasTranslation = Array.from(document.querySelectorAll('textarea[name^="translations"]'))
+            .some(textarea => textarea.value.trim() !== '');
+
+        if (!hasTranslation) {
+            alert('{{ __("Please fill at least one translation") }}');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+
+<style>
+.nav-tabs .nav-link {
+    border: 1px solid transparent;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    color: #495057;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+}
+.nav-tabs .nav-link.active {
+    color: #495057;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+    font-weight: 500;
+}
+.invalid-feedback {
+    display: block;
+}
+</style>
 @endpush

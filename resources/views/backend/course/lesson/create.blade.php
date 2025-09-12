@@ -40,16 +40,17 @@
                 @foreach($locales as $localeCode => $localeName)
                     <div class="tab-pane fade {{ $localeCode === $appLocale ? 'show active' : '' }}" id="locale-{{ $localeCode }}" role="tabpanel">
                         <div class="form-group">
-                            <label>Title ({{ $localeName }})</label>
-                            <input type="text" name="lessonTitle[{{ $localeCode }}]" class="form-control" value="{{ old('lessonTitle.'.$localeCode) }}" required>
+                            <label>Title ({{ $localeName }}) *</label>
+                            <input type="text" name="title_{{ $localeCode }}" class="form-control"
+                                   value="{{ old('title_'.$localeCode) }}" required>
                         </div>
                         <div class="form-group">
                             <label>Description ({{ $localeName }})</label>
-                            <textarea name="lessonDescription[{{ $localeCode }}]" class="form-control summernote">{{ old('lessonDescription.'.$localeCode) }}</textarea>
+                            <textarea name="description_{{ $localeCode }}" class="form-control summernote">{{ old('description_'.$localeCode) }}</textarea>
                         </div>
                         <div class="form-group">
                             <label>Notes ({{ $localeName }})</label>
-                            <textarea name="lessonNotes[{{ $localeCode }}]" class="form-control summernote">{{ old('lessonNotes.'.$localeCode) }}</textarea>
+                            <textarea name="notes_{{ $localeCode }}" class="form-control summernote">{{ old('notes_'.$localeCode) }}</textarea>
                         </div>
                     </div>
                 @endforeach
@@ -57,12 +58,12 @@
 
             {{-- Course Selector --}}
             <div class="form-group">
-                <label>Course</label>
-                <select name="courseId" class="form-control" required>
+                <label>Course *</label>
+                <select name="course_id" class="form-control" required>
                     <option value="">Select Course</option>
                     @foreach($courses as $course)
-                        <option value="{{ $course->id }}" {{ old('courseId') == $course->id ? 'selected' : '' }}>
-                            {{ $course->localized_title }}
+                        <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
+                            {{ $course->getTitleAttribute() }}
                         </option>
                     @endforeach
                 </select>

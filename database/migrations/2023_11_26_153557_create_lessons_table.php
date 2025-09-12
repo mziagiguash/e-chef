@@ -12,16 +12,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('lessons', function (Blueprint $table) {
-            $table->id();
-            $table->string('title', 255)->nullable(false);
-            $table->unsignedBigInteger('course_id')->index();
-            $table->text('description')->nullable();
-            $table->text('notes')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
+    $table->id();
+    $table->text('title')->nullable(); // изменено на text
+    $table->unsignedBigInteger('course_id');
+    $table->unsignedBigInteger('quiz_id')->nullable();
+    $table->text('description')->nullable(); // изменено на text
+    $table->text('notes')->nullable(); // изменено на text
+    $table->timestamps();
+    $table->softDeletes();
 
-            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
-        });
+    $table->index('course_id');
+    $table->index('quiz_id');
+
+    $table->foreign('course_id')
+          ->references('id')
+          ->on('courses')
+          ->onDelete('cascade');
+});
     }
 
     /**

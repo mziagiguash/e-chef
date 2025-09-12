@@ -23,16 +23,22 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SearchCourseController;
 use App\Http\Controllers\CheckoutController as checkout;
 use App\Http\Controllers\CouponController as coupon;
-use App\Http\Controllers\WatchCourseController as watchCourse;
+
+use App\Http\Controllers\Frontend\WatchCourseController as WatchCourseController;
+use App\Http\Controllers\Frontend\LessonController as LessonController;
 use App\Http\Controllers\LessonController as lesson;
 use App\Http\Controllers\EnrollmentController as enrollment;
+use App\Http\Controllers\EventSearchController;
 use App\Http\Controllers\EventController as event;
 use App\Models\Instructor;
+
 /* students */
 use App\Http\Controllers\Students\AuthController as sauth;
 use App\Http\Controllers\Students\DashboardController as studashboard;
 use App\Http\Controllers\Students\ProfileController as stu_profile;
 use App\Http\Controllers\Students\sslController as sslcz;
+
+use App\Http\Controllers\Frontend\QuizController;
 
 /*
 |--------------------------------------------------------------------------
@@ -74,6 +80,7 @@ Route::middleware(['checkrole'])->prefix('admin')->group(function () {
     Route::resource('user', user::class);
     Route::resource('role', role::class);
     Route::resource('student', student::class);
+
     // Edit
     Route::get('instructor/{id}/edit', [InstructorController::class, 'edit'])
         ->name('instructor.edit');
@@ -100,6 +107,8 @@ Route::middleware(['checkrole'])->prefix('admin')->group(function () {
     Route::resource('quiz', quiz::class);
     Route::resource('question', question::class);
     Route::resource('option', option::class);
+     Route::post('option/{option}/toggle-correctness', [option::class, 'toggleCorrectness'])
+        ->name('option.toggle.correctness');
     Route::resource('answer', answer::class);
     Route::resource('review', review::class);
     Route::resource('discussion', discussion::class);
@@ -143,13 +152,75 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
+| SSL Notify Routes (Non-localized)
+|--------------------------------------------------------------------------
+*/
+// Убедитесь, что этот маршрут находится ВНЕ локализованной группы
+Route::post('/ssl-payment-notify', [sslcz::class, 'notify'])->name('ssl.notify');
+
+/*
+|--------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 | Localized Routes
 |--------------------------------------------------------------------------
 */
+Route::get('{locale}/event-search', [EventSearchController::class, 'index'])
+    ->where('locale', 'en|ru|ka')
+    ->name('event.search');
+
 Route::prefix('{locale}')
     ->where(['locale' => 'en|ru|ka'])
     ->middleware('setlocale')
     ->group(function () {
+
+        // Главная страница курса
+        Route::get('/watch-course/{id}', [WatchCourseController::class, 'watchCourse'])
+            ->name('frontend.watchCourse');
+
+        // Маршруты для уроков и квизов
+        Route::prefix('courses/{course}/lessons/{lesson}')->group(function () {
+
+            // Просмотр урока
+            Route::get('/', [LessonController::class, 'show'])
+                ->name('lessons.show');
+
+            // Прогресс урока
+            Route::post('progress', [LessonController::class, 'updateProgress'])
+                ->name('lessons.progress.update');
+
+            // Завершение урока
+            Route::post('complete', [LessonController::class, 'completeLesson'])
+                ->name('lessons.complete');
+
+            // Маршруты для квизов
+            Route::prefix('quizzes/{quiz}')->group(function () {
+
+                // Просмотр квиза
+                Route::get('/', [QuizController::class, 'show'])
+                    ->name('frontend.quizzes.show');
+
+                // Начало квиза
+                Route::post('/start', [QuizController::class, 'start'])
+                    ->name('frontend.quizzes.start');
+
+                // Прохождение квиза
+                Route::get('/attempt/{attempt}', [QuizController::class, 'attempt'])
+                    ->name('frontend.quizzes.attempt');
+
+                // Отправка ответов
+                Route::post('/attempt/{attempt}/submit', [QuizController::class, 'submitAttempt'])
+                    ->name('frontend.quizzes.submit');
+
+                // Результаты
+                Route::get('/results/{attempt?}', [QuizController::class, 'results'])
+                    ->name('frontend.quizzes.results');
+            });
+        });
+
+        // Этот маршрут должен быть вне группы, так как он не соответствует префиксу
+        Route::get('course/{id}/back', function ($locale, $id) {
+            return redirect()->to("/$locale/watchCourse/$id");
+        })->name('course.back');
 
         // 🔐 Student Auth
         Route::get('/student/register', [sauth::class, 'signUpForm'])->name('studentRegister');
@@ -177,8 +248,7 @@ Route::prefix('{locale}')
         Route::get('/home', [HomeController::class, 'index']);
         Route::get('/searchCourse', [SearchCourseController::class, 'index'])->name('searchCourse');
         Route::get('/courseDetails/{id}', [course::class, 'frontShow'])->name('courseDetails');
-        Route::get('/watchCourse/{id}', [watchCourse::class, 'watchCourse'])->name('watchCourse');
-        Route::get('/instructorProfile/{id}', [instructor::class, 'frontShow'])->name('instructorProfile');
+        Route::get('/instructorProfile/{id}', [InstructorController::class, 'frontShow'])->name('instructorProfile');
         Route::get('/checkout', [checkout::class, 'index'])->name('checkout');
         Route::post('/checkout', [checkout::class, 'store'])->name('checkout.store');
 
@@ -193,12 +263,28 @@ Route::prefix('{locale}')
         // 🧾 Static pages
         Route::get('/about', fn() => view('frontend.about'))->name('about');
         Route::get('/contact', fn() => view('frontend.contact'))->name('contact');
-    });
+    }); // ЗАКРЫТИЕ ГРУППЫ ЛОКАЛИЗАЦИИ
 
 /*
 |--------------------------------------------------------------------------
-| SSL Notify Routes (Non-localized)
+| Для временного отключения аутентификации - добавьте этот middleware
 |--------------------------------------------------------------------------
 */
-Route::post('/payment/ssl/notify', [sslcz::class, 'notify'])->name('payment.ssl.notify');
-Route::post('/payment/ssl/cancel', [sslcz::class, 'cancel'])->name('payment.ssl.cancel');
+// Временное решение: закомментируйте middleware проверки ролей
+// или создайте временный middleware для отладки
+
+Route::get('/check-courses', function () {
+    $courses = \App\Models\Course::withCount('lessons')->get();
+
+    return response()->json([
+        'total_courses' => $courses->count(),
+        'courses' => $courses->map(function($course) {
+            return [
+                'id' => $course->id,
+                'title' => $course->title,
+                'lessons_count' => $course->lessons_count,
+                'has_quiz' => $course->lessons->contains('quiz_id', '!=', null)
+            ];
+        })
+    ]);
+});

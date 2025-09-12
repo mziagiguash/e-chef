@@ -2,37 +2,105 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Question extends Model
 {
-    use HasFactory;
-    protected $fillable = ['question_text', 'quiz_id'];
+    use SoftDeletes, HasFactory;
 
+    const TYPE_SINGLE = 'single';
+    const TYPE_MULTIPLE = 'multiple';
+    const TYPE_TEXT = 'text';
+    const TYPE_RATING = 'rating';
 
-    public function quiz(){
+    protected $fillable = [
+        'quiz_id',
+        'type',
+        'order',
+        'points',
+        'is_required',
+        'max_choices',
+        'min_rating',
+        'max_rating'
+    ];
+
+    protected $dates = ['deleted_at'];
+
+    public function quiz(): BelongsTo
+    {
         return $this->belongsTo(Quiz::class);
     }
 
-    public function option(){
+    public function options(): HasMany
+    {
         return $this->hasMany(Option::class);
     }
 
-    public function answer()
+    public function answers(): HasMany
     {
-        return $this->hasMany(Answer::class);
+        return $this->hasMany(QuestionAnswer::class);
     }
 
-    // Translations
-    public function translations()
+    public function translations(): HasMany
     {
         return $this->hasMany(QuestionTranslation::class);
     }
 
-    public function translation($locale = null)
+    public function correctOptions(): HasMany
     {
-        $locale = $locale ?: app()->getLocale();
-        return $this->hasOne(QuestionTranslation::class)->where('locale', $locale);
+        return $this->hasMany(Option::class)->where('is_correct', true);
+    }
+
+    // Accessor для получения перевода контента
+    public function getContentAttribute()
+    {
+        $locale = app()->getLocale();
+
+        if (!$this->relationLoaded('translations')) {
+            $this->load('translations');
+        }
+
+        $translation = $this->translations->where('locale', $locale)->first();
+        return $translation->content ??
+               $this->translations->first()->content ??
+               '';
+    }
+
+    // Accessor для удобства (синоним для content)
+    public function getTextAttribute()
+    {
+        return $this->content;
+    }
+
+    public function isMultipleChoice(): bool
+    {
+        return in_array($this->type, [self::TYPE_SINGLE, self::TYPE_MULTIPLE]);
+    }
+
+    public function isTextType(): bool
+    {
+        return $this->type === self::TYPE_TEXT;
+    }
+
+    public function isRatingType(): bool
+    {
+        return $this->type === self::TYPE_RATING;
+    }
+
+    // Получение перевода для конкретного поля
+    public function getTranslation($field, $locale = null)
+    {
+        $locale = $locale ?? app()->getLocale();
+
+        if (!$this->relationLoaded('translations')) {
+            $this->load('translations');
+        }
+
+        $translation = $this->translations->where('locale', $locale)->first();
+        return $translation ? $translation->$field : $this->$field;
     }
 }

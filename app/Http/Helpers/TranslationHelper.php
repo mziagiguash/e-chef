@@ -15,4 +15,14 @@ class TranslationHelper
         }
         return $arr;
     }
+    public static function getLocales()
+{
+    $availableLocales = config('app.available_locales');
+    $locales = [];
+    foreach ($availableLocales as $code => $data) {
+        $locales[$code] = $data[1]; // Берем только название языка
+    }
+    return $locales;
+}
+
 }

@@ -62,17 +62,15 @@
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-                               <tbody>
-@forelse($instructor as $d)
+                                <tbody>
+@forelse($instructors as $d)
     @php
         $locale = app()->getLocale();
-        $translation = $d->translate($locale); // получаем текущий перевод
 
-        // fallback если нет перевода
-        $name = $translation?->name ?? '';
-        $designation = $translation?->designation ?? '';
+        // Получаем переводы из отношения translations
+        $translations = $d->translations->keyBy('locale');
 
-        // картинка
+        // Картинка: ищем по ID с разными расширениями или дефолт
         $imagePath = public_path('uploads/users');
         $extensions = ['jpg','jpeg','png','gif','webp'];
         $foundImage = null;
@@ -95,9 +93,8 @@
         <td><strong>{{ $d->id }}</strong></td>
         <td>
             @foreach($locales as $code => $localeName)
-                @php $tr = $d->translate($code); @endphp
                 <span class="lang-{{ $code }}" style="{{ $code == $locale ? '' : 'display:none' }}">
-                    {{ $tr?->name ?? '' }}
+                    {{ $translations[$code]->name ?? 'No translation' }}
                 </span>
             @endforeach
         </td>
@@ -105,22 +102,24 @@
         <td>{{ $d->contact }}</td>
         <td>
             @foreach($locales as $code => $localeName)
-                @php $tr = $d->translate($code); @endphp
                 <span class="lang-{{ $code }}" style="{{ $code == $locale ? '' : 'display:none' }}">
-                    {{ $tr?->designation ?? '' }}
+                    {{ $translations[$code]->designation ?? '' }}
                 </span>
             @endforeach
         </td>
         <td>
-            <span class="badge {{ $d->status == 1 ? 'badge-success' : 'badge-danger' }}">
-                {{ $d->status == 1 ? 'Active' : 'Inactive' }}
-            </span>
-        </td>
+    <span class="badge
+        {{ $d->status == 2 ? 'badge-success' :
+           ($d->status == 1 ? 'badge-danger' : 'badge-warning') }}">
+        {{ $d->status == 2 ? 'Active' :
+           ($d->status == 1 ? 'Inactive' : 'Pending') }}
+    </span>
+</td>
         <td>
             <img class="rounded-circle" width="35" src="{{ $foundImage }}" alt="Instructor">
         </td>
         <td>
-            <a href="{{ route('instructor.edit', $d->id) }}"
+            <a href="{{ route('instructor.edit', encryptor('encrypt', $d->id)) }}"
                class="btn btn-sm btn-primary" title="Edit">
                 <i class="la la-pencil"></i>
             </a>
@@ -130,7 +129,7 @@
                 <i class="la la-trash-o"></i>
             </a>
             <form id="form{{ $d->id }}"
-                  action="{{ route('instructor.destroy', $d->id) }}"
+                  action="{{ route('instructor.destroy', encryptor('encrypt', $d->id)) }}"
                   method="POST" style="display:none;">
                 @csrf
                 @method('DELETE')
@@ -140,9 +139,7 @@
 @empty
     <tr><td colspan="8" class="text-center">No Instructor Found</td></tr>
 @endforelse
-
 </tbody>
-
                             </table>
                         </div>
                     </div>
@@ -155,23 +152,26 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('vendor/datatables/js/jquery.dataTables.min.js') }}"></script>
-<script src="{{ asset('js/plugins-init/datatables.init.js') }}"></script>
 <script>
-document.addEventListener('DOMContentLoaded',function(){
-    if($('#instructorTable').length) $('#instructorTable').DataTable();
+$(document).ready(function() {
+    // Переключение между языками
+    $('.lang-tab').click(function(e) {
+        e.preventDefault();
+        const locale = $(this).data('locale');
 
-    const initialLocale = localStorage.getItem('instructors_lang') || '{{ $appLocale }}';
-    function setActiveLocale(locale){
-        document.querySelectorAll('.lang-tab').forEach(tab=>{ tab.classList.toggle('active',tab.dataset.locale===locale) });
-        document.querySelectorAll('.lang-en,.lang-ru,.lang-ka').forEach(el=>{ el.style.display = el.classList.contains('lang-'+locale)?'':'none'; });
-    }
-    document.querySelectorAll('.lang-tab').forEach(tab=>tab.addEventListener('click',function(e){
-        e.preventDefault(); const locale=this.dataset.locale;
-        localStorage.setItem('instructors_lang',locale);
-        setActiveLocale(locale);
-    }));
-    setActiveLocale(initialLocale);
+        // Активируем таб
+        $('.lang-tab').removeClass('active');
+        $(this).addClass('active');
+
+        // Показываем/скрываем переводы
+        $('[class*="lang-"]').hide();
+        $('.lang-' + locale).show();
+    });
 });
 </script>
+@endpush
+
+@push('scripts')
+<script src="{{ asset('vendor/datatables/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('js/plugins-init/datatables.init.js') }}"></script>
 @endpush

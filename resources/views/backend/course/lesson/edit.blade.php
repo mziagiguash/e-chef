@@ -1,5 +1,5 @@
 @extends('backend.layouts.app')
-@section('title', 'Edit Lesson')
+@section('title', 'Add Lesson')
 
 @push('styles')
 <link href="{{ asset('vendor/summernote/summernote-bs4.css') }}" rel="stylesheet">
@@ -10,7 +10,7 @@
     <div class="container-fluid">
         <div class="row mb-3">
             <div class="col-lg-12">
-                <h4>Edit Lesson</h4>
+                <h4>Add New Lesson</h4>
                 <a href="{{ localeRoute('lesson.index') }}" class="btn btn-secondary mb-3">Back to List</a>
             </div>
         </div>
@@ -20,9 +20,8 @@
             $appLocale = app()->getLocale();
         @endphp
 
-        <form action="{{ localeRoute('lesson.update', encryptor('encrypt', $lesson->id)) }}" method="POST">
+        <form action="{{ localeRoute('lesson.store') }}" method="POST">
             @csrf
-            @method('PUT')
 
             {{-- Language Tabs --}}
             <ul class="nav nav-tabs mb-3" id="lessonLangTabs" role="tablist">
@@ -39,23 +38,19 @@
             {{-- Tab Contents --}}
             <div class="tab-content">
                 @foreach($locales as $localeCode => $localeName)
-                    @php
-                        $title = old('lessonTitle.'.$localeCode, $lesson->title[$localeCode] ?? '');
-                        $description = old('lessonDescription.'.$localeCode, $lesson->description[$localeCode] ?? '');
-                        $notes = old('lessonNotes.'.$localeCode, $lesson->notes[$localeCode] ?? '');
-                    @endphp
                     <div class="tab-pane fade {{ $localeCode === $appLocale ? 'show active' : '' }}" id="locale-{{ $localeCode }}" role="tabpanel">
                         <div class="form-group">
-                            <label>Title ({{ $localeName }})</label>
-                            <input type="text" name="lessonTitle[{{ $localeCode }}]" class="form-control" value="{{ $title }}" required>
+                            <label>Title ({{ $localeName }}) *</label>
+                            <input type="text" name="title_{{ $localeCode }}" class="form-control"
+                                   value="{{ old('title_'.$localeCode) }}" required>
                         </div>
                         <div class="form-group">
                             <label>Description ({{ $localeName }})</label>
-                            <textarea name="lessonDescription[{{ $localeCode }}]" class="form-control summernote">{{ $description }}</textarea>
+                            <textarea name="description_{{ $localeCode }}" class="form-control summernote">{{ old('description_'.$localeCode) }}</textarea>
                         </div>
                         <div class="form-group">
                             <label>Notes ({{ $localeName }})</label>
-                            <textarea name="lessonNotes[{{ $localeCode }}]" class="form-control summernote">{{ $notes }}</textarea>
+                            <textarea name="notes_{{ $localeCode }}" class="form-control summernote">{{ old('notes_'.$localeCode) }}</textarea>
                         </div>
                     </div>
                 @endforeach
@@ -63,18 +58,18 @@
 
             {{-- Course Selector --}}
             <div class="form-group">
-                <label>Course</label>
-                <select name="courseId" class="form-control" required>
+                <label>Course *</label>
+                <select name="course_id" class="form-control" required>
                     <option value="">Select Course</option>
                     @foreach($courses as $course)
-                        <option value="{{ $course->id }}" {{ $lesson->course_id == $course->id ? 'selected' : '' }}>
-                            {{ $course->localized_title }}
+                        <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
+                            {{ $course->getTitleAttribute() }}
                         </option>
                     @endforeach
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-primary">Update Lesson</button>
+            <button type="submit" class="btn btn-primary">Save Lesson</button>
         </form>
     </div>
 </div>
@@ -86,6 +81,7 @@
 $(document).ready(function(){
     $('.summernote').summernote({height: 150});
 
+    // Переключение табов с повторной инициализацией Summernote
     $('#lessonLangTabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         let target = $(e.target).attr('href');
         $(target+' .summernote').summernote({height:150});

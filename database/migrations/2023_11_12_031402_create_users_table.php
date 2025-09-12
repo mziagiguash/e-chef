@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('contact')->unique();
+            $table->string('contact')->nullable()->unique(); // Добавлено ->nullable()
             $table->unsignedBigInteger('role_id')->index();
             $table->string('password');
             $table->string('language')->default('en');

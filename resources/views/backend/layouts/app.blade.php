@@ -248,16 +248,18 @@
                             <span class="nav-text">Coupons</span>
                         </a>
                     </li>
-                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false">
-                            <i class="las la-tasks"></i>
-                            <span class="nav-text">Quizzes</span>
-                        </a>
-                        <ul aria-expanded="false">
-                            <li><a href="{{localeRoute('quiz.index')}}"><i class="las la-icons"></i>All Quizzes</a></li>
-                            <li><a href="{{localeRoute('question.index')}}"><i
-                                        class="las la-question-circle"></i>Questions</a></li>
-                        </ul>
-                    </li>
+                    <li>
+    <a class="has-arrow" href="javascript:void()" aria-expanded="false">
+        <i class="las la-tasks"></i>
+        <span class="nav-text">Quizzes</span>
+    </a>
+    <ul aria-expanded="false">
+        <li><a href="{{localeRoute('quiz.index')}}"><i class="las la-poll"></i>All Quizzes</a></li>
+        <li><a href="{{localeRoute('question.index')}}"><i class="las la-question"></i>Questions</a></li>
+        <li><a href="{{localeRoute('option.index')}}"><i class="las la-list-ul"></i>Options</a></li>
+        <li><a href="{{localeRoute('answer.index')}}"><i class="las la-check-double"></i>Answers</a></li>
+    </ul>
+</li>
                     <li><a class="has-arrow" href="javascript:void()" aria-expanded="false">
                             <i class="las la-star-half-alt"></i>
                             <span class="nav-text">Reviews</span>

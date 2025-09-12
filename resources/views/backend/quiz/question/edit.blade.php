@@ -1,5 +1,5 @@
 @extends('backend.layouts.app')
-@section('title', 'Edit Question')
+@section('title', __('Edit Question'))
 
 @push('styles')
 <!-- Pick date -->
@@ -8,23 +8,42 @@
 @endpush
 
 @section('content')
-
 <div class="content-body">
-    <!-- row -->
     <div class="container-fluid">
 
         <div class="row page-titles mx-0">
             <div class="col-sm-6 p-md-0">
                 <div class="welcome-text">
-                    <h4>Edit Question</h4>
+                    <h4>{{ __('Edit Question') }}</h4>
                 </div>
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('question.index')}}">Questions</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0);">Edit Question</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('Home') }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('question.index') }}">{{ __('Questions') }}</a></li>
+                    <li class="breadcrumb-item active">{{ __('Edit Question') }}</li>
                 </ol>
+            </div>
+        </div>
+
+        <!-- Языковые табы Bootstrap -->
+        <div class="row mb-3">
+            <div class="col-lg-12">
+                <ul class="nav nav-tabs" id="questionLangTabs" role="tablist">
+                    @foreach($locales as $localeCode => $localeName)
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ $localeCode === $currentLocale ? 'active' : '' }}"
+                                id="tab-{{ $localeCode }}"
+                                data-bs-toggle="tab"
+                                data-bs-target="#content-{{ $localeCode }}"
+                                type="button" role="tab"
+                                aria-controls="content-{{ $localeCode }}"
+                                aria-selected="{{ $localeCode === $currentLocale ? 'true' : 'false' }}">
+                            {{ $localeName }}
+                        </button>
+                    </li>
+                    @endforeach
+                </ul>
             </div>
         </div>
 
@@ -32,130 +51,265 @@
             <div class="col-xl-12 col-xxl-12 col-sm-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="card-title">Basic Info</h5>
+                        <h5 class="card-title">{{ __('Basic Information') }}</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{localeRoute('question.update',encryptor('encrypt', $question->id))}}" method="post"
-                            enctype="multipart/form-data">
+                        <form action="{{ route('question.update', $question->id) }}" method="post" enctype="multipart/form-data">
                             @csrf
-                            @method('PATCH')
-                            <input type="hidden" name="uptoken" value="{{encryptor('encrypt',$question->id)}}">
+                            @method('PUT')
+                            <input type="hidden" name="current_locale" value="{{ $currentLocale }}">
+
+                            <!-- Основные поля (не зависят от языка) -->
                             <div class="row">
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
-                                        <label class="form-label">Quiz</label>
-                                        <select class="form-control" name="quizId">
-                                            @forelse ($quiz as $q)
-                                            <option value="{{$q->id}}" {{old('quizId', $question->quiz_id) ==
-                                                $q->id?'selected':''}}>
-                                                {{$q->title}}</option>
+                                        <label class="form-label">{{ __('Quiz') }} <span class="text-danger">*</span></label>
+                                        <select class="form-control @error('quiz_id') is-invalid @enderror" name="quiz_id" required>
+                                            <option value="">{{ __('Select Quiz') }}</option>
+                                            @forelse ($quizzes as $quiz)
+                                            <option value="{{ $quiz->id }}" {{ old('quiz_id', $question->quiz_id) == $quiz->id ? 'selected' : '' }}>
+                                                {{ $quiz->title }}
+                                            </option>
                                             @empty
-                                            <option value="">No Quiz Found</option>
+                                            <option value="">{{ __('No Quizzes Found') }}</option>
                                             @endforelse
                                         </select>
+                                        @error('quiz_id')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
                                     </div>
-                                    @if($errors->has('quizId'))
-                                    <span class="text-danger"> {{ $errors->first('quizId') }}</span>
-                                    @endif
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
-                                        <label class="form-label">Qestion Type</label>
-                                        <select class="form-control" name="questionType">
-                                            <option value="multiple_choice" @if(old('questionType', $question->type)=='multiple_choice' ) selected
-                                                @endif>Multiple Choice
+                                        <label class="form-label">{{ __('Question Type') }} <span class="text-danger">*</span></label>
+                                        <select class="form-control @error('type') is-invalid @enderror" name="type" id="questionType" required>
+                                            <option value="single" {{ old('type', $question->type) == 'single' ? 'selected' : '' }}>
+                                                {{ __('Single Choice') }}
                                             </option>
-                                            <option value="true_false" @if(old('questionType', $question->type)=='true_false' ) selected
-                                                @endif>True False
+                                            <option value="multiple" {{ old('type', $question->type) == 'multiple' ? 'selected' : '' }}>
+                                                {{ __('Multiple Choice') }}
                                             </option>
-                                            <option value="short_answer" @if(old('questionType', $question->type)
-                                                =='short_answer' )
-                                                selected @endif>Short Answer</option>
+                                            <option value="text" {{ old('type', $question->type) == 'text' ? 'selected' : '' }}>
+                                                {{ __('Text Answer') }}
+                                            </option>
+                                            <option value="rating" {{ old('type', $question->type) == 'rating' ? 'selected' : '' }}>
+                                                {{ __('Rating') }}
+                                            </option>
                                         </select>
+                                        @error('type')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
                                     </div>
-                                    @if($errors->has('questionType'))
-                                    <span class="text-danger"> {{ $errors->first('questionType') }}</span>
-                                    @endif
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-3 col-md-6 col-sm-12">
                                     <div class="form-group">
-                                        <label class="form-label">Question Content</label>
-                                        <textarea class="form-control"
-                                            name="questionContent">{{old('questionContent',$question->content)}}</textarea>
+                                        <label class="form-label">{{ __('Points') }}</label>
+                                        <input type="number" class="form-control @error('points') is-invalid @enderror"
+                                               name="points" value="{{ old('points', $question->points) }}" min="1">
+                                        @error('points')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
                                     </div>
-                                    @if($errors->has('questionContent'))
-                                    <span class="text-danger"> {{ $errors->first('questionContent') }}</span>
-                                    @endif
                                 </div>
-                                <div class="col-lg-3 col-md-3 col-sm-6">
+                                <div class="col-lg-3 col-md-6 col-sm-12">
                                     <div class="form-group">
-                                        <label class="form-label">Option A</label>
-                                        <input type="text" class="form-control" name="optionA" value="{{old('optionA',$question->option_a)}}">
+                                        <label class="form-label">{{ __('Order') }}</label>
+                                        <input type="number" class="form-control @error('order') is-invalid @enderror"
+                                               name="order" value="{{ old('order', $question->order) }}" min="0">
+                                        @error('order')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
                                     </div>
-                                    @if($errors->has('optionA'))
-                                    <span class="text-danger"> {{ $errors->first('optionA') }}</span>
-                                    @endif
                                 </div>
-                                <div class="col-lg-3 col-md-3 col-sm-6">
+                                <div class="col-lg-3 col-md-6 col-sm-12">
                                     <div class="form-group">
-                                        <label class="form-label">Option B</label>
-                                        <input type="text" class="form-control" name="optionB" value="{{old('optionB',$question->option_b)}}">
-                                    </div>
-                                    @if($errors->has('optionB'))
-                                    <span class="text-danger"> {{ $errors->first('optionB') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-3 col-md-3 col-sm-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Option C</label>
-                                        <input type="text" class="form-control" name="optionC" value="{{old('optionC',$question->option_c)}}">
-                                    </div>
-                                    @if($errors->has('optionC'))
-                                    <span class="text-danger"> {{ $errors->first('optionC') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-3 col-md-3 col-sm-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Option D</label>
-                                        <input type="text" class="form-control" name="optionD" value="{{old('optionD',$question->option_d)}}">
-                                    </div>
-                                    @if($errors->has('optionD'))
-                                    <span class="text-danger"> {{ $errors->first('optionD') }}</span>
-                                    @endif
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Correct Answer</label>
-                                        <select class="form-control" name="correctAnswer">
-                                            <option value="a" @if(old('correctAnswer',$question->correct_answer)=='a' ) selected @endif>Option A</option>
-                                            <option value="b" @if(old('correctAnswer',$question->correct_answer)=='b' ) selected @endif>Option B</option>
-                                            <option value="c" @if(old('correctAnswer',$question->correct_answer)=='c' ) selected @endif>Option C</option>
-                                            <option value="d" @if(old('correctAnswer',$question->correct_answer)=='d' ) selected @endif>Option D</option>
+                                        <label class="form-label">{{ __('Required') }}</label>
+                                        <select class="form-control @error('is_required') is-invalid @enderror" name="is_required">
+                                            <option value="1" {{ old('is_required', $question->is_required) == 1 ? 'selected' : '' }}>{{ __('Yes') }}</option>
+                                            <option value="0" {{ old('is_required', $question->is_required) == 0 ? 'selected' : '' }}>{{ __('No') }}</option>
                                         </select>
+                                        @error('is_required')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
                                     </div>
                                 </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                    <button type="submit" class="btn btn-light">Cencel</button>
+                                <div class="col-lg-3 col-md-6 col-sm-12" id="maxChoicesContainer" style="display: none;">
+                                    <div class="form-group">
+                                        <label class="form-label">{{ __('Max Choices') }}</label>
+                                        <input type="number" class="form-control @error('max_choices') is-invalid @enderror"
+                                               name="max_choices" value="{{ old('max_choices', $question->max_choices) }}" min="1">
+                                        @error('max_choices')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
                                 </div>
+                            </div>
+
+                            <!-- Содержимое табов (поля, зависящие от языка) -->
+                            <div class="tab-content" id="questionTabContent">
+                                @foreach($locales as $localeCode => $localeName)
+                                <div class="tab-pane fade {{ $localeCode === $currentLocale ? 'show active' : '' }}"
+                                     id="content-{{ $localeCode }}" role="tabpanel"
+                                     aria-labelledby="tab-{{ $localeCode }}">
+
+                                    <h6 class="text-primary mt-4">{{ $localeName }} {{ __('Translation') }}</h6>
+
+                                    @php
+                                        $translation = $question->translations->firstWhere('locale', $localeCode);
+                                    @endphp
+
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12">
+                                            <div class="form-group">
+                                                <label class="form-label">{{ __('Question Content') }} <span class="text-danger">*</span></label>
+                                                <textarea class="form-control @error('translations.'.$localeCode.'.content') is-invalid @enderror"
+                                                          name="translations[{{ $localeCode }}][content]"
+                                                          rows="3"
+                                                          placeholder="{{ __('Enter question content') }}"
+                                                          {{ $localeCode === 'en' ? 'required' : '' }}>{{ old('translations.'.$localeCode.'.content', $translation->content ?? '') }}</textarea>
+                                                @error('translations.'.$localeCode.'.content')
+                                                <span class="invalid-feedback">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" name="translations[{{ $localeCode }}][locale]" value="{{ $localeCode }}">
+                                    @if($translation)
+                                    <input type="hidden" name="translations[{{ $localeCode }}][id]" value="{{ $translation->id }}">
+                                    @endif
+                                </div>
+                                @endforeach
+                            </div>
+
+                            <!-- Динамические опции (только для single и multiple choice) -->
+                            <div class="row mt-4" id="optionsContainer" style="display: none;">
+                                <div class="col-12">
+                                    <h5 class="mb-3">{{ __('Options') }}</h5>
+                                    <p class="text-muted">{{ __('Edit options in the options management section') }}</p>
+                                    <a href="{{ route('option.index', ['question_id' => $question->id, 'lang' => $currentLocale]) }}"
+                                       class="btn btn-info btn-sm">
+                                        <i class="la la-list"></i> {{ __('Manage Options') }}
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12 col-md-12 col-sm-12 mt-3">
+                                <button type="submit" class="btn btn-primary">{{ __('Update') }}</button>
+                                <a href="{{ route('question.index', ['lang' => $currentLocale]) }}" class="btn btn-light">{{ __('Cancel') }}</a>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
-<!-- pickdate -->
-<script src="{{asset('vendor/pickadate/picker.js')}}"></script>
-<script src="{{asset('vendor/pickadate/picker.time.js')}}"></script>
-<script src="{{asset('vendor/pickadate/picker.date.js')}}"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Pickdate -->
-<script src="{{asset('js/plugins-init/pickadate-init.js')}}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обновляем hidden поле при переключении табов
+    const questionTabs = document.querySelectorAll('#questionLangTabs .nav-link');
+    questionTabs.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function (event) {
+            const target = event.target;
+            const locale = target.id.replace('tab-', '');
+            document.querySelector('input[name="current_locale"]').value = locale;
+        });
+    });
+
+    // Показ/скрытие полей в зависимости от типа вопроса
+    const questionType = document.getElementById('questionType');
+    const maxChoicesContainer = document.getElementById('maxChoicesContainer');
+    const optionsContainer = document.getElementById('optionsContainer');
+
+    function toggleFields() {
+        const type = questionType.value;
+
+        if (type === 'multiple') {
+            maxChoicesContainer.style.display = 'block';
+            optionsContainer.style.display = 'block';
+        } else if (type === 'single') {
+            maxChoicesContainer.style.display = 'none';
+            optionsContainer.style.display = 'block';
+        } else {
+            maxChoicesContainer.style.display = 'none';
+            optionsContainer.style.display = 'none';
+        }
+    }
+
+    questionType.addEventListener('change', toggleFields);
+    toggleFields(); // Инициализация при загрузке
+
+    // Валидация формы
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const quizSelect = document.querySelector('select[name="quiz_id"]');
+        const questionTypeSelect = document.querySelector('select[name="type"]');
+
+        if (!quizSelect.value) {
+            quizSelect.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            quizSelect.classList.remove('is-invalid');
+        }
+
+        if (!questionTypeSelect.value) {
+            questionTypeSelect.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            questionTypeSelect.classList.remove('is-invalid');
+        }
+
+        // Проверка, что английский перевод заполнен (обязательное поле)
+        const enTranslation = document.querySelector('textarea[name="translations[en][content]"]');
+        if (!enTranslation.value.trim()) {
+            enTranslation.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            enTranslation.classList.remove('is-invalid');
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('{{ __("Please fill required fields") }}');
+        }
+    });
+});
+</script>
+
+<style>
+.nav-tabs .nav-link {
+    border: 1px solid transparent;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    color: #495057;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+}
+.nav-tabs .nav-link.active {
+    color: #495057;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+    font-weight: 500;
+}
+.invalid-feedback {
+    display: block;
+}
+.text-danger {
+    color: #dc3545 !important;
+}
+.text-muted {
+    color: #6c757d !important;
+}
+</style>
 @endpush

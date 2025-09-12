@@ -103,25 +103,41 @@
             @endphp
 
             <!-- Language Switcher -->
-            <div class="nav-item position-relative language-switcher" style="cursor: pointer;">
-                <div class="d-flex align-items-center" style="font-size: 24px;">
-                    {{ $locales[$currentLocale] ?? '🌐' }}
-                </div>
+<!-- Language Switcher -->
+<div class="nav-item position-relative language-switcher" style="cursor: pointer;">
+    <div class="d-flex align-items-center" style="font-size: 24px;">
+        @php
+            $localeFlags = [
+                'en' => '🇺🇸',
+                'ru' => '🇷🇺',
+                'ka' => '🇬🇪'
+            ];
+            $currentFlag = $localeFlags[$currentLocale] ?? '🌐';
+        @endphp
+        {{ $currentFlag }}
+    </div>
 
-                <div class="language-menu p-0 border rounded shadow position-absolute bg-white"
-                     style="top: 100%; left: 0; min-width: 50px; display: none; flex-direction: column; z-index: 1050;">
-                    @foreach ($locales as $locale => $flag)
-                        @if ($locale !== $currentLocale)
-                            <a href="{{ url($locale . '/' . $pathWithoutLocale) }}"
-                               class="px-3 py-2 text-center text-decoration-none"
-                               style="font-size: 24px; color: inherit;">
-                                {{ $flag }}
-                            </a>
-                        @endif
-                    @endforeach
-                </div>
-            </div>
-
+    <div class="language-menu p-0 border rounded shadow position-absolute bg-white"
+         style="top: 100%; left: 0; min-width: 50px; display: none; flex-direction: column; z-index: 1050;">
+        @foreach ($locales as $localeCode => $localeName)
+            @if ($localeCode !== $currentLocale)
+                @php
+                    $flag = $localeFlags[$localeCode] ?? '🌐';
+                    // Формируем URL с правильным языковым префиксом
+                    $url = url("/{$localeCode}/{$pathWithoutLocale}");
+                    if(request()->query()) {
+                        $url .= '?' . http_build_query(request()->query());
+                    }
+                @endphp
+                <a href="{{ $url }}"
+                   class="px-3 py-2 text-center text-decoration-none"
+                   style="font-size: 24px; color: inherit;">
+                    {{ $flag }}
+                </a>
+            @endif
+        @endforeach
+    </div>
+</div>
             <!-- Logo -->
             <a class="navbar-brand" href="{{ localeRoute('home') }}">
                 <img src="{{ asset('frontend/dist/images/logo/logo.png') }}" alt="Logo" class="img-fluid" />
@@ -471,7 +487,10 @@
                 <div class="footer__list">
                     <h6>{{ __('footer.quick_links') }}</h6>
                     <ul>
-                        <li><a href="event-search.html">{{ __('footer.events') }}</a></li>
+                        <li><a href="{{ route('event.search', ['locale' => app()->getLocale()]) }}" class="nav-link">
+    {{ __('Event Search') }}
+</a></li>
+
                         <li><a href="become-instructor.html">{{ __('footer.become_instructor') }}</a></li>
                         <li><a href="#">{{ __('footer.partnerships') }}</a></li>
                         <li><a href="#">{{ __('footer.get_app') }}</a></li>

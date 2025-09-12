@@ -83,13 +83,11 @@ return [
     |
     */
 
-    'locale' => 'en',
-
-
-    'available_locales' => [
-    'en' => '🇺🇸',
-    'ru' => '🇷🇺',
-    'ka' => '🇬🇪',
+'locale' => 'en',
+'available_locales' => [
+    'en' => ['🇺🇸', 'English'],
+    'ru' => ['🇷🇺', 'Русский'],
+    'ka' => ['🇬🇪', 'ქართული'],
 ],
 
 

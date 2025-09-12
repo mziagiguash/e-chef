@@ -54,7 +54,7 @@
     $appLocale = app()->getLocale();
 @endphp
 
-<!-- Search by Category  -->
+<!-- Search by Category -->
 <div class="accordion-item">
     <h2 class="accordion-header" id="categoryAcc">
         <button class="accordion-button" type="button" data-bs-toggle="collapse"
@@ -84,12 +84,27 @@
                 @forelse($category as $cat)
                     @php
                         $courseCount = $cat->courses()->where('status', 2)->count();
+
+                        // Получаем перевод для текущей локали из отдельной таблицы
+                        $translation = $cat->translations->firstWhere('locale', app()->getLocale());
+
+                        if (!$translation) {
+                            // Fallback на английский
+                            $translation = $cat->translations->firstWhere('locale', 'en');
+                        }
+
+                        if (!$translation) {
+                            // Fallback на первый доступный перевод
+                            $translation = $cat->translations->first();
+                        }
+
+                        $localizedName = $translation->category_name ?? 'No Category';
                     @endphp
                     <div class="accordion-body__item">
                         <div class="check-box">
                             <input type="checkbox" class="checkbox-primary" name="categories[]"
                                    value="{{ $cat->id }}" {{ in_array($cat->id, (array)$selectedCategories) ? 'checked' : '' }}>
-                            <label>{{ $cat->localized_name }}</label>
+                            <label>{{ $localizedName }}</label>
                         </div>
                         <p class="check-details">{{ $courseCount }}</p>
                     </div>
@@ -102,6 +117,7 @@
         </div>
     </div>
 </div>
+
                     <!-- Search by Level  -->
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="levelAcc">
@@ -392,10 +408,8 @@
                                         class="contentCard-user d-flex align-items-center">
                                         <img src="{{asset('uploads/users/'.$c->instructor?->image)}}"
                                             alt="Instructor Image" class="rounded-circle" height="34" width="34" />
-                                        <p class="font-para--md">
-    {{ $c->instructor ? ($c->instructor->translate()?->name ?? 'No Instructor') : 'No Instructor' }}
-</p>
-</a>
+                                        <p class="font-para--md">{{ $c->instructor ? $c->instructor->getTranslation('name') : 'No Instructor' }}</p>
+                                    </a>
                                     <div class="price">
     <span>
         {{ $c->price === null ? 'Free' : $currencySymbol . number_format($c->price * $currencyRate, 2) }}

@@ -6,10 +6,10 @@
 @endpush
 
 @section('content')
-
 <div class="content-body">
     <div class="container-fluid">
 
+        {{-- Заголовок и хлебные крошки --}}
         <div class="row page-titles mx-0">
             <div class="col-sm-6 p-md-0">
                 <div class="welcome-text">
@@ -19,8 +19,8 @@
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ localeRoute('dashboard') }}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{ localeRoute('course.index') }}">Courses</a></li>
-                    <li class="breadcrumb-item active"><a href="{{ localeRoute('course.index') }}">All Course</a></li>
+                    <li class="breadcrumb-item"><a href="{{ localeRoute('course.index') }}">Courses</a></li>
+                    <li class="breadcrumb-item active">All Courses</li>
                 </ol>
             </div>
         </div>
@@ -46,97 +46,91 @@
             </div>
         </div>
 
-        <div class="card-header mb-3">
-            <a href="{{ localeRoute('course.create') }}" class="btn btn-primary">+ Add new</a>
+        <div class="mb-3">
+            <a href="{{ localeRoute('course.create') }}" class="btn btn-primary">+ Add New</a>
         </div>
 
         <div class="row">
-            @forelse ($course as $d)
+            @forelse ($courses as $course)
                 @php
                     $translations = [];
                     foreach($locales as $localeCode => $localeName) {
                         $translations[$localeCode] = [
-                            'title' => addslashes($d->translation($localeCode)?->title ?? 'No Title'),
-                            'category' => addslashes($d->courseCategory?->getTranslation('category_name', $localeCode) ?? 'No Category'),
-                            'instructor' => addslashes($d->instructor?->getTranslation('name', $localeCode) ?? 'No Instructor'),
+                            'title' => addslashes($course->translation($localeCode)?->title ?? 'No Title'),
+                            'category' => addslashes($course->courseCategory?->getTranslation('category_name', $localeCode) ?? 'No Category'),
+                            'instructor' => addslashes($course->instructor?->getTranslation('name', $localeCode) ?? 'No Instructor'),
                         ];
                     }
                 @endphp
 
-                <div class="col-lg-4 col-md-4 col-sm-6">
-                    <div class="card card-profile course-card" data-translations="{{ json_encode($translations) }}">
-                        <div class="card-header justify-content-end pb-0">
+                <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                    <div class="card course-card" data-translations="{{ json_encode($translations) }}">
+                        <div class="card-header d-flex justify-content-end pb-0">
                             <div class="dropdown">
-                                <button class="btn btn-link" type="button" data-toggle="dropdown">
-                                    <span class="dropdown-dots fs--1"></span>
+                                <button class="btn btn-link p-0" type="button" data-bs-toggle="dropdown">
+                                    <span class="dropdown-dots fs-4">⋮</span>
                                 </button>
-                                <div class="dropdown-menu dropdown-menu-right border py-0">
-                                    <div class="py-2">
-                                        <a class="dropdown-item" href="{{ localeRoute('course.edit', encryptor('encrypt', $d->id)) }}">Edit</a>
-                                        <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="$('#form{{$d->id}}').submit()">Delete</a>
-                                        <form id="form{{$d->id}}" action="{{ localeRoute('course.destroy', encryptor('encrypt', $d->id)) }}" method="post">
-                                            @csrf
-                                            @method('DELETE')
-                                        </form>
-                                    </div>
-                                </div>
+                                <div class="dropdown-menu dropdown-menu-end py-0">
+    <div class="py-2">
+        <a class="dropdown-item" href="{{ localeRoute('course.edit', encryptor('encrypt', $course->id)) }}">Edit</a>
+
+        <form id="delete-form-{{ $course->id }}" action="{{ localeRoute('course.destroy', encryptor('encrypt', $course->id)) }}" method="POST" class="d-none">
+            @csrf
+            @method('DELETE')
+        </form>
+
+        <a class="dropdown-item text-danger" href="javascript:void(0);"
+   onclick="if(confirm('Are you sure you want to delete this course?')) {
+       document.getElementById('delete-form-{{ $course->id }}').submit();
+   }">
+   Delete
+</a>
+
+    </div>
+</div>
+
                             </div>
                         </div>
 
-                        <div class="card-body pt-2">
-                            <div class="text-center">
-                                <div class="mb-3">
-                                    <img src="{{ asset('uploads/courses/' . $d->image) }}" class="w-100" height="200" alt="">
-                                </div>
-
-                                <h3 class="mt-4 mb-1 course-title">{{ $d->translation($currentLocale)?->title ?? 'No Title' }}</h3>
-
-                                <ul class="list-group mb-3 list-group-flush text-left">
-                                    <li class="list-group-item d-flex justify-content-between">
-                                        <span>Difficulty</span>
-                                        <strong>
-                                            {{ $d->difficulty == 'beginner' ? __('Beginner') :
-                                               ($d->difficulty == 'intermediate' ? __('Intermediate') :
-                                               __('Advanced')) }}
-                                        </strong>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between">
-                                        <span>Instructor</span>
-                                        <strong class="course-instructor">{{ $d->instructor?->getTranslation('name', $currentLocale) ?? 'No Instructor' }}</strong>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between">
-                                        <span>Category</span>
-                                        <strong class="course-category">{{ $d->courseCategory?->getTranslation('category_name', $currentLocale) ?? 'No Category' }}</strong>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between">
-                                        <span>Price</span>
-                                        <strong>{{ $d->price ? $currentCurrency . number_format($d->price * $currencyRate, 2) : 'Free' }}</strong>
-                                    </li>
-                                    <li class="list-group-item d-flex justify-content-between">
-                                        <span>Status</span>
-                                        <span class="badge
-                                            @if($d->status == 0) badge-warning
-                                            @elseif($d->status == 1) badge-danger
-                                            @elseif($d->status == 2) badge-success
-                                            @endif">
-                                            @if($d->status == 0) {{__('Pending')}}
-                                            @elseif($d->status == 1) {{__('Inactive')}}
-                                            @elseif($d->status == 2) {{__('Active')}}
-                                            @endif
-                                        </span>
-                                    </li>
-                                </ul>
-
-                                <a class="btn btn-outline-primary btn-rounded mt-3 px-4" href="about-student.html">Read More</a>
-                            </div>
+                        <div class="card-body text-center">
+                            <img src="{{ asset('uploads/courses/' . $course->image) }}" class="img-fluid mb-3" style="height:200px; width:100%; object-fit:cover;" alt="Course Image">
+                            <h5 class="course-title mb-2">{{ $course->translation($currentLocale)?->title ?? 'No Title' }}</h5>
+                            <ul class="list-group list-group-flush text-start">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Instructor</span>
+                                    <strong class="course-instructor">{{ $course->instructor?->getTranslation('name', $currentLocale) ?? 'No Instructor' }}</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Category</span>
+                                    <strong class="course-category">{{ $course->courseCategory?->getTranslation('category_name', $currentLocale) ?? 'No Category' }}</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Price</span>
+                                    <strong>{{ $course->price ? $currentCurrency . number_format($course->price * $currencyRate, 2) : 'Free' }}</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Status</span>
+                                    <span class="badge
+                                        @if($course->status == 0) bg-warning
+                                        @elseif($course->status == 1) bg-danger
+                                        @elseif($course->status == 2) bg-success
+                                        @endif">
+                                        @if($course->status == 0) Pending
+                                        @elseif($course->status == 1) Inactive
+                                        @elseif($course->status == 2) Active
+                                        @endif
+                                    </span>
+                                </li>
+                            </ul>
+                            <a href="{{ localeRoute('course.show', encryptor('encrypt', $course->id)) }}" class="btn btn-outline-primary btn-sm mt-3">Read More</a>
                         </div>
                     </div>
                 </div>
             @empty
-                <div class="col-lg-6 col-md-6 col-sm-6 col-12">
-                    <div class="card card-profile">
-                        <div class="card-body pt-2 text-center">
-                            <p class="mt-3 px-4">Course Not Found</p>
+                <div class="col-12 text-center">
+                    <div class="card">
+                        <div class="card-body">
+                            <p>No courses found.</p>
                         </div>
                     </div>
                 </div>
@@ -145,7 +139,6 @@
 
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
@@ -162,21 +155,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Устанавливаем активный таб
     document.querySelectorAll('#courseLangTabs .nav-link').forEach(tab => {
         tab.classList.toggle('active', tab.dataset.locale === savedLocale);
-    });
-
-    // Клик по табу
-    document.querySelectorAll('#courseLangTabs .nav-link').forEach(tab => {
         tab.addEventListener('click', function (e) {
             e.preventDefault();
             const locale = this.dataset.locale;
             localStorage.setItem('courses_lang', locale);
-
             document.querySelectorAll('#courseLangTabs .nav-link').forEach(t => t.classList.remove('active'));
             this.classList.add('active');
-
             updateCourseLanguage(locale);
         });
     });

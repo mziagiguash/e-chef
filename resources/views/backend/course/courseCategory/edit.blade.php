@@ -7,7 +7,6 @@
 @endpush
 
 @section('content')
-
 <div class="content-body">
     <div class="container-fluid">
 
@@ -21,16 +20,15 @@
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ localeRoute('dashboard') }}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{ localeRoute('courseCategory.index') }}">Categories</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0);">Edit Category</a></li>
+                    <li class="breadcrumb-item"><a href="{{ localeRoute('courseCategory.index') }}">Categories</a></li>
+                    <li class="breadcrumb-item active">Edit Category</li>
                 </ol>
             </div>
         </div>
 
         @php
             $locales = ['en' => 'English', 'ru' => 'Русский', 'ka' => 'ქართული'];
-            // Подставляем старые значения или текущие
-            $categoryNames = old('category_name', $data->category_name ?? ['en' => '', 'ru' => '', 'ka' => '']);
+            $categoryNames = old('category_name', $data->category_name ?? ['en'=>'','ru'=>'','ka'=>'']);
         @endphp
 
         <div class="row">
@@ -40,7 +38,7 @@
                         <h5 class="card-title">Category Info</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('courseCategory.update', $data->id) }}" method="post" enctype="multipart/form-data">
+                        <form action="{{ localeRoute('courseCategory.update', $data->id) }}" method="post" enctype="multipart/form-data">
                             @csrf
                             @method('PATCH')
 
@@ -52,23 +50,22 @@
                                     </li>
                                 @endforeach
                             </ul>
-
-                            <div class="tab-content mb-4">
-                                @foreach ($locales as $localeCode => $localeName)
-                                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="tab-{{ $localeCode }}" role="tabpanel">
-                                        <div class="form-group">
-                                            <label class="form-label">Category Name ({{ $localeName }})</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   name="category_name[{{ $localeCode }}]"
-                                                   value="{{ $categoryNames[$localeCode] ?? '' }}">
-                                            @error('category_name.' . $localeCode)
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
+<div class="tab-content mb-4">
+    @foreach ($locales as $localeCode => $localeName)
+        <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="tab-{{ $localeCode }}" role="tabpanel">
+            <div class="form-group">
+                <label class="form-label">Category Name ({{ $localeName }})</label>
+                <input type="text"
+       class="form-control"
+       name="translations[{{ $localeCode }}][category_name]"
+       value="{{ old("translations.{$localeCode}.category_name", $data->translations->firstWhere('locale', $localeCode)->category_name ?? '') }}">
+                @error('category_name_' . $localeCode)
+                    <span class="text-danger">{{ $message }}</span>
+                @enderror
+            </div>
+        </div>
+    @endforeach
+</div>
 
                             <!-- Статус и изображение -->
                             <div class="row">
@@ -95,15 +92,10 @@
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
-                                    @if($data->category_image)
-                                        <div class="mt-2">
-                                            <img src="{{ asset('uploads/courseCategories/' . $data->category_image) }}" alt="Category Image" style="max-width: 200px;">
-                                        </div>
-                                    @endif
                                 </div>
 
                                 <div class="col-lg-12 mt-3">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button type="submit" class="btn btn-primary">Update</button>
                                     <button type="button" onclick="window.history.back();" class="btn btn-light">Cancel</button>
                                 </div>
                             </div>
@@ -116,7 +108,6 @@
 
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
@@ -124,7 +115,6 @@
 <script src="{{ asset('vendor/pickadate/picker.time.js') }}"></script>
 <script src="{{ asset('vendor/pickadate/picker.date.js') }}"></script>
 <script src="{{ asset('js/plugins-init/pickadate-init.js') }}"></script>
-@endpush
-
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+@endpush

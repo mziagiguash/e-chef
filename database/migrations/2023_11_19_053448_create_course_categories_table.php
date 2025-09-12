@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('course_categories', function (Blueprint $table) {
             $table->id();
-            $table->string('category_name',255);
+            $table->string('category_name')->nullable();
             $table->boolean('category_status')->default(1)->comment('1=>active 2=>inactive');
             $table->string('category_image')->nullable();
             $table->timestamps();

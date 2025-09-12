@@ -4,40 +4,66 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Course extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'course_category_id', 'instructor_id', 'type', 'price',
-        'old_price', 'subscription_price', 'start_from', 'duration',
-        'lesson', 'difficulty', 'course_code', 'tag', 'status',
-        'language', 'thumbnail_video', 'image', 'thumbnail_image'
+        'course_category_id',
+        'instructor_id',
+        'courseType',
+        'coursePrice',
+        'courseOldPrice',
+        'subscription_price',
+        'start_from',
+        'duration',
+        'lesson',
+        'course_code',
+        'thumbnail_video_url',
+        'tag',
+        'status',
+        'image',
+        'thumbnail_image',
+        'thumbnail_video_file'
+    ];
+
+    protected $dates = [
+        'start_from',
+        'deleted_at',
+        'created_at',
+        'updated_at'
+    ];
+
+    protected $casts = [
+        'coursePrice' => 'decimal:2',
+        'courseOldPrice' => 'decimal:2',
+        'subscription_price' => 'decimal:2',
+        'duration' => 'integer',
+        'lesson' => 'integer',
+        'status' => 'integer'
     ];
 
     // Связи
-    public function instructor()
-    {
-        return $this->belongsTo(Instructor::class, 'instructor_id');
-    }
-
     public function courseCategory()
     {
         return $this->belongsTo(CourseCategory::class, 'course_category_id');
     }
 
-    public function material() { return $this->hasMany(Material::class); }
-    public function quiz() { return $this->hasMany(Quiz::class); }
-    public function review() { return $this->hasMany(Review::class); }
-    public function discussion() { return $this->hasMany(Discussion::class); }
-    public function enrollment() { return $this->hasMany(Enrollment::class); }
-    public function lesson() { return $this->hasMany(Lesson::class); }
+    public function instructor()
+    {
+        return $this->belongsTo(Instructor::class, 'instructor_id');
+    }
+public function lessons()
+{
+    return $this->hasMany(Lesson::class);
+}
 
-    // Переводы курса
+
     public function translations()
     {
-        return $this->hasMany(CourseTranslation::class, 'course_id', 'id');
+        return $this->hasMany(CourseTranslation::class, 'course_id');
     }
 
     public function translation($locale = null)
@@ -46,41 +72,157 @@ class Course extends Model
         return $this->translations()->where('locale', $locale)->first();
     }
 
-    // Атрибут для текущего перевода
-public function getTitleAttribute()
+public function getNextLesson($currentLessonOrder)
 {
-    return $this->translation()?->title; // возвращает строку, а не массив
+    return $this->lessons()
+        ->where('order', '>', $currentLessonOrder)
+        ->orderBy('order')
+        ->first();
 }
 
-public function getDescriptionAttribute()
+public function getPrevLesson($currentLessonOrder)
 {
-    return $this->translation()?->description;
+    return $this->lessons()
+        ->where('order', '<', $currentLessonOrder)
+        ->orderBy('order', 'desc')
+        ->first();
 }
 
-public function getPrerequisitesAttribute()
+    public function getTranslatedPrerequisitesAttribute()
+    {
+        return $this->getTranslationValue('prerequisites');
+    }
+
+    public function getTranslatedKeywordsAttribute()
+    {
+        return $this->getTranslationValue('keywords');
+    }
+
+    protected function getTranslationValue($field, $locale = null)
+    {
+        $locale = $locale ?: app()->getLocale();
+
+        if (!$this->relationLoaded('translations')) {
+            $this->load('translations');
+        }
+
+        $translation = $this->translations->firstWhere('locale', $locale);
+
+        if (!$translation) {
+            $translation = $this->translations->firstWhere('locale', 'en');
+        }
+
+        if (!$translation) {
+            $translation = $this->translations->first();
+        }
+
+        return $translation ? $translation->$field : null;
+    }
+
+    public function getPriceAttribute()
+    {
+        return $this->coursePrice;
+    }
+
+    public function getOldPriceAttribute()
+    {
+        return $this->courseOldPrice;
+    }
+
+    public function getTypeAttribute()
+    {
+        return $this->courseType;
+    }
+
+    public function getStatusTextAttribute()
+    {
+        return match($this->status) {
+            0 => 'Pending',
+            1 => 'Inactive',
+            2 => 'Active',
+            default => 'Unknown'
+        };
+    }
+
+    // Scopes
+    public function scopeActive($query)
+    {
+        return $query->where('status', 2);
+    }
+
+    public function scopeWithTranslations($query, $locale = null)
+    {
+        $locale = $locale ?: app()->getLocale();
+        return $query->with(['translations' => function($q) use ($locale) {
+            $q->where('locale', $locale);
+        }]);
+    }
+
+    public function scopeWithAllTranslations($query)
+    {
+        return $query->with('translations');
+    }
+     public function getTranslation($field = null, $locale = null)
+    {
+        $locale = $locale ?: app()->getLocale();
+
+        // Загружаем переводы если еще не загружены
+        if (!$this->relationLoaded('translations')) {
+            $this->load('translations');
+        }
+
+        $translation = $this->translations->firstWhere('locale', $locale);
+
+        if (!$translation) {
+            // Fallback на английский
+            $translation = $this->translations->firstWhere('locale', 'en');
+        }
+
+        if (!$translation) {
+            // Fallback на первый доступный перевод
+            $translation = $this->translations->first();
+        }
+
+        if (!$translation) {
+            return $field ? null : null;
+        }
+
+        return $field ? $translation->$field : $translation;
+    }
+
+    // Добавим также accessor для удобства
+    public function getTranslatedTitleAttribute()
+    {
+        return $this->getTranslation('title') ?? 'No Title';
+    }
+    public function getTitleAttribute()
 {
-    return $this->translation()?->prerequisites;
+    $locale = app()->getLocale();
+
+    if (!$this->relationLoaded('translations')) {
+        $this->load('translations');
+    }
+
+    $translation = $this->translations->where('locale', $locale)->first();
+    return $translation->title ??
+           $this->translations->first()->title ??
+           'No title';
 }
 
-public function getKeywordsAttribute()
+    public function getTranslatedDescriptionAttribute()
+    {
+        return $this->getTranslation('description') ?? '';
+    }
+    public function getFormattedStartFromAttribute()
 {
-    return $this->translation()?->keywords;
-}
+    if (!$this->start_from) {
+        return '';
+    }
 
-// Для категории
-public function getCategoryNameAttribute()
-{
-    return $this->category?->translation()?->category_name;
+    try {
+        return \Carbon\Carbon::parse($this->start_from)->format('Y-m-d');
+    } catch (\Exception $e) {
+        return $this->start_from;
+    }
 }
-public function getLocalizedTitleAttribute(): string
-{
-    return $this->title ?? '';
 }
-public function getTranslation($field, $locale = null)
-{
-    $locale = $locale ?: app()->getLocale();
-    return $this->translation($locale)?->$field ?? '';
-}
-
-}
-

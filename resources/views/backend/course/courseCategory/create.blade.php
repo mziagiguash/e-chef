@@ -51,22 +51,23 @@
                                 @endforeach
                             </ul>
 
-                            <div class="tab-content mb-4">
-                                @foreach ($locales as $localeCode => $localeName)
-                                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="tab-{{ $localeCode }}" role="tabpanel">
-                                        <div class="form-group">
-                                            <label class="form-label">Category Name ({{ $localeName }})</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   name="category_name[{{ $localeCode }}]"
-                                                   value="{{ $categoryNames[$localeCode] ?? '' }}">
-                                            @error('category_name.' . $localeCode)
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
+                           <div class="tab-content mb-4">
+    <div class="tab-content mb-4">
+    @foreach ($locales as $localeCode => $localeName)
+        <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="tab-{{ $localeCode }}" role="tabpanel">
+            <div class="form-group">
+                <label class="form-label">Category Name ({{ $localeName }})</label>
+                <input type="text"
+                       class="form-control"
+                       name="translations[{{ $localeCode }}][category_name]"
+                       value="{{ old("translations.{$localeCode}.category_name", isset($data) ? $data->translations->firstWhere('locale', $localeCode)->category_name ?? '' : '') }}">
+                @error("translations.{$localeCode}.category_name")
+                    <span class="text-danger">{{ $message }}</span>
+                @enderror
+            </div>
+        </div>
+    @endforeach
+</div>
 
                             <!-- Статус и изображение -->
                             <div class="row">

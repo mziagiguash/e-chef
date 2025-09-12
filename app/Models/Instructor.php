@@ -4,16 +4,28 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Instructor extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
- protected $fillable = [
-        // здесь реальные поля таблицы instructors
-        'email','contact','role_id','status','access_block','password','image'
+    protected $fillable = [
+        'contact', 'email', 'role_id', 'image', 'status',
+        'password', 'language', 'access_block', 'remember_token'
     ];
 
+    protected $dates = ['deleted_at'];
+
+    protected $appends = [
+        'translated_name',
+        'translated_bio',
+        'translated_designation',
+        'translated_title',
+        'display_name'
+    ];
+
+    // Связи
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id');
@@ -29,20 +41,86 @@ class Instructor extends Model
         return $this->hasMany(InstructorTranslation::class, 'instructor_id');
     }
 
-    public function getTranslation($locale = null)
-    {
-        $locale = $locale ?? app()->getLocale();
-        return $this->translations->firstWhere('locale', $locale);
+    // Методы для переводов
+    public function getTranslation($field = null, $locale = null)
+{
+    $locale = $locale ?: app()->getLocale();
+
+    if (!$this->relationLoaded('translations')) {
+        $this->load('translations');
     }
 
+    $translation = $this->translations->firstWhere('locale', $locale);
 
-public function frontShow(): string
+    if (!$translation) {
+        $translation = $this->translations->firstWhere('locale', 'en');
+    }
+
+    if (!$translation) {
+        $translation = $this->translations->first();
+    }
+
+    if (!$translation) {
+        return $field ? null : null;
+    }
+
+    return $field ? $translation->$field : $translation;
+}
+
+public function getTranslatedNameAttribute()
 {
-    $name = $this->getTranslation()?->name ?? 'No Instructor';
-    $designation = $this->getTranslation()?->designation ?? '';
-
-    return $designation ? "$name — $designation" : $name;
+    return $this->getTranslation('name') ?? 'No Name';
 }
 
-}
 
+
+    public function getTranslatedBioAttribute()
+    {
+        return $this->getTranslation('bio');
+    }
+
+    public function getTranslatedDesignationAttribute()
+    {
+        return $this->getTranslation('designation');
+    }
+
+    public function getTranslatedTitleAttribute()
+    {
+        return $this->getTranslation('title');
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->translated_name ?: 'No Name';
+    }
+
+    
+
+    public function frontShow(): string
+    {
+        $name = $this->translated_name ?: 'No Instructor';
+        $designation = $this->translated_designation ?: '';
+
+        return $designation ? "$name — $designation" : $name;
+    }
+
+    // Scopes
+    public function scopeActive($query)
+    {
+        return $query->where('status', 1);
+    }
+
+    public function scopeWithTranslations($query, $locale = null)
+    {
+        $locale = $locale ?: app()->getLocale();
+
+        return $query->with(['translations' => function($q) use ($locale) {
+            $q->where('locale', $locale);
+        }]);
+    }
+
+    public function scopeWithAllTranslations($query)
+    {
+        return $query->with('translations');
+    }
+}

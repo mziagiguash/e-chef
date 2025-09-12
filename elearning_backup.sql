@@ -1,1380 +1,1368 @@
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
+-- MySQL dump 10.13  Distrib 5.7.44, for Linux (x86_64)
+--
+-- Host: localhost    Database: elearning_db
+-- ------------------------------------------------------
+-- Server version	5.7.44
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: `laravel_elearning`
---
-
--- --------------------------------------------------------
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `answers`
 --
 
+DROP TABLE IF EXISTS `answers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `answers` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `student_id` bigint(20) UNSIGNED NOT NULL,
-  `question_id` bigint(20) UNSIGNED NOT NULL,
-  `answer` text DEFAULT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `question_id` bigint(20) unsigned NOT NULL,
+  `text` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_correct` tinyint(1) NOT NULL DEFAULT '0',
+  `order` int(11) NOT NULL DEFAULT '0',
+  `explanation` text COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-CREATE TABLE `answers_translations` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `answer_id` BIGINT UNSIGNED NOT NULL,
-  `locale` VARCHAR(10) NOT NULL,
-  `answer` TEXT DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `answer_locale` (`answer_id`, `locale`),
-  FOREIGN KEY (`answer_id`) REFERENCES `answers`(`id`) ON DELETE CASCADE
+  KEY `answers_question_id_foreign` (`question_id`),
+  CONSTRAINT `answers_question_id_foreign` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `answers`
+--
+
+LOCK TABLES `answers` WRITE;
+/*!40000 ALTER TABLE `answers` DISABLE KEYS */;
+/*!40000 ALTER TABLE `answers` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `checkouts`
 --
 
+DROP TABLE IF EXISTS `checkouts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `checkouts` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `cart_data` longtext NOT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `cart_data` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
   `student_id` bigint(20) NOT NULL,
-  `txnid` varchar(255) DEFAULT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1 active, 0 inactive',
+  `txnid` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1 active, 0 inactive',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `checkouts`
 --
 
-INSERT INTO `checkouts` (`id`, `cart_data`, `student_id`, `txnid`, `status`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(18, 'eyJjYXJ0Ijp7IjYiOnsidGl0bGVfZW4iOiJGdWxsLVN0YWNrIFdlYiBEZXZlbG9wbWVudCBCb290Y2FtcDogQmFzaWNzIHRvIEFkdmFuY2VkIiwicXVhbnRpdHkiOjEsInByaWNlIjoiNTAwMC4wMCIsIm9sZF9wcmljZSI6IjkwMDAuMDAiLCJpbWFnZSI6IjE0MDE3MDQxMjY5NzIuanBnIiwiZGlmZmljdWx0eSI6ImJlZ2lubmVyIiwiaW5zdHJ1Y3RvciI6IkJ1cmhhbiBVZGRpbiBGdWFkIn19LCJjYXJ0X2RldGFpbHMiOnsiY2FydF90b3RhbCI6NTAwMCwiY291cG9uX2NvZGUiOiJvZmZlcjIwIiwiZGlzY291bnQiOiIyMC4wMCIsImRpc2NvdW50X2Ftb3VudCI6MTAwMCwidGF4Ijo2MDAsInRvdGFsX2Ftb3VudCI6NDYwMH19', 17, 'SSLCZ_TXN_6592f9adf2b79', 1, '2024-01-01 11:43:09', '2024-01-01 11:43:52', NULL);
-
--- --------------------------------------------------------
+LOCK TABLES `checkouts` WRITE;
+/*!40000 ALTER TABLE `checkouts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `checkouts` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `coupons`
 --
 
+DROP TABLE IF EXISTS `coupons`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `coupons` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `code` varchar(255) NOT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `discount` decimal(8,2) NOT NULL,
   `valid_from` date DEFAULT NULL,
   `valid_until` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `coupons_code_unique` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `coupons`
 --
 
-INSERT INTO `coupons` (`id`, `code`, `discount`, `valid_from`, `valid_until`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 'offer20', 20.00, '2023-12-09', '2024-03-26', '2023-12-09 09:30:32', '2023-12-09 09:30:32', NULL),
-(2, 'el50', 50.00, '2023-12-09', '2024-12-16', '2023-12-09 09:34:18', '2023-12-09 09:34:18', NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `courses`
---
-
-CREATE TABLE `courses` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `course_category_id` bigint(20) UNSIGNED NOT NULL,
-  `instructor_id` bigint(20) UNSIGNED NOT NULL,
-  `type` enum('free','paid','subscription') NOT NULL DEFAULT 'paid',
-  `price` decimal(10,2) DEFAULT 0.00,
-  `old_price` decimal(10,2) DEFAULT NULL,
-  `subscription_price` decimal(10,2) DEFAULT NULL,
-  `start_from` timestamp NULL DEFAULT NULL,
-  `duration` int(11) DEFAULT NULL,
-  `lesson` int(11) DEFAULT NULL,
-  `prerequisites` text DEFAULT NULL,
-  `difficulty` enum('beginner','intermediate','advanced') DEFAULT NULL,
-  `course_code` varchar(255) DEFAULT NULL,
-  `image` varchar(255) DEFAULT NULL,
-  `thumbnail_image` varchar(255) DEFAULT NULL,
-  `thumbnail_video` varchar(255) DEFAULT NULL,
-  `tag` enum('popular','featured','upcoming') DEFAULT NULL,
-  `status` int(1) NOT NULL DEFAULT 0 COMMENT '0 pending, 1 inactive, 2 active,',
-  `language` varchar(255) NOT NULL DEFAULT 'en',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `courses`
---
-
-INSERT INTO `courses` (`id`, `title`, `description`, `course_category_id`, `instructor_id`, `type`, `price`, `old_price`, `subscription_price`, `start_from`, `duration`, `lesson`, `prerequisites`, `difficulty`, `course_code`, `image`, `thumbnail_image`, `thumbnail_video`, `tag`, `status`, `language`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(6, 'Full-Stack Web Development Bootcamp: Basics to Advanced', 'Dive into the world of web development with a comprehensive bootcamp covering both front-end and back-end technologies. From HTML and CSS to server-side scripting, this course will equip you with the skills to build dynamic and interactive web applications.', 5, 1, 'paid', 5000.00, 9000.00, NULL, NULL, 3, 35, 'Basic understanding of HTML and CSS; familiarity with programming concepts is beneficial but not required.', 'beginner', NULL, '1401704126972.jpg', '8191704126972.jpg', 'https://www.youtube.com/watch?v=lw6IVgb-omg', 'popular', 2, 'en', '2023-11-26 03:30:17', '2024-01-09 09:15:25', NULL),
-(7, 'Adobe Creative Suite Mastery: Photoshop, Illustrator, InDesign', 'Gain proficiency in Adobe Creative Suite\'s powerhouse tools—Photoshop for image editing, Illustrator for vector graphics, and InDesign for layout design. Learn to seamlessly integrate these applications to bring your creative visions to life.', 2, 3, 'paid', 4500.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'intermediate', NULL, '4091704127086.jpg', '3521704127086.jpg', 'https://www.youtube.com/watch?v=lw6IVgb-omg', 'popular', 2, 'en', '2023-11-26 03:32:44', '2024-01-09 07:49:25', NULL),
-(8, 'Search Engine Optimization (SEO): Boosting Website Visibility', 'Demystify the world of SEO and discover techniques to improve website visibility in search engine results. Learn keyword research, on-page optimization, and off-page strategies to drive organic traffic and enhance online presence.', 6, 4, 'paid', 3000.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'advanced', NULL, '6891704127114.jpg', '8491704127114.jpg', 'https://www.youtube.com/watch?v=lw6IVgb-omg', 'popular', 2, 'en', '2023-11-26 03:34:25', '2024-01-09 09:19:39', NULL),
-(9, '3D Animation Basics: Getting Started with Blender', 'Delve into the basics of 3D animation using Blender. Learn the fundamentals of modeling, rigging, and animation to bring characters and scenes to life in a three-dimensional space.', 39, 2, 'free', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'beginner', NULL, '6781704127193.jpg', '7821704127193.jpg', 'https://www.youtube.com/watch?v=lw6IVgb-omg', 'popular', 2, 'en', '2023-11-26 03:37:43', '2024-01-09 09:20:01', NULL),
-(10, 'React.js Fundamentals: Building Modern User Interfaces', 'Delve into the fundamentals of React.js and discover how to build modern, component-based user interfaces. From state management to routing, this course guides you through React\'s core concepts, enabling you to create powerful and maintainable front-end applications.', 5, 5, 'free', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'beginner', NULL, '4341704127229.jpg', '6681704127229.jpg', 'https://www.youtube.com/watch?v=lw6IVgb-omg', 'popular', 2, 'en', '2023-11-26 03:39:29', '2024-01-09 09:29:35', NULL);
-
--- --------------------------------------------------------
+LOCK TABLES `coupons` WRITE;
+/*!40000 ALTER TABLE `coupons` DISABLE KEYS */;
+/*!40000 ALTER TABLE `coupons` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `course_categories`
 --
 
+DROP TABLE IF EXISTS `course_categories`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `course_categories` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `category_name` varchar(255) NOT NULL,
-  `category_status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1=>active 2=>inactive',
-  `category_image` varchar(255) DEFAULT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `category_status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1=>active 2=>inactive',
+  `category_image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `course_categories`
 --
 
-INSERT INTO `course_categories` (`id`, `category_name`, `category_status`, `category_image`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(2, 'Graphics Desgin', 1, '3241701795877.jpg', '2023-11-19 00:24:08', '2023-12-05 11:04:37', NULL),
-(4, 'Web Design', 1, '1601701795901.jpg', '2023-11-19 01:23:53', '2023-12-05 11:05:01', NULL),
-(5, 'Web Development', 1, '4441701795922.jpg', '2023-11-19 01:24:44', '2023-12-05 11:05:22', NULL),
-(6, 'Digital Marketing', 1, '9691701795938.jpg', '2023-11-19 21:20:48', '2023-12-05 11:05:38', NULL),
-(37, 'Video Editing', 1, '3621701795955.jpg', '2023-11-26 03:36:04', '2023-12-05 11:05:55', NULL),
-(38, '2D Animation', 1, '8361701795972.jpg', '2023-12-05 10:47:40', '2023-12-05 11:06:12', NULL),
-(39, '3D Animation', 1, '3241701795877.jpg', '2023-11-19 00:24:08', '2023-12-05 11:04:37', NULL),
-(40, 'Mobile Development', 1, '1601701795901.jpg', '2023-11-19 01:23:53', '2023-12-05 11:05:01', NULL),
-(41, 'Game Development', 1, '4441701795922.jpg', '2023-11-19 01:24:44', '2023-12-05 11:05:22', NULL),
-(42, 'Database Design & Development', 1, '9691701795938.jpg', '2023-11-19 21:20:48', '2023-12-05 11:05:38', NULL),
-(43, 'Data Science', 1, '3621701795955.jpg', '2023-11-26 03:36:04', '2023-12-05 11:05:55', NULL),
-(44, 'Entrepreneurship', 1, '8361701795972.jpg', '2023-12-05 10:47:40', '2023-12-05 11:06:12', NULL),
-(45, 'Network Technology', 1, '3241701795877.jpg', '2023-11-19 00:24:08', '2023-12-05 11:04:37', NULL),
-(46, 'Hardware', 1, '1601701795901.jpg', '2023-11-19 01:23:53', '2023-12-05 11:05:01', NULL),
-(47, 'Software & Security', 1, '4441701795922.jpg', '2023-11-19 01:24:44', '2023-12-05 11:05:22', NULL),
-(48, 'Operating System & Server', 1, '9691701795938.jpg', '2023-11-19 21:20:48', '2023-12-05 11:05:38', NULL);
+LOCK TABLES `course_categories` WRITE;
+/*!40000 ALTER TABLE `course_categories` DISABLE KEYS */;
+INSERT INTO `course_categories` VALUES (1,NULL,1,'category-games.jpg','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL),(2,NULL,1,'category-data.jpg','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL),(3,NULL,1,'category-database.jpg','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL),(4,NULL,1,'category-ai.jpg','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL),(5,NULL,1,'category-ai.jpg','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL),(6,NULL,1,'category-design.jpg','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL),(7,NULL,0,'category-web.jpg','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL),(8,NULL,1,'category-programming.jpg','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL),(9,NULL,0,'category-games.jpg','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL),(10,NULL,0,'category-web.jpg','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL),(11,NULL,0,'https://via.placeholder.com/400x300.png/00bbaa?text=business+fugit','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL);
+/*!40000 ALTER TABLE `course_categories` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
+-- Table structure for table `course_categories_translations`
+--
+
+DROP TABLE IF EXISTS `course_categories_translations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `course_categories_translations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `course_category_id` bigint(20) unsigned NOT NULL,
+  `locale` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `category_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `course_categories_translations_course_category_id_locale_unique` (`course_category_id`,`locale`),
+  CONSTRAINT `course_categories_translations_course_category_id_foreign` FOREIGN KEY (`course_category_id`) REFERENCES `course_categories` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `course_categories_translations`
+--
+
+LOCK TABLES `course_categories_translations` WRITE;
+/*!40000 ALTER TABLE `course_categories_translations` DISABLE KEYS */;
+INSERT INTO `course_categories_translations` VALUES (1,1,'en','Web Development','2025-09-11 06:25:04','2025-09-11 06:25:04'),(2,1,'ru','Веб-разработка','2025-09-11 06:25:04','2025-09-11 06:25:04'),(3,1,'ka','ვებ-განვითარება','2025-09-11 06:25:04','2025-09-11 06:25:04'),(4,2,'en','Mobile Development','2025-09-11 06:25:04','2025-09-11 06:25:04'),(5,2,'ru','Мобильная разработка','2025-09-11 06:25:04','2025-09-11 06:25:04'),(6,2,'ka','მობილური განვითარება','2025-09-11 06:25:04','2025-09-11 06:25:04'),(7,3,'en','Data Science','2025-09-11 06:25:04','2025-09-11 06:25:04'),(8,3,'ru','Наука о данных','2025-09-11 06:25:04','2025-09-11 06:25:04'),(9,3,'ka','მონაცემთა მეცნიერება','2025-09-11 06:25:04','2025-09-11 06:25:04'),(10,4,'en','Programming','2025-09-11 06:25:04','2025-09-11 06:25:04'),(11,4,'ru','Программирование','2025-09-11 06:25:04','2025-09-11 06:25:04'),(12,4,'ka','პროგრამირება','2025-09-11 06:25:04','2025-09-11 06:25:04'),(13,5,'en','Design','2025-09-11 06:25:04','2025-09-11 06:25:04'),(14,5,'ru','Дизайн','2025-09-11 06:25:04','2025-09-11 06:25:04'),(15,5,'ka','დიზაინი','2025-09-11 06:25:04','2025-09-11 06:25:04'),(16,6,'en','Network Administration','2025-09-11 06:25:04','2025-09-11 06:25:04'),(17,6,'ru','Разработка игр','2025-09-11 06:25:04','2025-09-11 06:25:04'),(18,6,'ka','DevOps','2025-09-11 06:25:04','2025-09-11 06:25:04'),(19,7,'en','Cybersecurity','2025-09-11 06:25:04','2025-09-11 06:25:04'),(20,7,'ru','Администрирование сетей','2025-09-11 06:25:04','2025-09-11 06:25:04'),(21,7,'ka','თამაშების განვითარება','2025-09-11 06:25:04','2025-09-11 06:25:04'),(22,8,'en','Machine Learning','2025-09-11 06:25:04','2025-09-11 06:25:04'),(23,8,'ru','Администрирование сетей','2025-09-11 06:25:04','2025-09-11 06:25:04'),(24,8,'ka','მანქანური სწავლა','2025-09-11 06:25:04','2025-09-11 06:25:04'),(25,9,'en','Cloud Computing','2025-09-11 06:25:04','2025-09-11 06:25:04'),(26,9,'ru','Программная инженерия','2025-09-11 06:25:04','2025-09-11 06:25:04'),(27,9,'ka','კიბერუსაფრთხოება','2025-09-11 06:25:04','2025-09-11 06:25:04'),(28,10,'en','UI/UX Design','2025-09-11 06:25:04','2025-09-11 06:25:04'),(29,10,'ru','Машинное обучение','2025-09-11 06:25:04','2025-09-11 06:25:04'),(30,10,'ka','თამაშების განვითარება','2025-09-11 06:25:04','2025-09-11 06:25:04'),(31,11,'en','nihil Category','2025-09-11 06:25:04','2025-09-11 06:25:04'),(32,11,'ru','placeat Категория','2025-09-11 06:25:04','2025-09-11 06:25:04'),(33,11,'ka','vero კატეგორია','2025-09-11 06:25:04','2025-09-11 06:25:04');
+/*!40000 ALTER TABLE `course_categories_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `course_translations`
+--
+
+DROP TABLE IF EXISTS `course_translations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `course_translations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `course_id` bigint(20) unsigned NOT NULL,
+  `locale` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `prerequisites` text COLLATE utf8mb4_unicode_ci,
+  `keywords` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `course_translations_course_id_locale_unique` (`course_id`,`locale`),
+  CONSTRAINT `course_translations_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `course_translations`
+--
+
+LOCK TABLES `course_translations` WRITE;
+/*!40000 ALTER TABLE `course_translations` DISABLE KEYS */;
+INSERT INTO `course_translations` VALUES (1,1,'en','Data Science-ის მასტერკლასი','Voluptas quia officia dolorum maxime ullam accusamus officiis. Repellat odio voluptatum suscipit dolorum. Quis hic magni aut quos omnis quaerat consequuntur. Autem labore officia error aut quod non itaque sit. Et blanditiis est nisi perspiciatis ad.\n\nSit at atque aliquid occaecati. Nihil beatae quod quidem est neque. Et aut sint soluta. Quaerat facilis ut harum et est debitis.\n\nCommodi nobis voluptate qui. Hic magnam repudiandae totam consequatur. Molestias et ut et omnis. Eveniet unde aliquid qui saepe harum. ისწავლეთ ინდუსტრიის ექსპერტებისგან და ააგეთ რეალური პროექტები.','პროგრამირების საბაზისო ცოდნა. გაეცანით veritatis.','კოდირება, ვებ-განვითარება, პროგრამირება','2025-09-11 06:25:04','2025-09-11 06:25:04'),(2,1,'ru','Data Science-ის მასტერკლასი','Molestias doloremque necessitatibus a pariatur aut harum. Minima consectetur vel quam doloribus ut animi officia. Reiciendis iusto sunt commodi perferendis. Corporis ullam dolorem id reiciendis deleniti. Veniam sapiente id enim neque et dolores est.\n\nAdipisci aut velit nisi fugiat. Aut quibusdam id corrupti debitis est officiis ut.\n\nQuisquam voluptas molestiae quo commodi veniam magnam doloribus consequatur. Eos aliquam quis ipsam soluta odit enim delectus. Omnis nisi molestias blanditiis et eveniet. ისწავლეთ ინდუსტრიის ექსპერტებისგან და ააგეთ რეალური პროექტები.','პროგრამირების საბაზისო ცოდნა. გაეცანით alias.','სწავლა, ვებ-განვითარება, ტექნოლოგიები','2025-09-11 06:25:04','2025-09-11 06:25:04'),(3,1,'ka','Основы UX/UI дизайна','Quos voluptates voluptates voluptatem. Voluptas quam pariatur aut omnis hic debitis. Atque voluptatibus id quas praesentium molestias quia est id.\n\nQuae porro ut adipisci deserunt. Qui eos aut dolore ut placeat eos laboriosam est. Aut quis ipsa eveniet suscipit enim at. Rem ipsum eos dolor.\n\nIure nisi odit a autem odit adipisci totam. Voluptatum iusto perspiciatis est vel repellat non voluptas. Enim ut natus explicabo quaerat. Fuga at laborum possimus ipsam. Учитесь у экспертов отрасли и создавайте реальные проекты.','Базовые знания программирования. Знакомство с voluptate.','обучение, программирование, кодирование','2025-09-11 06:25:04','2025-09-11 06:25:04');
+/*!40000 ALTER TABLE `course_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `courses`
+--
+
+DROP TABLE IF EXISTS `courses`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `courses` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '0 pending, 1 inactive, 2 active',
+  `title` json DEFAULT NULL,
+  `description` json DEFAULT NULL,
+  `prerequisites` json DEFAULT NULL,
+  `keywords` json DEFAULT NULL,
+  `course_category_id` bigint(20) unsigned NOT NULL,
+  `instructor_id` bigint(20) unsigned NOT NULL,
+  `courseType` enum('free','paid','subscription') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `coursePrice` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `courseOldPrice` decimal(10,2) DEFAULT NULL,
+  `subscription_price` decimal(10,2) DEFAULT NULL,
+  `start_from` date NOT NULL,
+  `duration` int(11) NOT NULL,
+  `lesson` int(11) NOT NULL,
+  `course_code` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `thumbnail_video_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `tag` enum('popular','featured','upcoming') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `thumbnail_image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `thumbnail_video_file` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `courses_course_category_id_foreign` (`course_category_id`),
+  KEY `courses_instructor_id_foreign` (`instructor_id`),
+  CONSTRAINT `courses_course_category_id_foreign` FOREIGN KEY (`course_category_id`) REFERENCES `course_categories` (`id`),
+  CONSTRAINT `courses_instructor_id_foreign` FOREIGN KEY (`instructor_id`) REFERENCES `instructors` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `courses`
+--
+
+LOCK TABLES `courses` WRITE;
+/*!40000 ALTER TABLE `courses` DISABLE KEYS */;
+INSERT INTO `courses` VALUES (1,1,NULL,NULL,NULL,NULL,11,1,'subscription',483.73,787.77,14.31,'2026-05-23',9,23,'CRS1264','http://zboncak.org/','popular','https://via.placeholder.com/800x600.png/00cc22?text=education+illo','https://via.placeholder.com/400x300.png/004422?text=education+ut','/tmp/faker01prfnpe8672byCDLC9','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL);
+/*!40000 ALTER TABLE `courses` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `discussions`
 --
 
+DROP TABLE IF EXISTS `discussions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `discussions` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `user_id` bigint(20) UNSIGNED NOT NULL,
-  `course_id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `content` text NOT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) unsigned NOT NULL,
+  `course_id` bigint(20) unsigned NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `discussions_user_id_index` (`user_id`),
+  KEY `discussions_course_id_index` (`course_id`),
+  CONSTRAINT `discussions_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `discussions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- --------------------------------------------------------
+--
+-- Dumping data for table `discussions`
+--
+
+LOCK TABLES `discussions` WRITE;
+/*!40000 ALTER TABLE `discussions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `discussions` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `enrollments`
 --
 
+DROP TABLE IF EXISTS `enrollments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `enrollments` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `student_id` bigint(20) UNSIGNED NOT NULL,
-  `course_id` bigint(20) UNSIGNED NOT NULL,
-  `enrollment_date` timestamp NOT NULL DEFAULT '2023-11-27 09:13:29',
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `student_id` bigint(20) unsigned NOT NULL,
+  `course_id` bigint(20) unsigned NOT NULL,
+  `enrollment_date` timestamp NOT NULL DEFAULT '2025-09-11 06:24:57',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `enrollments_student_id_index` (`student_id`),
+  KEY `enrollments_course_id_index` (`course_id`),
+  CONSTRAINT `enrollments_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `enrollments_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `enrollments`
 --
 
-INSERT INTO `enrollments` (`id`, `student_id`, `course_id`, `enrollment_date`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(14, 17, 6, '2023-12-31 18:00:00', '2024-01-01 11:43:52', '2024-01-01 11:43:52', NULL);
-
--- --------------------------------------------------------
+LOCK TABLES `enrollments` WRITE;
+/*!40000 ALTER TABLE `enrollments` DISABLE KEYS */;
+/*!40000 ALTER TABLE `enrollments` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `events`
 --
 
+DROP TABLE IF EXISTS `events`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `events` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text NOT NULL,
-  `image` varchar(255) DEFAULT NULL,
-  `topic` text DEFAULT NULL,
-  `goal` text DEFAULT NULL,
-  `location` varchar(255) DEFAULT NULL,
-  `hosted_by` varchar(255) DEFAULT NULL,
-  `date` datetime DEFAULT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `location` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `topic` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `goal` text COLLATE utf8mb4_unicode_ci,
+  `hosted_by` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date` date DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `events`
 --
 
-INSERT INTO `events` (`id`, `title`, `description`, `image`, `topic`, `goal`, `location`, `hosted_by`, `date`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(11, 'TechTalk Series: Exploring the Future of Artificial Intelligence', 'Join us for an immersive exploration into the fascinating world of Artificial Intelligence. In this TechTalk series, our expert panelists will delve deep into the latest trends, breakthroughs, and real-world applications of AI. From machine learning to natural language processing, discover how AI is reshaping industries and influencing our daily lives. This virtual event is designed for both enthusiasts and professionals seeking a comprehensive understanding of the future possibilities that AI holds. Do not miss out on this opportunity to engage with thought leaders and expand your knowledge in the realm of Artificial Intelligence.', '1.jpg', 'Artificial Intelligence', 'Enhance understanding of AI current landscape and its potential future impact.', 'Virtual Event', 'Your Platform Team', '2024-01-10 00:00:00', NULL, NULL, NULL),
-(12, 'Mastering Web Design and Development: A Hands-On Workshop', 'Embark on a journey to master the art of web development with our intensive hands-on workshop. Whether you are a beginner or an experienced developer, this event is designed to elevate your skills to new heights. Join industry professionals as they guide you through essential coding techniques, best practices, and the latest trends in web development. Bring your laptop and get ready to code alongside experts in a collaborative virtual environment. This workshop promises an interactive and enriching experience for all participants.', '2.jpg', 'Web Development', 'Equip participants with practical skills to excel in web development.', 'On Site Classroom', 'Your Platform Team', '2024-02-15 00:00:00', NULL, NULL, NULL),
-(13, 'Digital Marketing Trends: Navigating the Ever-Changing Landscape', 'Stay ahead of the curve in the dynamic world of digital marketing. Our in-depth webinar explores the latest trends, tools, and strategies that are shaping the digital marketing landscape. Led by seasoned marketing professionals, this event is a must-attend for anyone looking to enhance their online presence and stay competitive in the digital realm. From social media marketing to SEO best practices, gain actionable insights to elevate your digital marketing game.', '3.jpg', 'Digital Marketing', 'Provide an overview of current digital marketing trends and effective implementation strategies.', 'Online Webinar', 'Your Platform Team', '2024-03-20 00:00:00', NULL, NULL, NULL),
-(14, 'Multicultural Language Learning Fiesta: A Global Celebration', 'Embark on a linguistic and cultural journey with our Language Learning Fiesta. Immerse yourself in a multicultural celebration where language enthusiasts can explore diverse languages, traditions, and cuisines from around the world. This virtual event is designed to foster cultural appreciation and language diversity. Join us for a fun-filled experience that transcends borders, connecting people through the universal language of curiosity and understanding.', '4.jpg', 'Language Learning and Cultural Exchange', 'Foster cultural appreciation and language diversity.', 'Virtual Cultural Hub', 'Your Platform Team', '2024-04-25 00:00:00', NULL, NULL, NULL),
-(15, 'Finance Masterclass: Navigating the Stock Market', 'Unlock the secrets of successful investing with our comprehensive finance masterclass. Led by seasoned financial experts, this event goes beyond the basics, guiding participants through the intricacies of the stock market. From investment strategies to risk management, gain valuable insights that will empower both beginners and seasoned investors. Whether you are looking to build a solid investment portfolio or enhance your financial literacy, this online seminar is a must-attend for anyone seeking success in the world of finance.', '5.jpg', 'Finance and Stock Market', 'Empower participants with knowledge and strategies for successful investing.', 'Online Seminar', 'Your Platform Team', '2024-05-30 00:00:00', NULL, NULL, NULL),
-(16, 'Innovate & Inspire: Tech Entrepreneurship Summit', 'Embark on a transformative journey into the realm of tech entrepreneurship. Our summit brings together visionaries, successful entrepreneurs, and industry experts to share insights, strategies, and stories of innovation. From startup success stories to navigating challenges in the tech industry, this event is a goldmine for aspiring and seasoned entrepreneurs alike. Join us in this virtual summit to ignite your entrepreneurial spirit and discover the keys to building successful tech ventures.', '6.jpg', 'Tech Entrepreneurship', 'Inspire and educate participants on the principles and challenges of tech entrepreneurship.', 'Virtual Summit', 'Your Platform Team', '2024-06-15 00:00:00', NULL, NULL, NULL),
-(17, 'Environmental Sustainability Symposium: Shaping a Greener Future', 'Join us for a thought-provoking symposium on environmental sustainability. In this gathering of eco-conscious minds, we will explore the pressing issues facing our planet and discuss innovative solutions for a sustainable future. From renewable energy to waste reduction strategies, this event aims to raise awareness and inspire action towards a greener and more sustainable world. Be part of the change, and let us shape a future that prioritizes the well-being of our planet.', '7.jpg', 'Environmental Sustainability', 'Raise awareness and inspire action for a more sustainable future.', 'Online Symposium', 'Your Platform Team', '2024-07-20 00:00:00', NULL, NULL, NULL),
-(18, 'Wellness and Mindfulness Retreat: Nurturing Your Mind and Body', 'Take a break from the hustle and join us for a virtual wellness retreat focused on nurturing your mind and body. In this rejuvenating experience, we will explore mindfulness practices, relaxation techniques, and holistic wellness approaches. Led by experienced wellness practitioners, this retreat is designed to help you unwind, de-stress, and foster a healthy work-life balance. Prioritize your well-being and join us for a day of self-care and mindfulness.', '8.jpg', 'Wellness and Mindfulness', 'Promote well-being by providing participants with tools and practices for mindfulness and self-care.', 'Virtual Retreat', 'Your Platform Team', '2024-08-25 00:00:00', NULL, NULL, NULL);
+LOCK TABLES `events` WRITE;
+/*!40000 ALTER TABLE `events` DISABLE KEYS */;
+/*!40000 ALTER TABLE `events` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
+-- Table structure for table `events_translations`
+--
+
+DROP TABLE IF EXISTS `events_translations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `events_translations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `event_id` bigint(20) unsigned NOT NULL,
+  `locale` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `topic` text COLLATE utf8mb4_unicode_ci,
+  `goal` text COLLATE utf8mb4_unicode_ci,
+  `location` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `hosted_by` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `events_translations_event_id_locale_unique` (`event_id`,`locale`),
+  CONSTRAINT `events_translations_event_id_foreign` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `events_translations`
+--
+
+LOCK TABLES `events_translations` WRITE;
+/*!40000 ALTER TABLE `events_translations` DISABLE KEYS */;
+/*!40000 ALTER TABLE `events_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `instructor_translations`
+--
+
+DROP TABLE IF EXISTS `instructor_translations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `instructor_translations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `instructor_id` bigint(20) unsigned NOT NULL,
+  `locale` varchar(5) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `bio` text COLLATE utf8mb4_unicode_ci,
+  `designation` text COLLATE utf8mb4_unicode_ci,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `instructor_translations_instructor_id_foreign` (`instructor_id`),
+  CONSTRAINT `instructor_translations_instructor_id_foreign` FOREIGN KEY (`instructor_id`) REFERENCES `instructors` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `instructor_translations`
+--
+
+LOCK TABLES `instructor_translations` WRITE;
+/*!40000 ALTER TABLE `instructor_translations` DISABLE KEYS */;
+INSERT INTO `instructor_translations` VALUES (1,1,'en','Kaley Rice (en)','In necessitatibus eligendi ut consectetur voluptatem fugit veniam. Sunt itaque aut quia eaque. Ut aut est ab omnis.','Bulldozer Operator','numquam veritatis','2025-09-11 06:25:04','2025-09-11 06:25:04'),(2,1,'ru','Mr. Marc Schoen (ru)','Et sit consequatur delectus sunt voluptas aliquam adipisci voluptatem. Numquam id modi expedita perferendis soluta. Dicta labore velit aliquid qui aut sed.','Stonemason','blanditiis placeat','2025-09-11 06:25:04','2025-09-11 06:25:04'),(3,1,'ka','Dr. Keith Spinka DDS (ka)','Delectus explicabo qui explicabo non placeat praesentium cum. Et impedit sunt dolore est. Animi dignissimos illo illum consectetur culpa. Temporibus ad sapiente voluptatibus perspiciatis iusto ipsum.','Marking Machine Operator','sit odit','2025-09-11 06:25:04','2025-09-11 06:25:04');
+/*!40000 ALTER TABLE `instructor_translations` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `instructors`
 --
 
+DROP TABLE IF EXISTS `instructors`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `instructors` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `contact` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `role_id` bigint(20) UNSIGNED NOT NULL,
-  `bio` text DEFAULT NULL,
-  `title` varchar(255) DEFAULT NULL,
-  `designation` varchar(255) DEFAULT NULL,
-  `image` varchar(255) DEFAULT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1 active, 0 inactive',
-  `password` varchar(255) NOT NULL,
-  `language` varchar(255) NOT NULL DEFAULT 'en',
-  `access_block` text DEFAULT NULL,
-  `remember_token` varchar(100) DEFAULT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` json DEFAULT NULL,
+  `contact` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role_id` bigint(20) unsigned NOT NULL,
+  `bio` json DEFAULT NULL,
+  `title` json DEFAULT NULL,
+  `designation` json DEFAULT NULL,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1 active, 0 inactive',
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `language` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
+  `access_block` text COLLATE utf8mb4_unicode_ci,
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `instructors_contact_unique` (`contact`),
+  UNIQUE KEY `instructors_email_unique` (`email`),
+  KEY `instructors_role_id_index` (`role_id`),
+  CONSTRAINT `instructors_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `instructors`
 --
 
-INSERT INTO `instructors` (`id`, `name`, `contact`, `email`, `role_id`, `bio`, `title`, `designation`, `image`, `status`, `password`, `language`, `access_block`, `remember_token`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 'Burhan Uddin Fuad', NULL, '01828543453', NULL, 'fuad@gmail.com', 3, 'Fuad is a highly skilled Full Stack Web Developer with over 10 years of experience. He specializes in front-end and back-end development, bringing a wealth of knowledge in modern web technologies. John is passionate about teaching and enjoys sharing his expertise with aspiring developers.', 'Experienced Full Stack Web Developer passionate about teaching modern web technologies.', 'Senior Instructor', 'Instructor_Burhan Uddin Fuad_137.jpg', 1, '$2y$12$ZsGZnJfm4sKnDmH/nzDdf.3/ZthTEmY99rA9m/rPAXHx1UE6QhJCG', 'en', NULL, NULL, '2023-11-25 15:35:23', '2024-02-21 14:15:36', NULL),
-(2, 'Thouhidul Islam', NULL, '801300029', NULL, 'thouhid@gmail.com', 3, 'Thouhid is an Animation Expert and Video/Graphics Instructor known for her innovative approach to storytelling through animation. With a background in both 2D and 3D animation, Emily guides students through the world of visual storytelling, helping them unleash their creative potential.', '2D Animation and Short Video Ads Specialist', 'Animation Expert', 'Instructor_Thouhidul Islam_766.jpg', 1, '$2y$12$FNBov.CIK58wPQcSSKRToOMru6xabDZvdY34wpOH4Y/PCLZ4VyOLu', 'en', NULL, NULL, '2023-11-25 18:18:45', '2024-02-21 14:17:18', NULL),
-(3, 'Raihan Sazzad', NULL, '3218974218', NULL, 'raihan@gmail.com', 3, 'Raihan is an Animation Expert and Video/Graphics Instructor known for her innovative approach to storytelling through animation. With a background in both 2D and 3D animation, Emily guides students through the world of visual storytelling, helping them unleash their creative potential.', 'Professional Designer Who Loves to Design', 'UI UX Designer', 'Instructor_Raihan Sazzad_662.jpg', 1, '$2y$12$1x1.vxwZaewnKtRrl4Ieh.8sMHFgz8DFsR5SeAdjPPwQiAiCEEGR6', 'en', NULL, NULL, '2023-12-04 17:25:20', '2024-02-21 14:18:56', NULL),
-(4, 'Joshim Uddin', NULL, '675664644', NULL, 'joshim@gmail.com', 3, 'Joshim a passionate and results-oriented Digital Marketer with a knack for navigating the ever-evolving landscape of online promotion. With a strategic mindset, he specialize in crafting data-driven marketing campaigns that elevate brand visibility and engagement.', 'Expert in SMM and Lead Generation', 'Digital Marketer', 'Instructor_Joshim Uddin_155.jpg', 1, '$2y$12$t3XmqNf9miC7kaBXYTsAXuBWOZ.ySxQViaaUjh9W78f9DRQhrUvhm', 'en', NULL, NULL, '2023-12-04 17:27:57', '2024-02-21 14:19:51', NULL),
-(5, 'Asadullah Galib', NULL, '3453534521', NULL, 'galib@gmail.com', 3, 'Galib is an experienced Full Stack Web Developer known for her expertise in building scalable and robust web applications. With a background in both front-end and back-end development, Jane is dedicated to helping students master the skills needed for success in the ever-evolving field of web development.', 'Full Stack Web Developer', 'Lead Instructor', 'Instructor_Asadullah Galib_310.jpg', 1, '$2y$12$rVB66yb.OKaVj0HKcilFweoK5nOx.dJ4e2GHvyaITMvs0DPGgLEpm', 'en', NULL, NULL, '2023-12-05 04:18:26', '2024-02-21 14:20:17', NULL);
-
--- --------------------------------------------------------
+LOCK TABLES `instructors` WRITE;
+/*!40000 ALTER TABLE `instructors` DISABLE KEYS */;
+INSERT INTO `instructors` VALUES (1,NULL,'716-862-4509','delpha89@example.org',3,NULL,NULL,NULL,'instructor_5.jpg',1,'$2y$12$J5XAjkq8RSBkz0Py2gLq8.vEsiKy8E2a2JWG/CUsyTtVnd/A53u4G','en','1',NULL,'2025-09-11 06:25:04','2025-09-11 06:25:04',NULL);
+/*!40000 ALTER TABLE `instructors` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `lessons`
 --
 
+DROP TABLE IF EXISTS `lessons`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `lessons` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `course_id` bigint(20) UNSIGNED NOT NULL,
-  `description` text DEFAULT NULL,
-  `notes` text DEFAULT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `course_id` bigint(20) unsigned NOT NULL,
+  `quiz_id` bigint(20) unsigned DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `notes` text COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `lessons_course_id_index` (`course_id`),
+  KEY `lessons_quiz_id_foreign` (`quiz_id`),
+  CONSTRAINT `lessons_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `lessons_quiz_id_foreign` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `lessons`
 --
 
-INSERT INTO `lessons` (`id`, `title`, `course_id`, `description`, `notes`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 'Introduction to HTML', 6, 'In this lesson, students will be introduced to the fundamental structure of web development with HTML (Hypertext Markup Language). They will learn about the basic syntax of HTML tags, the document structure, and how to create a simple webpage. Emphasis will be placed on understanding the purpose of common HTML elements such as headings, paragraphs, lists, and links.', 'Introduction to HTML:\r\n\r\nHTML stands for Hypertext Markup Language.\r\nIt is the standard markup language for creating web pages.\r\nHTML tags are used to define and structure content on a webpage.\r\nDocument Structure:\r\n\r\nExplain the basic structure of an HTML document: !DOCTYPE html, html, head, and body tags.\r\nDiscuss the purpose of the head section for meta-information and the body section for content.\r\nCommon HTML Elements:\r\n\r\nIntroduce essential HTML tags such as h1, p, ul, li, and a.\r\nDemonstrate how to create hyperlinks using the a tag.\r\nHands-on Activity:\r\n\r\nHave students create a simple webpage with a heading, paragraphs, a list, and a hyperlink.\r\nEncourage them to experiment with different HTML elements.', '2023-12-17 12:28:08', '2023-12-21 00:14:51', NULL),
-(2, 'Introduction to CSS', 6, 'This lesson focuses on Cascading Style Sheets (CSS) and how it is used to enhance the presentation of HTML documents. Students will learn about selectors, properties, and values. The goal is for students to understand how to apply styles to HTML elements and gain insight into the concept of styling cascades.', 'Introduction to CSS:\r\n\r\nCSS stands for Cascading Style Sheets.\r\nIt is used to style the layout and presentation of HTML documents.\r\nSelectors and Properties:\r\n\r\nIntroduce CSS selectors and how they target HTML elements.\r\nDiscuss common CSS properties such as color, font-size, margin, and padding.\r\nBox Model:\r\n\r\nExplain the CSS box model: margin, border, padding, and content.\r\nDemonstrate how to use the box model to control spacing and layout.\r\nStyling Cascades:\r\n\r\nDiscuss the concept of cascading styles and how conflicting styles are resolved.\r\nIntroduce specificity and the importance of understanding the order of styles.\r\nHands-on Activity:\r\n\r\nHave students apply styles to the HTML webpage created in Lesson 1.\r\nExperiment with changing colors, fonts, and layout properties.', '2023-12-17 21:21:51', '2023-12-21 00:16:54', NULL),
-(3, 'JavaScript Tutorial', 6, 'This lesson introduces students to the basics of JavaScript, a programming language that enables dynamic and interactive web pages. Students will learn about variables, data types, and basic control structures. The lesson culminates in a simple interactive program.', 'Introduction to JavaScript:\r\n\r\nJavaScript is a scripting language that enables client-side interactivity in web browsers.\r\nIt is used to manipulate the content and behavior of HTML documents.\r\nVariables and Data Types:\r\n\r\nIntroduce the concept of variables and how they are used to store data.\r\nCover basic data types: strings, numbers, and booleans.\r\nBasic Control Structures:\r\n\r\nExplain control structures such as if statements for conditional logic.\r\nIntroduce loops, specifically the for loop, for repetitive tasks.\r\nDOM Manipulation:\r\n\r\nDiscuss the Document Object Model (DOM) and how JavaScript can be used to manipulate HTML elements dynamically.\r\nShow examples of changing text, styles, and adding/removing elements.\r\nHands-on Activity:\r\n\r\nGuide students in creating a simple interactive program using JavaScript.\r\nEncourage them to modify the HTML and CSS based on user interactions.', '2023-12-19 21:51:36', '2023-12-21 00:17:47', NULL);
+LOCK TABLES `lessons` WRITE;
+/*!40000 ALTER TABLE `lessons` DISABLE KEYS */;
+INSERT INTO `lessons` VALUES (1,NULL,1,NULL,NULL,NULL,'2025-09-11 06:25:04','2025-09-11 06:25:04',NULL);
+/*!40000 ALTER TABLE `lessons` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
+-- Table structure for table `lessons_translations`
+--
+
+DROP TABLE IF EXISTS `lessons_translations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `lessons_translations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `lesson_id` bigint(20) unsigned NOT NULL,
+  `locale` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `lessons_translations_lesson_id_locale_unique` (`lesson_id`,`locale`),
+  CONSTRAINT `lessons_translations_lesson_id_foreign` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lessons_translations`
+--
+
+LOCK TABLES `lessons_translations` WRITE;
+/*!40000 ALTER TABLE `lessons_translations` DISABLE KEYS */;
+INSERT INTO `lessons_translations` VALUES (1,1,'en','Принципы проектирования баз данных 6','Quibusdam numquam consectetur voluptate non quae sint. Dicta alias odit voluptate necessitatibus. Rem magni qui ullam fugit tenetur vero repudiandae. Eligendi saepe adipisci illum et officia.\n\nVelit quasi atque eius error enim omnis molestiae praesentium. Id beatae pariatur eveniet esse doloribus. Necessitatibus incidunt alias alias inventore doloribus. Velit dolor in itaque distinctio. Изучайте практические навыки и применяйте их в реальных проектах.','Rerum repudiandae et ipsum impedit. Iure at laboriosam omnis minima officiis ex quo. Earum in ullam consequatur ad et.\n• Ключевые моменты для запоминания\n• Дополнительные ресурсы: https://www.rohan.biz/veniam-quo-rerum-optio-laborum-qui','2025-09-11 06:25:04','2025-09-11 06:25:04'),(2,1,'ru','Introduction to Programming 6','Qui nihil voluptas saepe voluptatem et. Pariatur nobis dolorum commodi minus voluptas repudiandae at. Aut occaecati ab enim in nostrum illum velit. Ducimus ipsa non porro fuga. Perspiciatis ut qui eos explicabo exercitationem facere non.\n\nTenetur ut blanditiis adipisci consequuntur inventore. Magni est illum sit facere. Labore architecto dolorem et consequuntur sapiente qui ab illum. Learn practical skills and apply them in real projects.','Commodi voluptas itaque voluptate saepe beatae ut debitis. Rerum placeat ipsa assumenda nam quo dolores. Perferendis sunt commodi esse nihil sed. Dignissimos veritatis aperiam repellat porro harum.\n• Key points to remember\n• Additional resources: http://mann.org/','2025-09-11 06:25:04','2025-09-11 06:25:04'),(3,1,'ka','Backend Development Techniques 9','Nihil blanditiis facere cumque. Minus quae modi aliquid quia vel nisi et. Occaecati similique aut error error quidem sequi.\n\nQuia ratione repudiandae eum ducimus. Quia blanditiis voluptas quod molestiae aut. Et quasi velit et dolor ducimus. Learn practical skills and apply them in real projects.','Sed fuga delectus sed dolore alias nihil aspernatur. Iste voluptate animi magni omnis a sequi. Alias similique adipisci ab ipsa ut. Odio consequatur nostrum odit doloribus accusamus omnis autem.\n• Key points to remember\n• Additional resources: http://larkin.com/autem-dolorem-blanditiis-consequuntur-ipsam.html','2025-09-11 06:25:04','2025-09-11 06:25:04');
+/*!40000 ALTER TABLE `lessons_translations` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `materials`
 --
 
+DROP TABLE IF EXISTS `materials`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `materials` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `lesson_id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `type` enum('video','document','quiz') NOT NULL,
-  `content` varchar(255) DEFAULT NULL,
-  `content_url` text DEFAULT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `lesson_id` bigint(20) unsigned NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `type` enum('video','document','quiz') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `content_url` text COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `materials_lesson_id_index` (`lesson_id`),
+  CONSTRAINT `materials_lesson_id_foreign` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `materials`
 --
 
-INSERT INTO `materials` (`id`, `lesson_id`, `title`, `type`, `content`, `content_url`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 1, 'HTML Attributes', 'video', '5971703138819.mp4', NULL, '2023-12-17 21:16:21', '2023-12-21 00:05:53', NULL),
-(2, 1, 'HTML Tables', 'video', '5971703138819.mp4', NULL, '2023-12-17 21:23:30', '2023-12-21 00:06:07', NULL),
-(3, 2, 'CSS Syntax', 'video', '5971703138819.mp4', NULL, '2023-12-19 21:45:05', '2023-12-21 00:06:25', NULL),
-(4, 2, 'CSS Selectors', 'document', '3971703138919.jpg', NULL, '2023-12-19 21:46:44', '2023-12-21 00:09:25', NULL),
-(5, 2, 'CSS Colors', 'video', '5971703138819.mp4', NULL, '2023-12-19 21:52:59', '2023-12-21 00:06:39', NULL),
-(6, 3, 'JavaScript Statements', 'video', '5971703138819.mp4', NULL, '2023-12-19 21:56:54', '2023-12-21 00:06:59', NULL),
-(7, 3, 'JavaScript Variables', 'document', '3971703138919.jpg', NULL, '2023-12-19 21:59:01', '2023-12-21 00:08:39', NULL),
-(8, 3, 'JavaScript Data Types', 'video', '5971703138819.mp4', NULL, '2023-12-21 00:07:50', '2023-12-21 00:07:50', NULL);
+LOCK TABLES `materials` WRITE;
+/*!40000 ALTER TABLE `materials` DISABLE KEYS */;
+/*!40000 ALTER TABLE `materials` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
+-- Table structure for table `materials_translations`
+--
+
+DROP TABLE IF EXISTS `materials_translations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `materials_translations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `material_id` bigint(20) unsigned NOT NULL,
+  `locale` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `content_text` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `materials_translations_material_id_locale_unique` (`material_id`,`locale`),
+  CONSTRAINT `materials_translations_material_id_foreign` FOREIGN KEY (`material_id`) REFERENCES `materials` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `materials_translations`
+--
+
+LOCK TABLES `materials_translations` WRITE;
+/*!40000 ALTER TABLE `materials_translations` DISABLE KEYS */;
+/*!40000 ALTER TABLE `materials_translations` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `messages`
 --
 
+DROP TABLE IF EXISTS `messages`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `messages` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `sender_id` bigint(20) UNSIGNED NOT NULL,
-  `receiver_id` bigint(20) UNSIGNED NOT NULL,
-  `content` text NOT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `sender_id` bigint(20) unsigned NOT NULL,
+  `receiver_id` bigint(20) unsigned NOT NULL,
+  `content` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `messages_sender_id_index` (`sender_id`),
+  KEY `messages_receiver_id_index` (`receiver_id`),
+  CONSTRAINT `messages_receiver_id_foreign` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `messages_sender_id_foreign` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- --------------------------------------------------------
+--
+-- Dumping data for table `messages`
+--
+
+LOCK TABLES `messages` WRITE;
+/*!40000 ALTER TABLE `messages` DISABLE KEYS */;
+/*!40000 ALTER TABLE `messages` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `migrations`
 --
 
+DROP TABLE IF EXISTS `migrations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `migrations` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `migration` varchar(255) NOT NULL,
-  `batch` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `migrations`
 --
 
-INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
-(4, '2019_12_14_000001_create_personal_access_tokens_table', 1),
-(5, '2023_10_12_031415_create_roles_table', 1),
-(9, '2023_11_19_053448_create_course_categories_table', 2),
-(10, '2023_11_22_143059_create_permissions_table', 3),
-(14, '2023_11_25_034933_create_students_table', 4),
-(17, '2023_11_26_034558_create_courses_table', 5),
-(18, '2023_11_26_153556_create_enrollments_table', 6),
-(20, '2023_11_26_153639_create_quizzes_table', 6),
-(21, '2023_11_26_153659_create_questions_table', 6),
-(22, '2023_11_26_153719_create_answers_table', 6),
-(23, '2023_11_26_153735_create_reviews_table', 6),
-(25, '2023_11_26_153818_create_subscriptions_table', 6),
-(27, '2023_11_26_153902_create_discussions_table', 6),
-(28, '2023_11_26_153916_create_messages_table', 6),
-(29, '2023_11_26_153660_create_options_table', 7),
-(30, '2023_12_09_135359_create_coupons_table', 8),
-(32, '2023_12_09_170943_create_checkouts_table', 9),
-(33, '2023_11_26_153754_create_payments_table', 10),
-(34, '2023_11_26_153557_create_lessons_table', 11),
-(35, '2023_11_26_153620_create_materials_table', 12),
-(36, '2023_11_26_153844_create_progress_table', 12),
-(37, '2023_12_20_031354_create_watchlists_table', 13),
-(38, '2023_12_23_070253_add_tag_to_courses_table', 14),
-(41, '2023_11_12_031401_create_instructors_table', 15),
-(42, '2023_11_12_031402_create_users_table', 15),
-(43, '2024_01_01_121113_add_column_to_user_table', 15),
-(44, '2024_01_03_073449_create_events_table', 16);
-
--- --------------------------------------------------------
+LOCK TABLES `migrations` WRITE;
+/*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
+INSERT INTO `migrations` VALUES (1,'2019_12_14_000001_create_personal_access_tokens_table',1),(2,'2023_10_12_031415_create_roles_table',1),(3,'2023_11_12_031401_create_instructors_table',1),(4,'2023_11_12_031402_create_users_table',1),(5,'2023_11_19_053448_create_course_categories_table',1),(6,'2023_11_22_143059_create_permissions_table',1),(7,'2023_11_25_034933_create_students_table',1),(8,'2023_11_26_044558_create_courses_table',1),(9,'2023_11_26_153556_create_enrollments_table',1),(10,'2023_11_26_153557_create_lessons_table',1),(11,'2023_11_26_153620_create_materials_table',1),(12,'2023_11_26_153639_create_quizzes_table',1),(13,'2023_11_26_153735_create_reviews_table',1),(14,'2023_11_26_153754_create_payments_table',1),(15,'2023_11_26_153818_create_subscriptions_table',1),(16,'2023_11_26_153844_create_progress_table',1),(17,'2023_11_26_153902_create_discussions_table',1),(18,'2023_11_26_153916_create_messages_table',1),(19,'2023_12_09_135359_create_coupons_table',1),(20,'2023_12_09_170943_create_checkouts_table',1),(21,'2023_12_20_031354_create_watchlists_table',1),(22,'2024_01_01_121113_add_column_to_user_table',1),(23,'2024_01_03_073449_create_events_table',1),(24,'2025_07_29_084136_create_sessions_table',1),(25,'2025_07_29_092955_add_nullable_to_instructor_id_in_users_table',1),(26,'2025_08_06_104334_create_course_categories_translations_table',1),(27,'2025_08_06_104552_create_instructor_translations_table',1),(28,'2025_08_06_105200_create_lessons_translations_table',1),(29,'2025_08_06_105707_create_events_translations_table',1),(30,'2025_08_06_110144_create_reviews_translations_table',1),(31,'2025_08_06_113852_create_course_translations_table',1),(32,'2025_08_09_075221_create_materials_translations_table',1),(33,'2025_08_11_065153_add_instructor_id_to_users_table',1),(34,'2025_08_24_061128_make_contact_nullable_in_users_table',1),(35,'2025_08_30_034842_add_content_text_to_materials_translations_table',1),(36,'2025_08_30_053540_alter_materials_title_nullable',1),(37,'2025_08_30_095645_add_title_to_instructor_translations_table',1),(38,'2025_09_02_045858_remove_text_fields_from_events_table',1),(39,'2025_09_03_095701_create_questions_table',1),(40,'2025_09_03_095702_create_options_table',1),(41,'2025_09_03_095704_create_quiz_attempts_table',1),(42,'2025_09_03_095705_create_question_answers_table',1),(43,'2025_09_03_101114_create_quizzes_translations_table',1),(44,'2025_09_03_101559_add_quiz_id_to_lessons_table',1),(45,'2025_09_03_115100_create_questions_translations_table',1),(46,'2025_09_03_115101_create_options_translations_table',1),(47,'2025_09_04_052346_make_fields_nullable_in_instructors_table',1),(48,'2025_09_04_054659_migrate_json_to_translations',1),(49,'2025_09_05_045316_add_translation_fields_to_courses_table',1),(50,'2025_09_06_081651_make_lesson_title_nullable',1),(51,'2025_09_07_054957_create_student_lesson_progress_table',1),(52,'2025_09_08_100050_add_status_to_courses_table',1),(53,'2025_09_08_100447_create_answers_table',1);
+/*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `options`
 --
 
+DROP TABLE IF EXISTS `options`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `options` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `question_id` bigint(20) UNSIGNED NOT NULL,
-  `option_text` varchar(255) NOT NULL,
-  `is_correct` tinyint(1) NOT NULL DEFAULT 0,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `question_id` bigint(20) unsigned NOT NULL,
+  `is_correct` tinyint(1) NOT NULL DEFAULT '0',
+  `order` int(11) NOT NULL DEFAULT '0',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  PRIMARY KEY (`id`),
+  KEY `options_question_id_index` (`question_id`),
+  CONSTRAINT `options_question_id_foreign` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `options`
 --
 
-INSERT INTO `options` (`id`, `question_id`, `option_text`, `is_correct`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 1, 'Hyper Text Markup Language', 1, '2023-11-28 07:56:46', '2023-11-28 07:56:46', NULL),
-(2, 1, 'Hyperlinks and Text Markup Language', 0, '2023-11-28 07:58:01', '2023-11-28 07:58:01', NULL),
-(3, 1, 'Home Tool Markup Languages', 0, '2023-11-28 07:58:24', '2023-11-28 08:01:38', NULL);
+LOCK TABLES `options` WRITE;
+/*!40000 ALTER TABLE `options` DISABLE KEYS */;
+INSERT INTO `options` VALUES (1,1,1,1,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(2,1,0,2,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(3,1,0,3,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(4,1,0,4,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(5,1,0,5,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(6,2,1,1,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(7,2,0,2,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(8,2,0,3,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(9,2,0,4,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(10,3,1,1,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(11,3,0,2,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(12,3,0,3,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(13,3,0,4,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(14,3,0,5,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(15,5,1,1,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(16,5,1,2,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(17,5,0,3,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(18,6,1,1,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(19,6,0,2,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(20,6,0,3,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(21,6,0,4,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(22,6,0,5,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(23,7,1,1,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(24,7,0,2,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(25,7,0,3,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(26,7,0,4,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(27,8,1,1,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(28,8,0,2,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(29,8,0,3,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(30,8,0,4,'2025-09-11 06:25:05','2025-09-11 06:25:05'),(31,8,0,5,'2025-09-11 06:25:05','2025-09-11 06:25:05');
+/*!40000 ALTER TABLE `options` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
+-- Table structure for table `options_translations`
+--
+
+DROP TABLE IF EXISTS `options_translations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `options_translations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `option_id` bigint(20) unsigned NOT NULL,
+  `locale` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `option_text` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `options_translations_option_id_locale_unique` (`option_id`,`locale`),
+  CONSTRAINT `options_translations_option_id_foreign` FOREIGN KEY (`option_id`) REFERENCES `options` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `options_translations`
+--
+
+LOCK TABLES `options_translations` WRITE;
+/*!40000 ALTER TABLE `options_translations` DISABLE KEYS */;
+INSERT INTO `options_translations` VALUES (1,1,'en','მონაცემთა მთლიანობა და ურთიერთობები','2025-09-11 06:25:05','2025-09-11 06:25:05'),(2,1,'ru','წაკითხვადობა და მოვლა','2025-09-11 06:25:05','2025-09-11 06:25:05'),(3,1,'ka','Model-View-Controller გაყოფა','2025-09-11 06:25:05','2025-09-11 06:25:05'),(4,2,'en','Уменьшает количество запросов к базе данных','2025-09-11 06:25:05','2025-09-11 06:25:05'),(5,2,'ru','С использованием колбэков и промисов','2025-09-11 06:25:05','2025-09-11 06:25:05'),(6,2,'ka','Reduces database queries','2025-09-11 06:25:05','2025-09-11 06:25:05'),(7,3,'en','Readability and maintainability','2025-09-11 06:25:05','2025-09-11 06:25:05'),(8,3,'ru','Для отслеживания изменений в коде','2025-09-11 06:25:05','2025-09-11 06:25:05'),(9,3,'ka','Model-View-Controller გაყოფა','2025-09-11 06:25:05','2025-09-11 06:25:05'),(10,4,'en','Для отслеживания изменений в коде','2025-09-11 06:25:05','2025-09-11 06:25:05'),(11,4,'ru','დიახ, მხარს უჭერს მრავალ პარადიგმას','2025-09-11 06:25:05','2025-09-11 06:25:05'),(12,4,'ka','Classes and objects','2025-09-11 06:25:05','2025-09-11 06:25:05'),(13,5,'en','Adapts to different screen sizes','2025-09-11 06:25:05','2025-09-11 06:25:05'),(14,5,'ru','კოდში ცვლილებების თვალყურის დევნებისთვის','2025-09-11 06:25:05','2025-09-11 06:25:05'),(15,5,'ka','Разделение Model-View-Controller','2025-09-11 06:25:05','2025-09-11 06:25:05'),(16,6,'en','To track changes in code','2025-09-11 06:25:05','2025-09-11 06:25:05'),(17,6,'ru','To track changes in code','2025-09-11 06:25:05','2025-09-11 06:25:05'),(18,6,'ka','Classes and objects','2025-09-11 06:25:05','2025-09-11 06:25:05'),(19,7,'en','Классы и объекты','2025-09-11 06:25:05','2025-09-11 06:25:05'),(20,7,'ru','Читаемость и поддерживаемость','2025-09-11 06:25:05','2025-09-11 06:25:05'),(21,7,'ka','Classes and objects','2025-09-11 06:25:05','2025-09-11 06:25:05'),(22,8,'en','ეგუოდება სხვადასხვა ეკრანის ზომებს','2025-09-11 06:25:05','2025-09-11 06:25:05'),(23,8,'ru','დიახ, მხარს უჭერს მრავალ პარადიგმას','2025-09-11 06:25:05','2025-09-11 06:25:05'),(24,8,'ka','Разделение Model-View-Controller','2025-09-11 06:25:05','2025-09-11 06:25:05'),(25,9,'en','Model-View-Controller separation','2025-09-11 06:25:05','2025-09-11 06:25:05'),(26,9,'ru','Целостность данных и отношения','2025-09-11 06:25:05','2025-09-11 06:25:05'),(27,9,'ka','კოდში ცვლილებების თვალყურის დევნებისთვის','2025-09-11 06:25:05','2025-09-11 06:25:05'),(28,10,'en','ამცირებს მონაცემთა ბაზის მოთხოვნებს','2025-09-11 06:25:05','2025-09-11 06:25:05'),(29,10,'ru','Уменьшает количество запросов к базе данных','2025-09-11 06:25:05','2025-09-11 06:25:05'),(30,10,'ka','კლასები და ობიექტები','2025-09-11 06:25:05','2025-09-11 06:25:05'),(31,11,'en','Data integrity and relationships','2025-09-11 06:25:05','2025-09-11 06:25:05'),(32,11,'ru','Adapts to different screen sizes','2025-09-11 06:25:05','2025-09-11 06:25:05'),(33,11,'ka','Уменьшает количество запросов к базе данных','2025-09-11 06:25:05','2025-09-11 06:25:05'),(34,12,'en','Reduces database queries','2025-09-11 06:25:05','2025-09-11 06:25:05'),(35,12,'ru','HTTPS უზრუნველყოფს დაშიფვრას','2025-09-11 06:25:05','2025-09-11 06:25:05'),(36,12,'ka','Да, поддерживает несколько парадигм','2025-09-11 06:25:05','2025-09-11 06:25:05'),(37,13,'en','ეგუოდება სხვადასხვა ეკრანის ზომებს','2025-09-11 06:25:05','2025-09-11 06:25:05'),(38,13,'ru','ეგუოდება სხვადასხვა ეკრანის ზომებს','2025-09-11 06:25:05','2025-09-11 06:25:05'),(39,13,'ka','Для отслеживания изменений в коде','2025-09-11 06:25:05','2025-09-11 06:25:05'),(40,14,'en','Model-View-Controller გაყოფა','2025-09-11 06:25:05','2025-09-11 06:25:05'),(41,14,'ru','Да, поддерживает несколько парадигм','2025-09-11 06:25:05','2025-09-11 06:25:05'),(42,14,'ka','Читаемость и поддерживаемость','2025-09-11 06:25:05','2025-09-11 06:25:05'),(43,15,'en','Model-View-Controller separation','2025-09-11 06:25:05','2025-09-11 06:25:05'),(44,15,'ru','ამცირებს მონაცემთა ბაზის მოთხოვნებს','2025-09-11 06:25:05','2025-09-11 06:25:05'),(45,15,'ka','Reduces database queries','2025-09-11 06:25:05','2025-09-11 06:25:05'),(46,16,'en','Readability and maintainability','2025-09-11 06:25:05','2025-09-11 06:25:05'),(47,16,'ru','Adapts to different screen sizes','2025-09-11 06:25:05','2025-09-11 06:25:05'),(48,16,'ka','Readability and maintainability','2025-09-11 06:25:05','2025-09-11 06:25:05'),(49,17,'en','Классы и объекты','2025-09-11 06:25:05','2025-09-11 06:25:05'),(50,17,'ru','Classes and objects','2025-09-11 06:25:05','2025-09-11 06:25:05'),(51,17,'ka','წაკითხვადობა და მოვლა','2025-09-11 06:25:05','2025-09-11 06:25:05'),(52,18,'en','Уменьшает количество запросов к базе данных','2025-09-11 06:25:05','2025-09-11 06:25:05'),(53,18,'ru','Классы и объекты','2025-09-11 06:25:05','2025-09-11 06:25:05'),(54,18,'ka','Model-View-Controller გაყოფა','2025-09-11 06:25:05','2025-09-11 06:25:05'),(55,19,'en','С использованием колбэков и промисов','2025-09-11 06:25:05','2025-09-11 06:25:05'),(56,19,'ru','კოდში ცვლილებების თვალყურის დევნებისთვის','2025-09-11 06:25:05','2025-09-11 06:25:05'),(57,19,'ka','Using callbacks and promises','2025-09-11 06:25:05','2025-09-11 06:25:05'),(58,20,'en','Adapts to different screen sizes','2025-09-11 06:25:05','2025-09-11 06:25:05'),(59,20,'ru','Адаптируется к разным размерам экранов','2025-09-11 06:25:05','2025-09-11 06:25:05'),(60,20,'ka','Для отслеживания изменений в коде','2025-09-11 06:25:05','2025-09-11 06:25:05'),(61,21,'en','Разделение Model-View-Controller','2025-09-11 06:25:05','2025-09-11 06:25:05'),(62,21,'ru','To track changes in code','2025-09-11 06:25:05','2025-09-11 06:25:05'),(63,21,'ka','კოდში ცვლილებების თვალყურის დევნებისთვის','2025-09-11 06:25:05','2025-09-11 06:25:05'),(64,22,'en','Да, поддерживает несколько парадигм','2025-09-11 06:25:05','2025-09-11 06:25:05'),(65,22,'ru','კლასები და ობიექტები','2025-09-11 06:25:05','2025-09-11 06:25:05'),(66,22,'ka','Читаемость и поддерживаемость','2025-09-11 06:25:05','2025-09-11 06:25:05'),(67,23,'en','Yes, it supports multiple paradigms','2025-09-11 06:25:05','2025-09-11 06:25:05'),(68,23,'ru','Классы и объекты','2025-09-11 06:25:05','2025-09-11 06:25:05'),(69,23,'ka','Да, поддерживает несколько парадигм','2025-09-11 06:25:05','2025-09-11 06:25:05'),(70,24,'en','Data integrity and relationships','2025-09-11 06:25:05','2025-09-11 06:25:05'),(71,24,'ru','Data integrity and relationships','2025-09-11 06:25:05','2025-09-11 06:25:05'),(72,24,'ka','Yes, it supports multiple paradigms','2025-09-11 06:25:05','2025-09-11 06:25:05'),(73,25,'en','To track changes in code','2025-09-11 06:25:05','2025-09-11 06:25:05'),(74,25,'ru','Уменьшает количество запросов к базе данных','2025-09-11 06:25:05','2025-09-11 06:25:05'),(75,25,'ka','დიახ, მხარს უჭერს მრავალ პარადიგმას','2025-09-11 06:25:05','2025-09-11 06:25:05'),(76,26,'en','To track changes in code','2025-09-11 06:25:05','2025-09-11 06:25:05'),(77,26,'ru','Adapts to different screen sizes','2025-09-11 06:25:05','2025-09-11 06:25:05'),(78,26,'ka','Читаемость и поддерживаемость','2025-09-11 06:25:05','2025-09-11 06:25:05'),(79,27,'en','Разделение Model-View-Controller','2025-09-11 06:25:05','2025-09-11 06:25:05'),(80,27,'ru','HTTPS обеспечивает шифрование','2025-09-11 06:25:05','2025-09-11 06:25:05'),(81,27,'ka','Классы и объекты','2025-09-11 06:25:05','2025-09-11 06:25:05'),(82,28,'en','Читаемость и поддерживаемость','2025-09-11 06:25:05','2025-09-11 06:25:05'),(83,28,'ru','ეგუოდება სხვადასხვა ეკრანის ზომებს','2025-09-11 06:25:05','2025-09-11 06:25:05'),(84,28,'ka','ეგუოდება სხვადასხვა ეკრანის ზომებს','2025-09-11 06:25:05','2025-09-11 06:25:05'),(85,29,'en','Readability and maintainability','2025-09-11 06:25:05','2025-09-11 06:25:05'),(86,29,'ru','კლასები და ობიექტები','2025-09-11 06:25:05','2025-09-11 06:25:05'),(87,29,'ka','ამცირებს მონაცემთა ბაზის მოთხოვნებს','2025-09-11 06:25:05','2025-09-11 06:25:05'),(88,30,'en','Data integrity and relationships','2025-09-11 06:25:05','2025-09-11 06:25:05'),(89,30,'ru','Readability and maintainability','2025-09-11 06:25:05','2025-09-11 06:25:05'),(90,30,'ka','Читаемость и поддерживаемость','2025-09-11 06:25:05','2025-09-11 06:25:05'),(91,31,'en','კლასები და ობიექტები','2025-09-11 06:25:05','2025-09-11 06:25:05'),(92,31,'ru','To track changes in code','2025-09-11 06:25:05','2025-09-11 06:25:05'),(93,31,'ka','HTTPS უზრუნველყოფს დაშიფვრას','2025-09-11 06:25:05','2025-09-11 06:25:05');
+/*!40000 ALTER TABLE `options_translations` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `payments`
 --
 
+DROP TABLE IF EXISTS `payments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `payments` (
-  `id` bigint(20) UNSIGNED NOT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `student_id` bigint(20) DEFAULT NULL,
-  `currency` varchar(255) DEFAULT NULL,
-  `currency_code` varchar(255) DEFAULT NULL,
+  `currency` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `currency_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `amount` decimal(10,2) DEFAULT NULL,
   `currency_value` decimal(10,2) DEFAULT NULL,
-  `method` varchar(255) DEFAULT NULL,
-  `txnid` varchar(255) DEFAULT NULL,
-  `status` int(11) NOT NULL DEFAULT 0 COMMENT '0 pending, 1 successfull, 2 fail',
+  `method` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `txnid` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '0 pending, 1 successfull, 2 fail',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `payments`
 --
 
-INSERT INTO `payments` (`id`, `student_id`, `currency`, `currency_code`, `amount`, `currency_value`, `method`, `txnid`, `status`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 10, 'BDT', 'BDT', 182.16, 1.00, 'SSLCommerz', 'SSLCZ_TXN_657699d29ce57', 0, '2023-12-10 23:10:42', '2023-12-10 23:10:42', NULL),
-(2, 10, 'BDT', 'BDT', 91.08, 1.00, 'SSLCommerz', 'SSLCZ_TXN_65769ad5411ed', 1, '2023-12-10 23:15:01', '2023-12-10 23:15:05', NULL),
-(3, 10, 'BDT', 'BDT', 91.08, 1.00, 'SSLCommerz', 'SSLCZ_TXN_65769e8f0cf11', 1, '2023-12-10 23:30:55', '2023-12-10 23:30:59', NULL),
-(4, 10, 'BDT', 'BDT', 182.16, 1.00, 'SSLCommerz', 'SSLCZ_TXN_65769f2a84099', 1, '2023-12-10 23:33:30', '2023-12-10 23:33:34', NULL),
-(5, 14, 'BDT', 'BDT', 113.85, 1.00, 'SSLCommerz', 'SSLCZ_TXN_6576a5e82a723', 1, '2023-12-11 00:02:16', '2023-12-11 00:02:25', NULL),
-(6, 14, 'BDT', 'BDT', 113.85, 1.00, 'SSLCommerz', 'SSLCZ_TXN_6576a7c21ecb3', 0, '2023-12-11 00:10:10', '2023-12-11 00:10:10', NULL),
-(7, 14, 'BDT', 'BDT', 113.85, 1.00, 'SSLCommerz', 'SSLCZ_TXN_6576a8b00421a', 1, '2023-12-11 00:14:08', '2023-12-11 00:14:48', NULL),
-(8, 14, 'BDT', 'BDT', 113.85, 1.00, 'SSLCommerz', 'SSLCZ_TXN_6576a8f323604', 1, '2023-12-11 00:15:15', '2023-12-11 00:15:26', NULL),
-(9, 17, 'BDT', 'BDT', 145.36, 1.00, 'SSLCommerz', 'SSLCZ_TXN_657fea661d5b3', 0, '2023-12-18 00:44:54', '2023-12-18 00:44:54', NULL),
-(10, 17, 'BDT', 'BDT', 145.36, 1.00, 'SSLCommerz', 'SSLCZ_TXN_657feb1853ccc', 0, '2023-12-18 00:47:52', '2023-12-18 00:47:52', NULL),
-(11, 17, 'BDT', 'BDT', 91.08, 1.00, 'SSLCommerz', 'SSLCZ_TXN_657fee632397d', 0, '2023-12-18 01:01:55', '2023-12-18 01:01:55', NULL),
-(12, 17, 'BDT', 'BDT', 113.85, 1.00, 'SSLCommerz', 'SSLCZ_TXN_657fef18a049e', 0, '2023-12-18 01:04:56', '2023-12-18 01:04:56', NULL),
-(13, 17, 'BDT', 'BDT', 113.85, 1.00, 'SSLCommerz', 'SSLCZ_TXN_657ff023049f9', 1, '2023-12-18 01:09:23', '2023-12-18 01:09:26', NULL),
-(14, 17, 'BDT', 'BDT', 0.00, 1.00, 'SSLCommerz', 'SSLCZ_TXN_65810ee5590a9', 0, '2023-12-18 21:32:53', '2023-12-18 21:32:53', NULL),
-(15, 17, 'BDT', 'BDT', 0.00, 1.00, 'SSLCommerz', 'SSLCZ_TXN_65810eeaba3cd', 0, '2023-12-18 21:32:58', '2023-12-18 21:32:58', NULL),
-(16, 17, 'BDT', 'BDT', 67.85, 1.00, 'SSLCommerz', 'SSLCZ_TXN_65810efe527f4', 1, '2023-12-18 21:33:18', '2023-12-18 21:33:25', NULL),
-(17, 17, 'BDT', 'BDT', 4600.00, 1.00, 'SSLCommerz', 'SSLCZ_TXN_65829556dfd67', 1, '2023-12-20 01:18:46', '2023-12-20 01:18:53', NULL),
-(18, 17, 'BDT', 'BDT', 4600.00, 1.00, 'SSLCommerz', 'SSLCZ_TXN_658412e42bb29', 1, '2023-12-21 04:26:44', '2023-12-21 04:26:50', NULL),
-(19, 17, 'BDT', 'BDT', 5750.00, 1.00, 'SSLCommerz', 'SSLCZ_TXN_658676a7d8af0', 1, '2023-12-22 23:56:55', '2023-12-22 23:57:02', NULL),
-(20, 17, 'BDT', 'BDT', 4600.00, 1.00, 'SSLCommerz', 'SSLCZ_TXN_6592f9adf2b79', 1, '2024-01-01 11:43:10', '2024-01-01 11:43:52', NULL);
-
--- --------------------------------------------------------
+LOCK TABLES `payments` WRITE;
+/*!40000 ALTER TABLE `payments` DISABLE KEYS */;
+/*!40000 ALTER TABLE `payments` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `permissions`
 --
 
+DROP TABLE IF EXISTS `permissions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `permissions` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `role_id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `role_id` bigint(20) unsigned NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `permissions_role_id_index` (`role_id`),
+  CONSTRAINT `permissions_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `permissions`
 --
 
-INSERT INTO `permissions` (`id`, `role_id`, `name`, `created_at`, `updated_at`) VALUES
-(185, 1, 'user.index', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(186, 1, 'user.create', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(187, 1, 'user.show', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(188, 1, 'user.edit', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(189, 1, 'user.destroy', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(190, 1, 'role.index', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(191, 1, 'role.create', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(192, 1, 'role.show', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(193, 1, 'role.edit', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(194, 1, 'role.destroy', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(195, 1, 'student.index', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(196, 1, 'student.create', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(197, 1, 'student.show', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(198, 1, 'student.edit', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(199, 1, 'student.destroy', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(200, 1, 'instructor.index', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(201, 1, 'instructor.create', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(202, 1, 'instructor.show', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(203, 1, 'instructor.edit', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(204, 1, 'instructor.destroy', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(205, 1, 'courseCategory.index', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(206, 1, 'courseCategory.create', '2023-11-29 00:37:43', '2023-11-29 00:37:43'),
-(207, 1, 'courseCategory.show', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(208, 1, 'courseCategory.edit', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(209, 1, 'courseCategory.destroy', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(210, 1, 'course.index', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(211, 1, 'course.create', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(212, 1, 'course.show', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(213, 1, 'course.edit', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(214, 1, 'course.destroy', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(215, 1, 'material.index', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(216, 1, 'material.create', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(217, 1, 'material.show', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(218, 1, 'material.edit', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(219, 1, 'material.destroy', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(220, 1, 'quiz.index', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(221, 1, 'quiz.create', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(222, 1, 'quiz.show', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(223, 1, 'quiz.edit', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(224, 1, 'quiz.destroy', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(225, 1, 'question.index', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(226, 1, 'question.create', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(227, 1, 'question.show', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(228, 1, 'question.edit', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(229, 1, 'question.destroy', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(230, 1, 'option.index', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(231, 1, 'option.create', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(232, 1, 'option.show', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(233, 1, 'option.edit', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(234, 1, 'option.destroy', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(235, 1, 'answer.index', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(236, 1, 'answer.create', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(237, 1, 'answer.show', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(238, 1, 'answer.edit', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(239, 1, 'answer.destroy', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(240, 1, 'review.index', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(241, 1, 'review.create', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(242, 1, 'review.show', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(243, 1, 'review.edit', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(244, 1, 'review.destroy', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(245, 1, 'discussion.index', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(246, 1, 'discussion.create', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(247, 1, 'discussion.show', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(248, 1, 'discussion.edit', '2023-11-29 00:37:44', '2023-11-29 00:37:44'),
-(249, 1, 'discussion.destroy', '2023-11-29 00:37:45', '2023-11-29 00:37:45'),
-(250, 1, 'message.index', '2023-11-29 00:37:45', '2023-11-29 00:37:45'),
-(251, 1, 'message.create', '2023-11-29 00:37:45', '2023-11-29 00:37:45'),
-(252, 1, 'message.show', '2023-11-29 00:37:45', '2023-11-29 00:37:45'),
-(253, 1, 'message.edit', '2023-11-29 00:37:45', '2023-11-29 00:37:45'),
-(254, 1, 'message.destroy', '2023-11-29 00:37:45', '2023-11-29 00:37:45'),
-(255, 1, 'permission.list', '2023-11-29 00:37:45', '2023-11-29 00:37:45'),
-(256, 2, 'student.index', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(257, 2, 'student.create', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(258, 2, 'student.show', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(259, 2, 'student.edit', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(260, 2, 'student.destroy', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(261, 2, 'instructor.index', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(262, 2, 'instructor.create', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(263, 2, 'instructor.show', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(264, 2, 'instructor.edit', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(265, 2, 'instructor.destroy', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(266, 2, 'courseCategory.index', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(267, 2, 'courseCategory.create', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(268, 2, 'courseCategory.show', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(269, 2, 'courseCategory.edit', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(270, 2, 'courseCategory.destroy', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(271, 2, 'course.index', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(272, 2, 'course.create', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(273, 2, 'course.show', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(274, 2, 'course.edit', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(275, 2, 'course.destroy', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(276, 2, 'material.index', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(277, 2, 'material.create', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(278, 2, 'material.show', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(279, 2, 'material.edit', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(280, 2, 'material.destroy', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(281, 2, 'quiz.index', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(282, 2, 'quiz.create', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(283, 2, 'quiz.show', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(284, 2, 'quiz.edit', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(285, 2, 'quiz.destroy', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(286, 2, 'question.index', '2023-11-29 00:38:42', '2023-11-29 00:38:42'),
-(287, 2, 'question.create', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(288, 2, 'question.show', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(289, 2, 'question.edit', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(290, 2, 'question.destroy', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(291, 2, 'option.index', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(292, 2, 'option.create', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(293, 2, 'option.show', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(294, 2, 'option.edit', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(295, 2, 'option.destroy', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(296, 2, 'answer.index', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(297, 2, 'answer.create', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(298, 2, 'answer.show', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(299, 2, 'answer.edit', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(300, 2, 'answer.destroy', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(301, 2, 'review.index', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(302, 2, 'review.create', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(303, 2, 'review.show', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(304, 2, 'review.edit', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(305, 2, 'review.destroy', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(306, 2, 'discussion.index', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(307, 2, 'discussion.create', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(308, 2, 'discussion.show', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(309, 2, 'discussion.edit', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(310, 2, 'discussion.destroy', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(311, 2, 'message.index', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(312, 2, 'message.create', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(313, 2, 'message.show', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(314, 2, 'message.edit', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(315, 2, 'message.destroy', '2023-11-29 00:38:43', '2023-11-29 00:38:43'),
-(345, 3, 'user.index', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(346, 3, 'role.index', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(347, 3, 'student.index', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(348, 3, 'instructor.index', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(349, 3, 'courseCategory.index', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(350, 3, 'courseCategory.create', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(351, 3, 'courseCategory.show', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(352, 3, 'courseCategory.edit', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(353, 3, 'courseCategory.destroy', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(354, 3, 'course.index', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(355, 3, 'course.create', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(356, 3, 'course.show', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(357, 3, 'course.edit', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(358, 3, 'course.destroy', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(359, 3, 'material.index', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(360, 3, 'material.create', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(361, 3, 'material.show', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(362, 3, 'material.edit', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(363, 3, 'material.destroy', '2024-01-02 00:45:52', '2024-01-02 00:45:52'),
-(364, 3, 'lesson.index', '2024-01-02 00:45:53', '2024-01-02 00:45:53'),
-(365, 3, 'lesson.create', '2024-01-02 00:45:53', '2024-01-02 00:45:53'),
-(366, 3, 'lesson.show', '2024-01-02 00:45:53', '2024-01-02 00:45:53'),
-(367, 3, 'lesson.edit', '2024-01-02 00:45:53', '2024-01-02 00:45:53'),
-(368, 3, 'lesson.destroy', '2024-01-02 00:45:53', '2024-01-02 00:45:53'),
-(369, 3, 'coupon.index', '2024-01-02 00:45:53', '2024-01-02 00:45:53'),
-(370, 3, 'coupon.create', '2024-01-02 00:45:53', '2024-01-02 00:45:53'),
-(371, 3, 'coupon.show', '2024-01-02 00:45:53', '2024-01-02 00:45:53'),
-(372, 3, 'coupon.edit', '2024-01-02 00:45:53', '2024-01-02 00:45:53'),
-(373, 3, 'coupon.destroy', '2024-01-02 00:45:53', '2024-01-02 00:45:53'),
-(374, 3, 'enrollment.index', '2024-01-02 00:45:53', '2024-01-02 00:45:53');
-
--- --------------------------------------------------------
+LOCK TABLES `permissions` WRITE;
+/*!40000 ALTER TABLE `permissions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `permissions` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `personal_access_tokens`
 --
 
+DROP TABLE IF EXISTS `personal_access_tokens`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `personal_access_tokens` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `tokenable_type` varchar(255) NOT NULL,
-  `tokenable_id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `token` varchar(64) NOT NULL,
-  `abilities` text DEFAULT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `tokenable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tokenable_id` bigint(20) unsigned NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `abilities` text COLLATE utf8mb4_unicode_ci,
   `last_used_at` timestamp NULL DEFAULT NULL,
   `expires_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
+  KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- --------------------------------------------------------
+--
+-- Dumping data for table `personal_access_tokens`
+--
+
+LOCK TABLES `personal_access_tokens` WRITE;
+/*!40000 ALTER TABLE `personal_access_tokens` DISABLE KEYS */;
+/*!40000 ALTER TABLE `personal_access_tokens` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `progress`
 --
 
+DROP TABLE IF EXISTS `progress`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `progress` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `student_id` bigint(20) UNSIGNED NOT NULL,
-  `course_id` bigint(20) UNSIGNED NOT NULL,
-  `progress_percentage` int(11) NOT NULL DEFAULT 0,
-  `completed` tinyint(1) NOT NULL DEFAULT 0,
-  `last_viewed_material_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `student_id` bigint(20) unsigned NOT NULL,
+  `course_id` bigint(20) unsigned NOT NULL,
+  `progress_percentage` int(11) NOT NULL DEFAULT '0',
+  `completed` tinyint(1) NOT NULL DEFAULT '0',
+  `last_viewed_material_id` bigint(20) unsigned DEFAULT NULL,
   `last_viewed_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `progress_student_id_index` (`student_id`),
+  KEY `progress_course_id_index` (`course_id`),
+  KEY `progress_last_viewed_material_id_index` (`last_viewed_material_id`),
+  CONSTRAINT `progress_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `progress_last_viewed_material_id_foreign` FOREIGN KEY (`last_viewed_material_id`) REFERENCES `materials` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `progress_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- --------------------------------------------------------
+--
+-- Dumping data for table `progress`
+--
+
+LOCK TABLES `progress` WRITE;
+/*!40000 ALTER TABLE `progress` DISABLE KEYS */;
+/*!40000 ALTER TABLE `progress` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `question_answers`
+--
+
+DROP TABLE IF EXISTS `question_answers`; 
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `question_answers` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `attempt_id` bigint(20) unsigned NOT NULL,
+  `question_id` bigint(20) unsigned NOT NULL,
+  `user_id` bigint(20) unsigned NOT NULL,
+  `text_answer` text COLLATE utf8mb4_unicode_ci,
+  `rating_answer` int(11) DEFAULT NULL,
+  `is_correct` tinyint(1) DEFAULT NULL,
+  `points_earned` int(11) NOT NULL DEFAULT '0',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `question_answers_attempt_id_index` (`attempt_id`),
+  KEY `question_answers_question_id_index` (`question_id`),
+  KEY `question_answers_user_id_index` (`user_id`),
+  CONSTRAINT `question_answers_attempt_id_foreign` FOREIGN KEY (`attempt_id`) REFERENCES `quiz_attempts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `question_answers_question_id_foreign` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `question_answers_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `question_answers`
+--
+
+LOCK TABLES `question_answers` WRITE;
+/*!40000 ALTER TABLE `question_answers` DISABLE KEYS */;
+/*!40000 ALTER TABLE `question_answers` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `questions`
 --
 
+DROP TABLE IF EXISTS `questions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `questions` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `quiz_id` bigint(20) UNSIGNED NOT NULL,
-  `content` text NOT NULL,
-  `type` enum('multiple_choice','true_false','short_answer') NOT NULL,
-  `option_a` varchar(255) DEFAULT NULL,
-  `option_b` varchar(255) DEFAULT NULL,
-  `option_c` varchar(255) DEFAULT NULL,
-  `option_d` varchar(255) DEFAULT NULL,
-  `correct_answer` varchar(255) DEFAULT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `quiz_id` bigint(20) unsigned NOT NULL,
+  `type` enum('single','multiple','text','rating') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'single',
+  `order` int(11) NOT NULL DEFAULT '0',
+  `points` int(11) NOT NULL DEFAULT '1',
+  `is_required` tinyint(1) NOT NULL DEFAULT '1',
+  `max_choices` int(11) DEFAULT NULL,
+  `min_rating` int(11) DEFAULT NULL,
+  `max_rating` int(11) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `questions_quiz_id_index` (`quiz_id`),
+  CONSTRAINT `questions_quiz_id_foreign` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `questions`
 --
 
-INSERT INTO `questions` (`id`, `quiz_id`, `content`, `type`, `option_a`, `option_b`, `option_c`, `option_d`, `correct_answer`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 1, 'What does HTML stand for?', 'multiple_choice', 'Hyper Text Markup Language', 'Hyperlinks and Text Markup Language', 'Home Tool Markup Languages', 'Home Text Making Language', 'a', '2023-11-28 06:04:51', '2023-11-28 23:39:14', NULL),
-(2, 1, 'Which tag is used to display bold text?', 'multiple_choice', '<a>', '<bold>', '<b>', '<abbr>', 'c', '2023-11-28 06:05:24', '2023-11-28 23:40:30', NULL);
+LOCK TABLES `questions` WRITE;
+/*!40000 ALTER TABLE `questions` DISABLE KEYS */;
+INSERT INTO `questions` VALUES (1,1,'single',9,4,1,NULL,NULL,NULL,'2025-09-11 06:25:05','2025-09-11 06:25:05',NULL),(2,1,'single',13,9,1,NULL,NULL,NULL,'2025-09-11 06:25:05','2025-09-11 06:25:05',NULL),(3,1,'single',4,9,0,NULL,NULL,NULL,'2025-09-11 06:25:05','2025-09-11 06:25:05',NULL),(4,1,'rating',11,1,1,NULL,1,9,'2025-09-11 06:25:05','2025-09-11 06:25:05',NULL),(5,1,'multiple',11,5,1,5,NULL,NULL,'2025-09-11 06:25:05','2025-09-11 06:25:05',NULL),(6,1,'single',2,2,0,NULL,NULL,NULL,'2025-09-11 06:25:05','2025-09-11 06:25:05',NULL),(7,1,'single',10,6,1,NULL,NULL,NULL,'2025-09-11 06:25:05','2025-09-11 06:25:05',NULL),(8,1,'multiple',10,10,0,4,NULL,NULL,'2025-09-11 06:25:05','2025-09-11 06:25:05',NULL),(9,1,'text',20,7,0,NULL,NULL,NULL,'2025-09-11 06:25:05','2025-09-11 06:25:05',NULL);
+/*!40000 ALTER TABLE `questions` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
+-- Table structure for table `questions_translations`
+--
+
+DROP TABLE IF EXISTS `questions_translations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `questions_translations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `question_id` bigint(20) unsigned NOT NULL,
+  `locale` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `questions_translations_question_id_locale_unique` (`question_id`,`locale`),
+  CONSTRAINT `questions_translations_question_id_foreign` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `questions_translations`
+--
+
+LOCK TABLES `questions_translations` WRITE;
+/*!40000 ALTER TABLE `questions_translations` DISABLE KEYS */;
+INSERT INTO `questions_translations` VALUES (1,1,'en','როგორ უმჯობესებს კეშირება აპლიკაციის მუშაობას?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(2,1,'ru','Which programming paradigm does Python support?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(3,1,'ka','როგორ უმჯობესებს კეშირება აპლიკაციის მუშაობას?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(4,2,'en','Опишите архитектурный паттерн MVC.','2025-09-11 06:25:05','2025-09-11 06:25:05'),(5,2,'ru','What are the principles of clean code?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(6,2,'ka','როგორ ამუშავებს JavaScript ასინქრონულ ოპერაციებს?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(7,3,'en','ახსენით რესპონსიული ვებ-დიზაინის კონცეფცია.','2025-09-11 06:25:05','2025-09-11 06:25:05'),(8,3,'ru','What are the advantages of using a relational database?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(9,3,'ka','რა არის სუფთა კოდის პრინციპები?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(10,4,'en','ახსენით ობიექტზე-ორიენტირებული პროგრამირების კონცეფცია.','2025-09-11 06:25:05','2025-09-11 06:25:05'),(11,4,'ru','Каковы преимущества использования реляционной базы данных?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(12,4,'ka','ახსენით რესპონსიული ვებ-დიზაინის კონცეფცია.','2025-09-11 06:25:05','2025-09-11 06:25:05'),(13,5,'en','What are the principles of clean code?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(14,5,'ru','Explain the concept of object-oriented programming.','2025-09-11 06:25:05','2025-09-11 06:25:05'),(15,5,'ka','რომელ პროგრამირების პარადიგმას უჭერს მხარს Python?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(16,6,'en','Which programming paradigm does Python support?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(17,6,'ru','Объясните концепцию адаптивного веб-дизайна.','2025-09-11 06:25:05','2025-09-11 06:25:05'),(18,6,'ka','What are the principles of clean code?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(19,7,'en','Какую парадигму программирования поддерживает Python?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(20,7,'ru','Опишите архитектурный паттерн MVC.','2025-09-11 06:25:05','2025-09-11 06:25:05'),(21,7,'ka','რომელ პროგრამირების პარადიგმას უჭერს მხარს Python?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(22,8,'en','Which programming paradigm does Python support?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(23,8,'ru','Explain the concept of responsive web design.','2025-09-11 06:25:05','2025-09-11 06:25:05'),(24,8,'ka','Which programming paradigm does Python support?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(25,9,'en','რა არის ვერსიების კონტროლის სისტემების მთავარი მიზანი?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(26,9,'ru','What is the difference between HTTP and HTTPS?','2025-09-11 06:25:05','2025-09-11 06:25:05'),(27,9,'ka','Which programming paradigm does Python support?','2025-09-11 06:25:05','2025-09-11 06:25:05');
+/*!40000 ALTER TABLE `questions_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `quiz_attempts`
+--
+
+DROP TABLE IF EXISTS `quiz_attempts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `quiz_attempts` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `quiz_id` bigint(20) unsigned NOT NULL,
+  `user_id` bigint(20) unsigned NOT NULL,
+  `score` int(11) NOT NULL DEFAULT '0',
+  `total_questions` int(11) NOT NULL DEFAULT '0',
+  `correct_answers` int(11) NOT NULL DEFAULT '0',
+  `started_at` timestamp NULL DEFAULT NULL,
+  `completed_at` timestamp NULL DEFAULT NULL,
+  `time_taken` int(11) DEFAULT NULL,
+  `status` enum('in_progress','completed','expired') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'in_progress',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `quiz_attempts_quiz_id_index` (`quiz_id`),
+  KEY `quiz_attempts_user_id_index` (`user_id`),
+  CONSTRAINT `quiz_attempts_quiz_id_foreign` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `quiz_attempts_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `quiz_attempts`
+--
+
+LOCK TABLES `quiz_attempts` WRITE;
+/*!40000 ALTER TABLE `quiz_attempts` DISABLE KEYS */;
+INSERT INTO `quiz_attempts` VALUES (1,1,6,0,15,0,'2025-08-15 09:20:42',NULL,NULL,'in_progress','2025-08-15 09:20:42','2025-08-15 09:20:42'),(2,1,14,0,7,0,'2025-09-10 12:21:23',NULL,NULL,'in_progress','2025-09-10 12:21:23','2025-09-10 12:21:23'),(3,1,14,15,11,7,'2025-08-28 18:04:13','2025-09-09 05:37:10',511,'completed','2025-08-28 18:04:13','2025-08-28 18:04:13'),(4,1,11,12,20,4,'2025-08-15 00:22:45','2025-09-08 17:11:19',1600,'completed','2025-08-15 00:22:45','2025-08-15 00:22:45'),(5,1,9,85,13,10,'2025-09-07 17:01:30','2025-09-08 16:15:40',525,'completed','2025-09-07 17:01:30','2025-09-07 17:01:30'),(6,1,6,0,20,0,'2025-08-21 07:08:26',NULL,NULL,'in_progress','2025-08-21 07:08:26','2025-08-21 07:08:26'),(7,1,16,77,14,5,'2025-08-15 03:58:50','2025-08-29 09:58:27',145,'completed','2025-08-15 03:58:50','2025-08-15 03:58:50'),(8,1,14,0,15,0,'2025-08-12 13:15:30',NULL,NULL,'in_progress','2025-08-12 13:15:30','2025-08-12 13:15:30'),(9,1,10,0,16,0,'2025-08-18 20:40:35',NULL,NULL,'in_progress','2025-08-18 20:40:35','2025-08-18 20:40:35'),(10,1,10,1,5,1,'2025-08-12 10:34:08','2025-09-06 07:29:41',813,'completed','2025-08-12 10:34:08','2025-08-12 10:34:08'),(11,1,14,0,20,0,'2025-09-07 09:45:56',NULL,NULL,'expired','2025-09-07 09:45:56','2025-09-07 09:45:56'),(12,1,17,0,5,0,'2025-08-19 14:48:57',NULL,NULL,'expired','2025-08-19 14:48:57','2025-08-19 14:48:57'),(13,1,7,65,15,10,'2025-09-01 23:49:42','2025-09-06 21:56:32',434,'completed','2025-09-01 23:49:42','2025-09-01 23:49:42'),(14,1,15,16,19,8,'2025-08-14 10:45:08','2025-08-19 21:09:52',1187,'completed','2025-08-14 10:45:08','2025-08-14 10:45:08'),(15,1,16,33,20,17,'2025-08-23 19:15:28','2025-08-31 08:50:22',394,'completed','2025-08-23 19:15:28','2025-08-23 19:15:28'),(16,1,7,0,20,0,'2025-08-18 17:44:02',NULL,NULL,'in_progress','2025-08-18 17:44:02','2025-08-18 17:44:02'),(17,1,16,0,10,0,'2025-09-10 12:19:04',NULL,NULL,'in_progress','2025-09-10 12:19:04','2025-09-10 12:19:04'),(18,1,17,0,16,0,'2025-08-20 08:04:44',NULL,NULL,'in_progress','2025-08-20 08:04:44','2025-08-20 08:04:44'),(19,1,6,38,6,3,'2025-08-20 11:52:35','2025-08-28 15:53:11',85,'completed','2025-08-20 11:52:35','2025-08-20 11:52:35'),(20,1,5,12,17,0,'2025-08-23 18:19:04','2025-08-23 19:45:29',92,'completed','2025-08-23 18:19:04','2025-08-23 18:19:04'),(21,1,8,64,17,0,'2025-09-07 08:55:47','2025-09-07 12:38:35',1146,'completed','2025-09-07 08:55:47','2025-09-07 08:55:47'),(22,1,13,0,9,0,'2025-08-19 20:38:14',NULL,NULL,'expired','2025-08-19 20:38:14','2025-08-19 20:38:14'),(23,1,15,17,18,13,'2025-08-20 00:17:38','2025-08-24 10:13:39',74,'completed','2025-08-20 00:17:38','2025-08-20 00:17:38'),(24,1,10,65,5,2,'2025-09-05 08:55:58','2025-09-10 11:22:50',544,'completed','2025-09-05 08:55:58','2025-09-05 08:55:58'),(25,1,10,91,12,3,'2025-09-08 01:23:30','2025-09-10 10:03:34',120,'completed','2025-09-08 01:23:30','2025-09-08 01:23:30'),(26,1,6,0,5,0,'2025-09-03 22:53:39',NULL,NULL,'in_progress','2025-09-03 22:53:39','2025-09-03 22:53:39'),(27,1,6,0,15,0,'2025-08-11 08:24:06',NULL,NULL,'in_progress','2025-08-11 08:24:06','2025-08-11 08:24:06'),(28,1,7,0,7,0,'2025-09-10 18:42:34',NULL,NULL,'in_progress','2025-09-10 18:42:34','2025-09-10 18:42:34'),(29,1,8,75,6,4,'2025-08-31 06:05:08','2025-09-02 19:00:53',797,'completed','2025-08-31 06:05:08','2025-08-31 06:05:08'),(30,1,13,42,14,2,'2025-08-29 22:29:57','2025-09-01 03:07:24',949,'completed','2025-08-29 22:29:57','2025-08-29 22:29:57'),(31,1,10,54,13,11,'2025-08-22 12:23:16','2025-08-29 06:12:02',1761,'completed','2025-08-22 12:23:16','2025-08-22 12:23:16'),(32,1,10,0,19,0,'2025-08-29 12:05:34',NULL,NULL,'expired','2025-08-29 12:05:34','2025-08-29 12:05:34'),(33,1,16,0,20,0,'2025-08-17 00:42:04',NULL,NULL,'in_progress','2025-08-17 00:42:04','2025-08-17 00:42:04'),(34,1,8,87,16,11,'2025-08-30 02:43:42','2025-09-07 20:23:02',1708,'completed','2025-08-30 02:43:42','2025-08-30 02:43:42'),(35,1,6,55,9,7,'2025-08-22 19:18:13','2025-08-25 00:27:42',871,'completed','2025-08-22 19:18:13','2025-08-22 19:18:13'),(36,1,7,81,6,3,'2025-09-07 03:55:06','2025-09-10 03:39:17',972,'completed','2025-09-07 03:55:06','2025-09-07 03:55:06'),(37,1,7,71,5,2,'2025-09-08 02:00:21','2025-09-10 18:00:56',824,'completed','2025-09-08 02:00:21','2025-09-08 02:00:21'),(38,1,13,72,20,4,'2025-09-08 04:55:17','2025-09-08 06:25:15',399,'completed','2025-09-08 04:55:17','2025-09-08 04:55:17'),(39,1,6,14,14,13,'2025-09-01 12:13:56','2025-09-06 09:26:34',399,'completed','2025-09-01 12:13:56','2025-09-01 12:13:56'),(40,1,11,36,9,8,'2025-08-23 13:05:08','2025-09-09 12:00:49',840,'completed','2025-08-23 13:05:08','2025-08-23 13:05:08'),(41,1,7,13,11,2,'2025-08-22 06:27:15','2025-09-03 01:02:47',354,'completed','2025-08-22 06:27:15','2025-08-22 06:27:15'),(42,1,6,0,10,0,'2025-08-15 01:31:13',NULL,NULL,'in_progress','2025-08-15 01:31:13','2025-08-15 01:31:13'),(43,1,16,13,14,6,'2025-08-29 13:13:23','2025-09-03 08:24:47',1767,'completed','2025-08-29 13:13:23','2025-08-29 13:13:23'),(44,1,8,76,18,15,'2025-08-19 17:36:02','2025-08-22 12:07:22',930,'completed','2025-08-19 17:36:02','2025-08-19 17:36:02'),(45,1,8,85,20,3,'2025-09-08 11:58:06','2025-09-08 23:57:22',1702,'completed','2025-09-08 11:58:06','2025-09-08 11:58:06'),(46,1,6,0,19,0,'2025-08-11 23:01:31',NULL,NULL,'in_progress','2025-08-11 23:01:31','2025-08-11 23:01:31'),(47,1,15,0,14,0,'2025-08-18 07:50:27',NULL,NULL,'in_progress','2025-08-18 07:50:27','2025-08-18 07:50:27'),(48,1,15,0,9,0,'2025-08-28 13:48:54',NULL,NULL,'in_progress','2025-08-28 13:48:54','2025-08-28 13:48:54'),(49,1,12,92,6,2,'2025-09-02 14:53:18','2025-09-04 14:41:43',371,'completed','2025-09-02 14:53:18','2025-09-02 14:53:18'),(50,1,13,75,18,10,'2025-08-24 19:21:48','2025-09-09 08:36:22',1033,'completed','2025-08-24 19:21:48','2025-08-24 19:21:48');
+/*!40000 ALTER TABLE `quiz_attempts` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `quizzes`
 --
 
+DROP TABLE IF EXISTS `quizzes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `quizzes` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `course_id` bigint(20) UNSIGNED NOT NULL,
-  `title` varchar(255) NOT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `lesson_id` bigint(20) unsigned DEFAULT NULL,
+  `order` int(11) NOT NULL DEFAULT '0',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `time_limit` int(11) DEFAULT NULL COMMENT 'Time limit in minutes',
+  `passing_score` int(11) NOT NULL DEFAULT '70',
+  `max_attempts` int(11) NOT NULL DEFAULT '1',
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `quizzes_lesson_id_index` (`lesson_id`),
+  CONSTRAINT `quizzes_lesson_id_foreign` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `quizzes`
 --
 
-INSERT INTO `quizzes` (`id`, `course_id`, `title`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 6, 'Introduction to HTML', '2023-11-28 06:01:21', '2023-11-28 06:16:31', NULL),
-(2, 8, 'Necessity of Keywords and Tags', '2023-11-28 06:01:49', '2023-11-28 06:18:33', NULL),
-(3, 10, 'Get Started with JSX', '2023-11-28 06:02:04', '2023-11-28 06:20:26', NULL);
+LOCK TABLES `quizzes` WRITE;
+/*!40000 ALTER TABLE `quizzes` DISABLE KEYS */;
+INSERT INTO `quizzes` VALUES (1,1,7,1,27,87,5,'ut autem ut','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL);
+/*!40000 ALTER TABLE `quizzes` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
+-- Table structure for table `quizzes_translations`
+--
+
+DROP TABLE IF EXISTS `quizzes_translations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `quizzes_translations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `quiz_id` bigint(20) unsigned NOT NULL,
+  `locale` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `quizzes_translations_quiz_id_locale_unique` (`quiz_id`,`locale`),
+  CONSTRAINT `quizzes_translations_quiz_id_foreign` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `quizzes_translations`
+--
+
+LOCK TABLES `quizzes_translations` WRITE;
+/*!40000 ALTER TABLE `quizzes_translations` DISABLE KEYS */;
+INSERT INTO `quizzes_translations` VALUES (1,1,'en','Проверка знаний фронтенд фреймворков','Minus eum itaque enim. Vel a exercitationem doloremque vero voluptas voluptatem. Consequatur sapiente est deleniti sit atque repellendus impedit beatae. Проверьте свои знания и понимание материала курса.','2025-09-11 06:25:04','2025-09-11 06:25:04'),(2,1,'ru','Основы веб-разработки','Consequatur odit sint labore aut autem eius recusandae. Corporis et consequatur veritatis illo. Neque ut quia error recusandae temporibus necessitatibus id esse. Nostrum est porro asperiores voluptate. Проверьте свои знания и понимание материала курса.','2025-09-11 06:25:04','2025-09-11 06:25:04'),(3,1,'ka','Проверка знаний фронтенд фреймворков','Et id ipsa quis soluta. Nihil distinctio atque amet labore itaque. Aliquam aut natus consequatur illum minus nemo et. Recusandae sequi expedita dolores qui itaque. Eum explicabo optio voluptas quo animi nulla quod. Проверьте свои знания и понимание материала курса.','2025-09-11 06:25:04','2025-09-11 06:25:04');
+/*!40000 ALTER TABLE `quizzes_translations` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `reviews`
 --
 
+DROP TABLE IF EXISTS `reviews`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `reviews` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `student_id` bigint(20) UNSIGNED NOT NULL,
-  `course_id` bigint(20) UNSIGNED NOT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `student_id` bigint(20) unsigned NOT NULL,
+  `course_id` bigint(20) unsigned NOT NULL,
   `rating` int(11) NOT NULL,
-  `comment` text DEFAULT NULL,
+  `comment` text COLLATE utf8mb4_unicode_ci,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `reviews_student_id_index` (`student_id`),
+  KEY `reviews_course_id_index` (`course_id`),
+  CONSTRAINT `reviews_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `reviews_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- --------------------------------------------------------
+--
+-- Dumping data for table `reviews`
+--
+
+LOCK TABLES `reviews` WRITE;
+/*!40000 ALTER TABLE `reviews` DISABLE KEYS */;
+/*!40000 ALTER TABLE `reviews` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `reviews_translations`
+--
+
+DROP TABLE IF EXISTS `reviews_translations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `reviews_translations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `review_id` bigint(20) unsigned NOT NULL,
+  `locale` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `comment` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `reviews_translations_review_id_locale_unique` (`review_id`,`locale`),
+  CONSTRAINT `reviews_translations_review_id_foreign` FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `reviews_translations`
+--
+
+LOCK TABLES `reviews_translations` WRITE;
+/*!40000 ALTER TABLE `reviews_translations` DISABLE KEYS */;
+/*!40000 ALTER TABLE `reviews_translations` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `roles`
 --
 
+DROP TABLE IF EXISTS `roles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `roles` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(20) NOT NULL,
-  `identity` varchar(30) NOT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `identity` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roles_name_unique` (`name`),
+  UNIQUE KEY `roles_identity_unique` (`identity`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `roles`
 --
 
-INSERT INTO `roles` (`id`, `name`, `identity`, `created_at`, `updated_at`) VALUES
-(1, 'Super Admin', 'superadmin', '2023-11-16 12:16:34', NULL),
-(2, 'Admin', 'admin', '2023-11-16 12:16:34', NULL),
-(3, 'Instructor', 'instructor', '2023-11-16 12:16:34', NULL),
-(4, 'Student', 'student', '2023-11-16 12:16:34', NULL),
+LOCK TABLES `roles` WRITE;
+/*!40000 ALTER TABLE `roles` DISABLE KEYS */;
+INSERT INTO `roles` VALUES (1,'Super Admin','superadmin','2025-09-11 06:24:57',NULL),(2,'Admin','admin','2025-09-11 06:24:57',NULL),(3,'Instructor','instructor','2025-09-11 06:24:57',NULL),(4,'Student','student','2025-09-11 06:24:57',NULL);
+/*!40000 ALTER TABLE `roles` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- --------------------------------------------------------
+--
+-- Table structure for table `sessions`
+--
+
+DROP TABLE IF EXISTS `sessions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sessions` (
+  `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` bigint(20) unsigned DEFAULT NULL,
+  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_unicode_ci,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_activity` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sessions_user_id_index` (`user_id`),
+  KEY `sessions_last_activity_index` (`last_activity`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `sessions`
+--
+
+LOCK TABLES `sessions` WRITE;
+/*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `student_lesson_progress`
+--
+
+DROP TABLE IF EXISTS `student_lesson_progress`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `student_lesson_progress` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `student_id` bigint(20) unsigned NOT NULL,
+  `lesson_id` bigint(20) unsigned NOT NULL,
+  `course_id` bigint(20) unsigned NOT NULL,
+  `progress` int(11) NOT NULL DEFAULT '0',
+  `video_position` int(11) NOT NULL DEFAULT '0',
+  `video_duration` int(11) NOT NULL DEFAULT '0',
+  `is_completed` tinyint(1) NOT NULL DEFAULT '0',
+  `completed_at` timestamp NULL DEFAULT NULL,
+  `last_accessed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `student_lesson_progress_student_id_lesson_id_unique` (`student_id`,`lesson_id`),
+  KEY `student_lesson_progress_lesson_id_foreign` (`lesson_id`),
+  KEY `student_lesson_progress_course_id_foreign` (`course_id`),
+  CONSTRAINT `student_lesson_progress_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `student_lesson_progress_lesson_id_foreign` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `student_lesson_progress_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `student_lesson_progress`
+--
+
+LOCK TABLES `student_lesson_progress` WRITE;
+/*!40000 ALTER TABLE `student_lesson_progress` DISABLE KEYS */;
+/*!40000 ALTER TABLE `student_lesson_progress` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `students`
 --
 
+DROP TABLE IF EXISTS `students`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `students` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `contact` varchar(255) DEFAULT NULL,
-  `email` varchar(255) NOT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contact` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `date_of_birth` date DEFAULT NULL,
-  `gender` enum('male','female','other') DEFAULT NULL,
-  `image` varchar(255) DEFAULT NULL,
-  `bio` text DEFAULT NULL,
-  `profession` varchar(255) DEFAULT NULL,
-  `nationality` varchar(255) DEFAULT 'Georgien',
-  `address` text DEFAULT NULL,
-  `city` varchar(255) DEFAULT NULL,
-  `state` varchar(255) DEFAULT NULL,
-  `postcode` varchar(255) DEFAULT NULL,
-  `country` varchar(255) DEFAULT NULL,
-  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1 active, 0 inactive',
-  `password` varchar(255) NOT NULL,
-  `language` varchar(255) NOT NULL DEFAULT 'en',
-  `remember_token` varchar(100) DEFAULT NULL,
+  `gender` enum('male','female') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bio` text COLLATE utf8mb4_unicode_ci,
+  `profession` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nationality` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT 'Georgien',
+  `address` text COLLATE utf8mb4_unicode_ci,
+  `city` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `state` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `postcode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `country` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1 active, 0 inactive',
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `language` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `students_email_unique` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `students`
 --
 
-INSERT INTO `students` (`id`, `name`, `contact`, `email`, `date_of_birth`, `gender`, `image`, `bio`, `profession`, `nationality`, `address`, `city`, `state`, `postcode`, `country`, `status`, `password`, `language`, `remember_token`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(17, 'Safayet Ullah', NULL, '0183478963', NULL, 'student@gmail.com', '2000-02-01', NULL, '3291704130747.jpg', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur', 'Web Developer', 'Georgien', NULL, NULL, NULL, NULL, NULL, 1, '$2y$12$rUxi5wAuMt/u9jG46La/h.rva.37gFo6invimj.kjxQEOiRyL7os.', 'en', NULL, '2023-12-18 00:13:14', '2024-01-01 11:40:25', NULL);
-
--- --------------------------------------------------------
+LOCK TABLES `students` WRITE;
+/*!40000 ALTER TABLE `students` DISABLE KEYS */;
+/*!40000 ALTER TABLE `students` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `subscriptions`
 --
 
+DROP TABLE IF EXISTS `subscriptions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `subscriptions` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `student_id` bigint(20) UNSIGNED NOT NULL,
-  `course_id` bigint(20) UNSIGNED NOT NULL,
-  `plan` enum('monthly','yearly') NOT NULL,
-  `start_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `student_id` bigint(20) unsigned NOT NULL,
+  `course_id` bigint(20) unsigned NOT NULL,
+  `plan` enum('monthly','yearly') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `start_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `end_date` timestamp NULL DEFAULT NULL,
-  `status` enum('active','canceled','expired') NOT NULL DEFAULT 'active',
+  `status` enum('active','canceled','expired') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `subscriptions_student_id_index` (`student_id`),
+  KEY `subscriptions_course_id_index` (`course_id`),
+  CONSTRAINT `subscriptions_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `subscriptions_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
--- --------------------------------------------------------
+--
+-- Dumping data for table `subscriptions`
+--
+
+LOCK TABLES `subscriptions` WRITE;
+/*!40000 ALTER TABLE `subscriptions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `subscriptions` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `users`
 --
 
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `contact` varchar(255) NOT NULL,
-  `role_id` bigint(20) UNSIGNED NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `language` varchar(255) NOT NULL DEFAULT 'en',
-  `image` varchar(255) DEFAULT NULL,
-  `full_access` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1=>yes, 0=>no',
-  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '1=>active 2=>inactive',
-  `remember_token` varchar(100) DEFAULT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `instructor_id` bigint(20) unsigned DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `contact` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `role_id` bigint(20) unsigned NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `language` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'en',
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `full_access` tinyint(1) NOT NULL DEFAULT '0' COMMENT '1=>yes, 0=>no',
+  `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '1=>active 2=>inactive',
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  `instructor_id` bigint(20) UNSIGNED DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`),
+  UNIQUE KEY `users_contact_unique` (`contact`),
+  KEY `users_role_id_index` (`role_id`),
+  CONSTRAINT `users_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `contact`, `role_id`, `password`, `language`, `image`, `full_access`, `status`, `remember_token`, `created_at`, `updated_at`, `deleted_at`, `instructor_id`) VALUES
-(2, 'Ibrahim Khalil', NULL, 'admin@gmail.com', '+9951300025229', NULL, 1, '$2y$12$RDPYtmf4JJwoQ4sEMuVYse6kg.Xnv1vcJ86sZhT63uaL5vrMje69W', 'en', '7741704114296.png', 1, 1, NULL, '2024-01-01 06:47:43', '2024-01-01 07:04:57', NULL, NULL),
-(4, 'Asadullah Galib', NULL, 'galib@gmail.com', '3453534521', NULL, 3, '$2y$12$CgGd2qfI/1nRHDyzYBUq3.nuw/vWV.e9hP/Ze6T6tEzpgng.Dyl6m', 'en', 'Instructor_Asadullah Galib_310.jpg', 0, 1, NULL, '2024-01-01 07:49:40', '2024-02-21 14:20:18', NULL, 5),
-(5, 'Joshim Uddin', NULL, 'joshim@gmail.com', '675664644', NULL, 3, '$2y$12$1l18cpPxU4M2zZgMxECs6ezwQKGM/ton5GsztDIiFz0keVvmVsX4O', 'en', 'Instructor_Joshim Uddin_155.jpg', 0, 1, NULL, '2024-01-01 07:50:08', '2024-02-21 14:19:51', NULL, 4),
-(6, 'Raihan Sazzad', NULL, 'raihan@gmail.com', '3218974218', NULL, 3, '$2y$12$slth2axx..G1Nz.3jFSa4eHOfBzJybSrjSY3ocZCOQSx10KEcdqtO', 'en', 'Instructor_Raihan Sazzad_662.jpg', 0, 1, NULL, '2024-01-01 07:50:18', '2024-02-21 14:18:57', NULL, 3),
-(7, 'Thouhidul Islam', NULL, 'thouhid@gmail.com', '801300029', NULL, 3, '$2y$12$ua2TYVVOxnQWxa2RFnD1euGL8rRUwzFZ2m/uWOw8V/pFfNI3K8Qxa', 'en', 'Instructor_Thouhidul Islam_766.jpg', 0, 1, NULL, '2024-01-01 07:50:28', '2024-02-21 14:17:19', NULL, 2),
-(8, 'Burhan Uddin Fuad', NULL, 'fuad@gmail.com', '01828543453', NULL, 3, '$2y$12$uTGQ75wrj/r/2wZgWe8tVeetckNkgGaqMczxzGhRTbxLWvAfpADp6', 'en', 'Instructor_Burhan Uddin Fuad_137.jpg', 0, 1, NULL, '2024-01-01 07:50:43', '2024-02-21 14:15:37', NULL, 1);
-
--- --------------------------------------------------------
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (1,NULL,'Super Administrator','superadmin@example.com','+995123456789',1,'$2y$12$5NukyDna9.zQXO8vp0j2/OCEkzYpOHLFKakpQuhJ.9tp5sSLn8/7m','en',NULL,1,1,NULL,'2025-09-11 06:25:00','2025-09-11 06:25:00',NULL),(2,NULL,'Administrator','admin@example.com','+995987654321',2,'$2y$12$NSsn9WssbxvpfLe6enGYReczQlot24a3GBE6sUXdlOTUBRChgR/hO','en',NULL,1,1,NULL,'2025-09-11 06:25:01','2025-09-11 06:25:01',NULL),(3,NULL,'John Instructor','instructor1@example.com','+995555111222',3,'$2y$12$LaLFh2WW3Zod/i3.qH4diuWYjhsxuftf/zj/yTRa8Qohu0ZR03U.q','en',NULL,0,1,NULL,'2025-09-11 06:25:01','2025-09-11 06:25:01',NULL),(4,NULL,'Jane Teacher','instructor2@example.com','+995555333444',3,'$2y$12$Tk35kuYJv0i7a//hWP/K..Xuyo0WcdTOXq6cCOa41DHYPSFUjY1cC','ru',NULL,0,1,NULL,'2025-09-11 06:25:01','2025-09-11 06:25:01',NULL),(5,NULL,'Student One','student1@example.com','+995777111222',4,'$2y$12$rJNk0SHU736oa0rsJcFviOHAyGkkJTRSrat.EwG9RA1Mse8luIhLG','en',NULL,0,1,NULL,'2025-09-11 06:25:01','2025-09-11 06:25:01',NULL),(6,NULL,'Student Two','student2@example.com','+995777333444',4,'$2y$12$sc9JIRRIWKgpvSsTvQKt9OHm8bVck9VO9kLg1767ix3nj/w95HWsW','ru',NULL,0,1,NULL,'2025-09-11 06:25:01','2025-09-11 06:25:01',NULL),(7,NULL,'Student Three','student3@example.com','+995777555666',4,'$2y$12$ZJpCaN3B5m7pX3lzsUdJN.Xf4VZ9cMEUwS0DRB2n73ic1AqsykeAK','ka',NULL,0,1,NULL,'2025-09-11 06:25:02','2025-09-11 06:25:02',NULL),(8,NULL,'Justen Mraz','greenfelder.ryder@example.com',NULL,4,'$2y$12$4/qfaNsFrtwtGktHSzUpYuboovVSQOZtcNsvXqC4FKHwNAzIPfe5e','ru','https://via.placeholder.com/100x100.png/007711?text=people+ut',0,1,'NAcBkZ65uS','2025-09-11 06:25:02','2025-09-11 06:25:02',NULL),(9,NULL,'Prof. Dortha Wyman','xhand@example.net','+1 (828) 630-3413',4,'$2y$12$IbWLLpEuHhVG4k6wBxa2cOzO72Bzb3MKhWWDRmOf5d8mynkndPJFO','ka','https://via.placeholder.com/100x100.png/006699?text=people+est',0,1,'K7qH2RqlyB','2025-09-11 06:25:02','2025-09-11 06:25:02',NULL),(10,NULL,'Prof. Harley Abshire I','jakayla.klocko@example.com',NULL,4,'$2y$12$oi4dv5xx1Qusob1svXCm/OFF9qrhlfVpkQM8MCHKjYR92dD7qDQV.','ru','https://via.placeholder.com/100x100.png/00cc00?text=people+consequatur',0,1,'zQ3lzn9Aak','2025-09-11 06:25:02','2025-09-11 06:25:02',NULL),(11,NULL,'Vicky Stanton','acartwright@example.net',NULL,4,'$2y$12$ysGlRBW/8wiqu7.tS9HDFeXjrm2Z.BWQ5TBpib7ug./G.fSYxaCTO','en','https://via.placeholder.com/100x100.png/007700?text=people+est',0,0,'kjPnVKY0f6','2025-09-11 06:25:03','2025-09-11 06:25:03',NULL),(12,NULL,'Janet Schmeler','elouise09@example.com',NULL,4,'$2y$12$3JA0ykiSL0Z3WrQx7jHD.uw46sxG/UrPyxX7Ww254jq.FxXKKvKq.','ru','https://via.placeholder.com/100x100.png/0011bb?text=people+fugiat',0,1,'XT2MKgunw3','2025-09-11 06:25:03','2025-09-11 06:25:03',NULL),(13,NULL,'Karina Russel','joanne.greenholt@example.org','1-316-580-9072',4,'$2y$12$QYto28Z445AVa.Z1C0XMiuHbFRHhPhxhHVELi3kqx93ouqz47Tq66','ka','https://via.placeholder.com/100x100.png/004433?text=people+aliquam',0,1,'7YTM5mjCMK','2025-09-11 06:25:03','2025-09-11 06:25:03',NULL),(14,NULL,'Haskell Hilpert','rhermann@example.com',NULL,4,'$2y$12$mEIfdYaokL2RzEpVoec97.u4/BdJwhBqtYOg1FKeCgR6NLwP.Awk.','ru','https://via.placeholder.com/100x100.png/0011aa?text=people+soluta',0,1,'hO4avbfSbe','2025-09-11 06:25:03','2025-09-11 06:25:03',NULL),(15,NULL,'Elyssa Hahn Sr.','alison51@example.net',NULL,4,'$2y$12$/4pjC8gIjK.dBOn8xIIWveOlcKNdSAUkDbxOznEdhqfoIdqqiUqQe','ru','https://via.placeholder.com/100x100.png/0077bb?text=people+est',0,1,'y4TLw09bC3','2025-09-11 06:25:03','2025-09-11 06:25:03',NULL),(16,NULL,'Marcellus Wilkinson','julien.abshire@example.net',NULL,4,'$2y$12$QdT8D54oqT1S.FU0HtFoKu9nU.VgFUEZFM6pV76bVWVCuR0PH5mNm','ru',NULL,0,1,'KpWG0zieK3','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL),(17,NULL,'Hal Dibbert','mertz.germaine@example.com',NULL,4,'$2y$12$CxwKO51usuymTS6jxhPB2OPaFSzL38LUWAfHkWHeCeNld/.PWf..a','ru',NULL,0,1,'lBp5SUhJrZ','2025-09-11 06:25:04','2025-09-11 06:25:04',NULL);
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `watchlists`
 --
 
+DROP TABLE IF EXISTS `watchlists`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `watchlists` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `student_id` bigint(20) UNSIGNED NOT NULL,
-  `course_id` bigint(20) UNSIGNED NOT NULL,
-  `lesson_id` bigint(20) UNSIGNED NOT NULL,
-  `material_id` bigint(20) UNSIGNED NOT NULL,
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `student_id` bigint(20) unsigned NOT NULL,
+  `course_id` bigint(20) unsigned NOT NULL,
+  `lesson_id` bigint(20) unsigned NOT NULL,
+  `material_id` bigint(20) unsigned NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `watchlists_student_id_index` (`student_id`),
+  KEY `watchlists_course_id_index` (`course_id`),
+  KEY `watchlists_lesson_id_index` (`lesson_id`),
+  KEY `watchlists_material_id_index` (`material_id`),
+  CONSTRAINT `watchlists_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `watchlists_lesson_id_foreign` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `watchlists_material_id_foreign` FOREIGN KEY (`material_id`) REFERENCES `materials` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `watchlists_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Indexes for dumped tables
+-- Dumping data for table `watchlists`
 --
 
---
--- Indexes for table `answers`
---
-ALTER TABLE `answers`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `answers_student_id_index` (`student_id`),
-  ADD KEY `answers_question_id_index` (`question_id`);
-
---
--- Indexes for table `checkouts`
---
-ALTER TABLE `checkouts`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `coupons`
---
-ALTER TABLE `coupons`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `coupons_code_unique` (`code`);
-
---
--- Indexes for table `courses`
---
-ALTER TABLE `courses`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `courses_category_id_index` (`course_category_id`),
-  ADD KEY `courses_instructor_id_index` (`instructor_id`);
-
---
--- Indexes for table `course_categories`
---
-ALTER TABLE `course_categories`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `discussions`
---
-ALTER TABLE `discussions`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `discussions_user_id_index` (`user_id`),
-  ADD KEY `discussions_course_id_index` (`course_id`);
-
---
--- Indexes for table `enrollments`
---
-ALTER TABLE `enrollments`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `enrollments_student_id_index` (`student_id`),
-  ADD KEY `enrollments_course_id_index` (`course_id`);
-
---
--- Indexes for table `events`
---
-ALTER TABLE `events`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `instructors`
---
-ALTER TABLE `instructors`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `instructors_contact_unique` (`contact`),
-  ADD UNIQUE KEY `instructors_email_unique` (`email`),
-  ADD KEY `instructors_role_id_index` (`role_id`);
-
---
--- Indexes for table `lessons`
---
-ALTER TABLE `lessons`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `lessons_course_id_index` (`course_id`);
-
---
--- Indexes for table `materials`
---
-ALTER TABLE `materials`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `materials_lesson_id_index` (`lesson_id`);
-
---
--- Indexes for table `messages`
---
-ALTER TABLE `messages`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `messages_sender_id_index` (`sender_id`),
-  ADD KEY `messages_receiver_id_index` (`receiver_id`);
-
---
--- Indexes for table `migrations`
---
-ALTER TABLE `migrations`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `options`
---
-ALTER TABLE `options`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `options_question_id_index` (`question_id`);
-
---
--- Indexes for table `payments`
---
-ALTER TABLE `payments`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `permissions`
---
-ALTER TABLE `permissions`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `permissions_role_id_index` (`role_id`);
-
---
--- Indexes for table `personal_access_tokens`
---
-ALTER TABLE `personal_access_tokens`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
-  ADD KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`);
-
---
--- Indexes for table `progress`
---
-ALTER TABLE `progress`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `progress_student_id_index` (`student_id`),
-  ADD KEY `progress_course_id_index` (`course_id`),
-  ADD KEY `progress_last_viewed_material_id_index` (`last_viewed_material_id`);
-
---
--- Indexes for table `questions`
---
-ALTER TABLE `questions`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `questions_quiz_id_index` (`quiz_id`);
-
---
--- Indexes for table `quizzes`
---
-ALTER TABLE `quizzes`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `quizzes_course_id_index` (`course_id`);
-
---
--- Indexes for table `reviews`
---
-ALTER TABLE `reviews`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `reviews_student_id_index` (`student_id`),
-  ADD KEY `reviews_course_id_index` (`course_id`);
-
---
--- Indexes for table `roles`
---
-ALTER TABLE `roles`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `roles_type_unique` (`name`),
-  ADD UNIQUE KEY `roles_identity_unique` (`identity`);
-
---
--- Indexes for table `students`
---
-ALTER TABLE `students`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `students_email_unique` (`email`);
-
---
--- Indexes for table `subscriptions`
---
-ALTER TABLE `subscriptions`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `subscriptions_student_id_index` (`student_id`),
-  ADD KEY `subscriptions_course_id_index` (`course_id`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `users_email_unique` (`email`),
-  ADD UNIQUE KEY `users_contact_unique` (`contact`),
-  ADD KEY `users_role_id_index` (`role_id`),
-  ADD KEY `users_instructor_id_index` (`instructor_id`);
-
---
--- Indexes for table `watchlists`
---
-ALTER TABLE `watchlists`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `watchlists_student_id_index` (`student_id`),
-  ADD KEY `watchlists_course_id_index` (`course_id`),
-  ADD KEY `watchlists_lesson_id_index` (`lesson_id`),
-  ADD KEY `watchlists_material_id_index` (`material_id`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `answers`
---
-ALTER TABLE `answers`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `checkouts`
---
-ALTER TABLE `checkouts`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
-
---
--- AUTO_INCREMENT for table `coupons`
---
-ALTER TABLE `coupons`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `courses`
---
-ALTER TABLE `courses`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-
---
--- AUTO_INCREMENT for table `course_categories`
---
-ALTER TABLE `course_categories`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
-
---
--- AUTO_INCREMENT for table `discussions`
---
-ALTER TABLE `discussions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `enrollments`
---
-ALTER TABLE `enrollments`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
-
---
--- AUTO_INCREMENT for table `events`
---
-ALTER TABLE `events`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
-
---
--- AUTO_INCREMENT for table `instructors`
---
-ALTER TABLE `instructors`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
-
---
--- AUTO_INCREMENT for table `lessons`
---
-ALTER TABLE `lessons`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `materials`
---
-ALTER TABLE `materials`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT for table `messages`
---
-ALTER TABLE `messages`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `migrations`
---
-ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
-
---
--- AUTO_INCREMENT for table `options`
---
-ALTER TABLE `options`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `payments`
---
-ALTER TABLE `payments`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
-
---
--- AUTO_INCREMENT for table `permissions`
---
-ALTER TABLE `permissions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=375;
-
---
--- AUTO_INCREMENT for table `personal_access_tokens`
---
-ALTER TABLE `personal_access_tokens`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `progress`
---
-ALTER TABLE `progress`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `questions`
---
-ALTER TABLE `questions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `quizzes`
---
-ALTER TABLE `quizzes`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `reviews`
---
-ALTER TABLE `reviews`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `roles`
---
-ALTER TABLE `roles`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `students`
---
-ALTER TABLE `students`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
-
---
--- AUTO_INCREMENT for table `subscriptions`
---
-ALTER TABLE `subscriptions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
-
---
--- AUTO_INCREMENT for table `watchlists`
---
-ALTER TABLE `watchlists`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `answers`
---
-ALTER TABLE `answers`
-  ADD CONSTRAINT `answers_question_id_foreign` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `answers_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `courses`
---
-ALTER TABLE `courses`
-  ADD CONSTRAINT `courses_category_id_foreign` FOREIGN KEY (`course_category_id`) REFERENCES `course_categories` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `courses_instructor_id_foreign` FOREIGN KEY (`instructor_id`) REFERENCES `instructors` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `discussions`
---
-ALTER TABLE `discussions`
-  ADD CONSTRAINT `discussions_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `discussions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `enrollments`
---
-ALTER TABLE `enrollments`
-  ADD CONSTRAINT `enrollments_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `enrollments_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `instructors`
---
-ALTER TABLE `instructors`
-  ADD CONSTRAINT `instructors_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `lessons`
---
-ALTER TABLE `lessons`
-  ADD CONSTRAINT `lessons_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `materials`
---
-ALTER TABLE `materials`
-  ADD CONSTRAINT `materials_lesson_id_foreign` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `messages`
---
-ALTER TABLE `messages`
-  ADD CONSTRAINT `messages_receiver_id_foreign` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `messages_sender_id_foreign` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `options`
---
-ALTER TABLE `options`
-  ADD CONSTRAINT `options_question_id_foreign` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `permissions`
---
-ALTER TABLE `permissions`
-  ADD CONSTRAINT `permissions_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `progress`
---
-ALTER TABLE `progress`
-  ADD CONSTRAINT `progress_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `progress_last_viewed_material_id_foreign` FOREIGN KEY (`last_viewed_material_id`) REFERENCES `materials` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `progress_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `questions`
---
-ALTER TABLE `questions`
-  ADD CONSTRAINT `questions_quiz_id_foreign` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `quizzes`
---
-ALTER TABLE `quizzes`
-  ADD CONSTRAINT `quizzes_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `reviews`
---
-ALTER TABLE `reviews`
-  ADD CONSTRAINT `reviews_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `reviews_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `subscriptions`
---
-ALTER TABLE `subscriptions`
-  ADD CONSTRAINT `subscriptions_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `subscriptions_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `users`
---
-ALTER TABLE `users`
-  ADD CONSTRAINT `users_instructor_id_foreign` FOREIGN KEY (`instructor_id`) REFERENCES `instructors` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `users_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `watchlists`
---
-ALTER TABLE `watchlists`
-  ADD CONSTRAINT `watchlists_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `watchlists_lesson_id_foreign` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `watchlists_material_id_foreign` FOREIGN KEY (`material_id`) REFERENCES `materials` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `watchlists_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
-COMMIT;
+LOCK TABLES `watchlists` WRITE;
+/*!40000 ALTER TABLE `watchlists` DISABLE KEYS */;
+/*!40000 ALTER TABLE `watchlists` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-09-11  6:28:10

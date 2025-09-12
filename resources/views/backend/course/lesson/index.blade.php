@@ -66,12 +66,15 @@
                                 </thead>
                                 <tbody>
                                     @forelse ($lessons as $lesson)
-                                        <tr class="lesson-row"
-                                            data-titles='@json($lesson->title)'
-                                            data-courses='@json((array) ($lesson->course?->title ?? []))'>
+                                        @php
+                                            // Получаем переводы для текущей локали
+                                            $lessonTitle = $lesson->title; // используем accessor из модели
+                                            $courseTitle = $lesson->course ? $lesson->course->title : 'No Course'; // используем accessor из модели Course
+                                        @endphp
+                                        <tr class="lesson-row">
                                             <td>{{ $lesson->id }}</td>
-                                            <td class="lesson-title">{{ $lesson->display_title ?? 'No Title' }}</td>
-                                            <td class="lesson-course">{{ $lesson->localized_title ?? 'No Course' }}</td>
+                                            <td class="lesson-title">{{ $lessonTitle }}</td>
+                                            <td class="lesson-course">{{ $courseTitle }}</td>
                                             <td>
                                                 <a href="{{localeRoute('lesson.edit', encryptor('encrypt',$lesson->id))}}" class="btn btn-sm btn-primary" title="Edit"><i class="la la-pencil"></i></a>
                                                 <a href="javascript:void(0);" class="btn btn-sm btn-danger" title="Delete" onclick="$('#form{{$lesson->id}}').submit()"><i class="la la-trash-o"></i></a>
@@ -97,14 +100,17 @@
             <div id="grid-view" class="tab-pane fade col-lg-12">
                 <div class="row">
                     @forelse ($lessons as $lesson)
+                        @php
+                                            // Получаем переводы для текущей локали
+                                            $lessonTitle = $lesson->title; // используем accessor из модели
+                                            $courseTitle = $lesson->course ? $lesson->course->title : 'No Course'; // используем accessor из модели Course
+                                        @endphp
                         <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
-                            <div class="card card-profile h-100 lesson-card"
-                                 data-titles='@json($lesson->title)'
-                                 data-courses='@json((array) ($lesson->course?->title ?? []))'>
+                            <div class="card card-profile h-100 lesson-card">
                                 <div class="card-body text-center">
-                                    <h5 class="card-title lesson-title">{{ $lesson->display_title ?? 'No Title' }}</h5>
+                                    <h5 class="card-title lesson-title">{{ $lessonTitle }}</h5>
                                     <p class="mb-1"><strong>Course:</strong>
-                                        <span class="lesson-course">{{ $lesson->localized_title ?? 'No Course' }}</span>
+                                        <span class="lesson-course">{{ $courseTitle }}</span>
                                     </p>
                                     <div class="mt-3">
                                         <a href="{{localeRoute('lesson.edit', encryptor('encrypt',$lesson->id))}}" class="btn btn-sm btn-primary" title="Edit"><i class="la la-pencil"></i></a>
@@ -137,42 +143,19 @@
 <script src="{{asset('js/plugins-init/datatables.init.js')}}"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const savedLocale = localStorage.getItem('lessons_lang') || '{{ app()->getLocale() }}';
+$(document).ready(function() {
+    // Переключение между языками
+    $('.lang-tab').click(function(e) {
+        e.preventDefault();
+        const locale = $(this).data('locale');
 
-    function updateLessonLanguage(locale) {
-        document.querySelectorAll('.lesson-row, .lesson-card').forEach(el => {
-            const titles = JSON.parse(el.dataset.titles);
-            const courses = JSON.parse(el.dataset.courses);
+        // Активируем таб
+        $('.lang-tab').removeClass('active');
+        $(this).addClass('active');
 
-            const titleText = titles[locale] ?? Object.values(titles)[0] ?? 'No Title';
-            const courseText = courses[locale] ?? Object.values(courses)[0] ?? 'No Course';
-
-            el.querySelectorAll('.lesson-title').forEach(t => t.textContent = titleText);
-            el.querySelectorAll('.lesson-course').forEach(c => c.textContent = courseText);
-        });
-    }
-
-    // Активный таб
-    document.querySelectorAll('#lessonLangTabs .lang-tab').forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.locale === savedLocale);
-
-        tab.addEventListener('click', function(e){
-            e.preventDefault();
-            const locale = this.dataset.locale;
-            localStorage.setItem('lessons_lang', locale);
-
-            // Переключаем активный таб
-            document.querySelectorAll('#lessonLangTabs .lang-tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-
-            // Обновляем тексты
-            updateLessonLanguage(locale);
-        });
+        // Обновляем страницу с выбранной локалью
+        window.location.href = "{{ route('lesson.index') }}?lang=" + locale;
     });
-
-    // Применяем язык при загрузке
-    updateLessonLanguage(savedLocale);
 });
 </script>
 @endpush

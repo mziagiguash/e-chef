@@ -49,3 +49,16 @@ backup:
 restore:
 	cat $(BACKUP_FILE) | docker exec -i $(DB_CONTAINER) mysql -u $(DB_USER) -p"$(DB_PASS)" $(DB_NAME)
 	@echo "Database restored from $(BACKUP_FILE)"
+
+# Создать бэкап с текущей датой
+backup-current:
+	docker exec $(DB_CONTAINER) sh -c 'exec mysqldump -u $(DB_USER) -p"$(DB_PASS)" --no-tablespaces $(DB_NAME)' > elearning_backup_$(shell date +"%Y%m%d_%H%M%S").sql
+	@echo "Backup with timestamp created"
+
+# Показать список всех бэкапов
+list-backups:
+	@echo "=== Текущие бэкапы ==="
+	@ls -la *.sql 2>/dev/null || echo "Бэкапов не найдено"
+	@echo ""
+	@echo "=== Архивные бэкапы ==="
+	@ls -la old_backups/*.sql 2>/dev/null || echo "Архивных бэкапов не найдено"

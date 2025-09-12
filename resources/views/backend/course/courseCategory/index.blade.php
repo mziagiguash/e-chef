@@ -87,15 +87,15 @@
     }
 @endphp
                                                 <tr>
-                                                    <td><strong>{{ $d->id }}</strong></td>
-                                                    <td>
-                                                        @foreach ($locales as $localeCode => $localeName)
-                                                            <span class="cat-name lang-{{ $localeCode }}"
-                                                                  style="{{ $localeCode === $appLocale ? '' : 'display:none' }}">
-                                                                {{ $names[$localeCode] ?? '' }}
-                                                            </span>
-                                                        @endforeach
-                                                    </td>
+                                                   <td><strong>{{ $d->id }}</strong></td>
+<td>
+    @foreach ($locales as $localeCode => $localeName)
+        <span class="cat-name lang-{{ $localeCode }}"
+              style="{{ $localeCode === $appLocale ? '' : 'display:none' }}">
+            {{ $d->translations->firstWhere('locale', $localeCode)->category_name ?? '' }}
+        </span>
+    @endforeach
+</td>
                                                     <td>
                                                         <span class="badge {{ $d->category_status == 1 ? 'badge-success' : 'badge-danger' }}">
                                                             {{ $d->category_status == 1 ? 'Active' : 'Inactive' }}

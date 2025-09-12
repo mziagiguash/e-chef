@@ -18,28 +18,32 @@
                         @csrf
                         @php $locales = ['en'=>'English','ru'=>'Русский','ka'=>'ქართული']; @endphp
                         @foreach($locales as $code=>$name)
+                            <h6 class="mt-3">{{ $name }} Translation</h6>
                             <div class="row mb-2">
                                 <div class="col-lg-6">
                                     <label>Name ({{ $name }})</label>
-                                    <input type="text" name="name[{{ $code }}]" class="form-control" value="{{ old('name.'.$code) }}">
-                                    @error('name.'.$code)<span class="text-danger">{{ $message }}</span>@enderror
+                                    <input type="text" name="translations[{{ $code }}][name]" class="form-control" value="{{ old('translations.'.$code.'.name') }}">
+                                    @error('translations.'.$code.'.name')<span class="text-danger">{{ $message }}</span>@enderror
                                 </div>
                                 <div class="col-lg-6">
                                     <label>Designation ({{ $name }})</label>
-                                    <input type="text" name="designation[{{ $code }}]" class="form-control" value="{{ old('designation.'.$code) }}">
-                                    @error('designation.'.$code)<span class="text-danger">{{ $message }}</span>@enderror
+                                    <input type="text" name="translations[{{ $code }}][designation]" class="form-control" value="{{ old('translations.'.$code.'.designation') }}">
+                                    @error('translations.'.$code.'.designation')<span class="text-danger">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                             <div class="row mb-2">
                                 <div class="col-lg-6">
                                     <label>Title ({{ $name }})</label>
-                                    <input type="text" name="title[{{ $code }}]" class="form-control" value="{{ old('title.'.$code) }}">
+                                    <input type="text" name="translations[{{ $code }}][title]" class="form-control" value="{{ old('translations.'.$code.'.title') }}">
+                                    @error('translations.'.$code.'.title')<span class="text-danger">{{ $message }}</span>@enderror
                                 </div>
                                 <div class="col-lg-6">
                                     <label>Bio ({{ $name }})</label>
-                                    <textarea name="bio[{{ $code }}]" class="form-control">{{ old('bio.'.$code) }}</textarea>
+                                    <textarea name="translations[{{ $code }}][bio]" class="form-control">{{ old('translations.'.$code.'.bio') }}</textarea>
+                                    @error('translations.'.$code.'.bio')<span class="text-danger">{{ $message }}</span>@enderror
                                 </div>
                             </div>
+                            <input type="hidden" name="translations[{{ $code }}][locale]" value="{{ $code }}">
                             <hr>
                         @endforeach
                         <div class="row mb-2">
@@ -90,7 +94,6 @@
     </div>
 </div>
 @endsection
-
 
 @push('scripts')
 <!-- pickdate -->

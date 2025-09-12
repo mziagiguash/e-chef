@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Lesson extends Model
@@ -11,49 +14,68 @@ class Lesson extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'title',
         'course_id',
-        'description',
-        'notes',
+        'quiz_id',
     ];
 
-    protected $casts = [
-        'title' => 'array',        // JSON для всех языков
-        'description' => 'array',
-        'notes' => 'array',
-    ];
+    protected $dates = ['deleted_at'];
 
-    public function course()
+    public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
 
-    // Получение перевода по атрибуту
-    public function getTranslation(string $attribute, ?string $locale = null)
+    // Отношение с переводами
+    public function translations(): HasMany
     {
-        $locale = $locale ?: app()->getLocale();
-        $data = $this->{$attribute} ?? [];
+        return $this->hasMany(LessonTranslation::class);
+    }
 
-        if (!is_array($data)) {
-            $data = json_decode($data, true) ?? [];
+    public function materials(): HasMany
+    {
+        return $this->hasMany(Material::class);
+    }
+
+    // Правильное отношение с квизом (через lesson_id в quizzes)
+    public function quiz(): HasOne
+    {
+        return $this->hasOne(Quiz::class, 'lesson_id');
+    }
+
+    // Упрощенный accessor для перевода
+    protected function getTranslation($field)
+    {
+        $locale = app()->getLocale();
+        $defaultLocale = config('app.fallback_locale', 'en');
+
+        if (!$this->relationLoaded('translations')) {
+            $this->load('translations');
         }
 
-        return $data[$locale] ?? reset($data) ?? '';
+        $translation = $this->translations->where('locale', $locale)->first()
+                    ?? $this->translations->where('locale', $defaultLocale)->first();
+
+        return $translation->{$field} ?? null;
     }
 
-    // Для удобного отображения
-    public function displayTitle($locale = null)
+    public function getTitleAttribute()
     {
-        return $this->getTranslation('title', $locale);
+        return $this->getTranslation('title') ?? 'Lesson #' . $this->id;
     }
 
-    public function displayDescription($locale = null)
+    public function getDescriptionAttribute()
     {
-        return $this->getTranslation('description', $locale);
+        return $this->getTranslation('description');
     }
 
-    public function displayNotes($locale = null)
+    public function getNotesAttribute()
     {
-        return $this->getTranslation('notes', $locale);
+        return $this->getTranslation('notes');
+    }
+
+    // Проверка наличия квиза
+    public function getHasQuizAttribute(): bool
+    {
+        return $this->quiz()->exists();
     }
 }

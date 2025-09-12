@@ -32,12 +32,18 @@ public function rules(): array
         'instructor_id' => 'required|exists:instructors,id',
         'courseType' => 'required|in:free,paid,subscription',
         'coursePrice' => 'required|numeric|min:0',
+        'courseOldPrice' => 'nullable|numeric|min:0', // Добавьте это
+        'subscription_price' => 'nullable|numeric|min:0', // Добавьте это
         'start_from' => 'required|date',
         'duration' => 'required|integer|min:1',
         'lesson' => 'required|integer|min:1',
         'course_code' => 'required|string',
+        'thumbnail_video_url' => 'nullable|url', // Добавьте это
+        'tag' => 'nullable|in:popular,featured,upcoming', // Добавьте это
+        'status' => 'required|in:0,1,2', // Добавьте это правило для статуса
         'image' => 'required|image|max:2048',
         'thumbnail_image' => 'nullable|image|max:2048',
+        'thumbnail_video_file' => 'nullable|file|mimes:mp4,mov,avi|max:10240', // Добавьте для видео файла
     ];
 }
 

@@ -26,184 +26,209 @@
             </div>
         </div>
 
-        {{-- Форма --}}
-        <div class="row">
-            <div class="col-xl-12 col-xxl-12 col-sm-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="mt-3">Basic Info</h3>
-                        <ul class="nav nav-tabs" role="tablist">
-                            @foreach(['en'=>'English','ru'=>'Русский','ka'=>'ქართული'] as $locale=>$langName)
-                                <li class="nav-item">
-                                    <a class="nav-link {{ $loop->first ? 'active' : '' }}" data-bs-toggle="tab" href="#tab-{{ $locale }}" role="tab">
-                                        {{ $langName }}
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
+{{-- Форма --}}
+<div class="row">
+    <div class="col-xl-12 col-xxl-12 col-sm-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mt-3">Basic Info</h3>
+                <ul class="nav nav-tabs" role="tablist">
+                    @foreach(['en'=>'English','ru'=>'Русский','ka'=>'ქართული'] as $locale=>$langName)
+                        <li class="nav-item">
+                            <a class="nav-link {{ $loop->first ? 'active' : '' }}" data-bs-toggle="tab" href="#tab-{{ $locale }}" role="tab">
+                                {{ $langName }}
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <div class="card-body">
+                <form action="{{ localeRoute('course.store') }}" method="post" enctype="multipart/form-data">
+                    @csrf
+
+                    {{-- Локализации --}}
+                    <div class="tab-content mb-4">
+                        @foreach(['en'=>'English','ru'=>'Русский','ka'=>'ქართული'] as $locale=>$langName)
+                            <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="tab-{{ $locale }}" role="tabpanel">
+                                <div class="form-group">
+                                    <label class="form-label">Title ({{ $langName }})</label>
+                                    <input type="text" class="form-control"
+                                           name="translations[{{ $locale }}][title]"
+                                           value="{{ old("translations.$locale.title") }}"
+                                           required>
+                                    @error("translations.$locale.title") <span class="text-danger">{{ $message }}</span> @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Description ({{ $langName }})</label>
+                                    <textarea class="form-control" name="translations[{{ $locale }}][description]" required>{{ old("translations.$locale.description") }}</textarea>
+                                    @error("translations.$locale.description") <span class="text-danger">{{ $message }}</span> @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Prerequisites ({{ $langName }})</label>
+                                    <textarea class="form-control" name="translations[{{ $locale }}][prerequisites]">{{ old("translations.$locale.prerequisites") }}</textarea>
+                                    @error("translations.$locale.prerequisites") <span class="text-danger">{{ $message }}</span> @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Keywords ({{ $langName }})</label>
+                                    <input type="text" class="form-control"
+                                           name="translations[{{ $locale }}][keywords]"
+                                           value="{{ old("translations.$locale.keywords") }}">
+                                    @error("translations.$locale.keywords") <span class="text-danger">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
 
-                    <div class="card-body">
-                        <form action="{{ localeRoute('course.store') }}" method="post" enctype="multipart/form-data">
-                            @csrf
+                    {{-- Общие поля --}}
+                    <div class="row">
+<div class="col-lg-6">
+    <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-control" name="course_category_id" required>
+            <option value="">Select Category</option>
+            @forelse($courseCategory as $c)
+                <option value="{{ $c->id }}" {{ old('course_category_id') == $c->id ? 'selected' : '' }}>
+                    {{ $c->getTranslation('category_name') ?? $c->translated_category_name ?? 'No Category' }}
+                </option>
+            @empty
+                <option value="">No Category Found</option>
+            @endforelse
+        </select>
+        @error('course_category_id') <span class="text-danger">{{ $message }}</span> @enderror
+    </div>
+</div>
+                        <div class="col-lg-6">
+    <div class="form-group">
+        <label class="form-label">Instructor</label>
+        <select class="form-control" name="instructor_id" required>
+            <option value="">Select Instructor</option>
+            @forelse($instructors as $i)
+                <option value="{{ $i->id }}" {{ old('instructor_id') == $i->id ? 'selected' : '' }}>
+                    {{ $i->getTranslation('name') ?? $i->translated_name ?? 'No Instructor' }}
+                </option>
+            @empty
+                <option value="">No Instructor Found</option>
+            @endforelse
+        </select>
+        @error('instructor_id') <span class="text-danger">{{ $message }}</span> @enderror
+    </div>
+</div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Type</label>
+                            <select class="form-control" name="courseType" required>
+                                <option value="free" {{ old('courseType')=='free'?'selected':'' }}>Free</option>
+                                <option value="paid" {{ old('courseType')=='paid'?'selected':'' }}>Paid</option>
+                                <option value="subscription" {{ old('courseType')=='subscription'?'selected':'' }}>Subscription-based</option>
+                            </select>
+                            @error('courseType') <span class="text-danger">{{ $message }}</span> @enderror
+                        </div>
 
-                            {{-- Локализации --}}
-                            <div class="tab-content mb-4">
-                                @foreach(['en'=>'English','ru'=>'Русский','ka'=>'ქართული'] as $locale=>$langName)
-                                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="tab-{{ $locale }}" role="tabpanel">
-                                        <div class="form-group">
-                                            <label class="form-label">Title ({{ $langName }})</label>
-                                            <input type="text" class="form-control"
-                                                   name="translations[{{ $locale }}][title]"
-                                                   value="{{ old("translations.$locale.title") }}"
-                                                   required>
-                                            @error("translations.$locale.title") <span class="text-danger">{{ $message }}</span> @enderror
-                                        </div>
+                        <div class="col-lg-6">
+    <label class="form-label">Price ({{ $currentCurrency }})</label>
+    <input type="number" step="0.01" min="0" class="form-control" name="coursePrice"
+           value="{{ old('coursePrice') }}" placeholder="0.00" required>
+    @error('coursePrice') <span class="text-danger">{{ $message }}</span> @enderror
+</div>
 
-                                        <div class="form-group">
-                                            <label class="form-label">Description ({{ $langName }})</label>
-                                            <textarea class="form-control" name="translations[{{ $locale }}][description]" required>{{ old("translations.$locale.description") }}</textarea>
-                                            @error("translations.$locale.description") <span class="text-danger">{{ $message }}</span> @enderror
-                                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Old Price</label>
+                            <input type="number" min="0" class="form-control" name="courseOldPrice"
+                                   value="{{ old('courseOldPrice') }}">
+                            @error('courseOldPrice') <span class="text-danger">{{ $message }}</span> @enderror
+                        </div>
 
-                                        <div class="form-group">
-                                            <label class="form-label">Prerequisites ({{ $langName }})</label>
-                                            <textarea class="form-control" name="translations[{{ $locale }}][prerequisites]">{{ old("translations.$locale.prerequisites") }}</textarea>
-                                            @error("translations.$locale.prerequisites") <span class="text-danger">{{ $message }}</span> @enderror
-                                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Subscription Price</label>
+                            <input type="number" min="0" class="form-control" name="subscription_price"
+                                   value="{{ old('subscription_price') }}">
+                            @error('subscription_price') <span class="text-danger">{{ $message }}</span> @enderror
+                        </div>
 
-                                        <div class="form-group">
-                                            <label class="form-label">Keywords ({{ $langName }})</label>
-                                            <input type="text" class="form-control"
-                                                   name="translations[{{ $locale }}][keywords]"
-                                                   value="{{ old("translations.$locale.keywords") }}">
-                                            @error("translations.$locale.keywords") <span class="text-danger">{{ $message }}</span> @enderror
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
+                        <div class="col-lg-6">
+    <label class="form-label">Start From</label>
+    <input type="date" class="form-control" name="start_from"
+           value="{{ old('start_from') }}" required>
+    @error('start_from') <span class="text-danger">{{ $message }}</span> @enderror
+</div>
 
-                            {{-- Общие поля --}}
-                            <div class="row">
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Category</label>
-                                        <select class="form-control" name="course_category_id" required>
-                                            @forelse($courseCategory as $c)
-                                                <option value="{{ $c->id }}" {{ old('course_category_id') == $c->id ? 'selected' : '' }}>
-                                                    {{ $c->display_name }}
-                                                </option>
-                                            @empty
-                                                <option value="">No Category Found</option>
-                                            @endforelse
-                                        </select>
-                                        @error('course_category_id') <span class="text-danger">{{ $message }}</span> @enderror
-                                    </div>
-                                </div>
+                        <div class="col-lg-6">
+    <label class="form-label">Duration (days)</label>
+    <input type="number" min="1" max="365" class="form-control" name="duration"
+           value="{{ old('duration', 30) }}" required>
+    @error('duration') <span class="text-danger">{{ $message }}</span> @enderror
+</div>
 
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Instructor</label>
-                                        <select class="form-control" name="instructor_id" required>
-                                            @forelse($instructors as $i)
-                                                <option value="{{ $i->id }}" {{ old('instructor_id') == $i->id ? 'selected' : '' }}>
-                                                    {{ $i->display_name }}
-                                                </option>
-                                            @empty
-                                                <option value="">No Instructor Found</option>
-                                            @endforelse
-                                        </select>
-                                        @error('instructor_id') <span class="text-danger">{{ $message }}</span> @enderror
-                                    </div>
-                                </div>
+                        <div class="col-lg-6">
+    <label class="form-label">Number of Lessons</label>
+    <input type="number" min="1" max="500" class="form-control" name="lesson"
+           value="{{ old('lesson', 10) }}" required>
+    @error('lesson') <span class="text-danger">{{ $message }}</span> @enderror
+</div>
 
-                                <div class="col-lg-6">
-                                    <label class="form-label">Type</label>
-                                    <select class="form-control" name="courseType" required>
-                                        <option value="free" {{ old('courseType')=='free'?'selected':'' }}>Free</option>
-                                        <option value="paid" {{ old('courseType')=='paid'?'selected':'' }}>Paid</option>
-                                        <option value="subscription" {{ old('courseType')=='subscription'?'selected':'' }}>Subscription-based</option>
-                                    </select>
-                                </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Course Code</label>
+                            <input type="text" class="form-control" name="course_code"
+                                   value="{{ old('course_code') }}" required>
+                            @error('course_code') <span class="text-danger">{{ $message }}</span> @enderror
+                        </div>
 
-                                <div class="col-lg-6">
-                                    <label class="form-label">Price ({{ $currentCurrency }})</label>
-                                    <input type="number" step="0.01" min="0" class="form-control" name="coursePrice"
-                                           value="{{ old('coursePrice') }}" required>
-                                </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">YouTube Video URL</label>
+                            <input type="url" class="form-control" name="thumbnail_video_url"
+                                   value="{{ old('thumbnail_video_url') }}">
+                            @error('thumbnail_video_url') <span class="text-danger">{{ $message }}</span> @enderror
+                        </div>
+<div class="col-lg-6">
+    <label class="form-label">Upload Video</label>
+    <input type="file" class="form-control" name="thumbnail_video_file" accept="video/*">
+    <small class="text-muted">Max size: 10MB, Formats: MP4, MOV, AVI</small>
+    @error('thumbnail_video_file') <span class="text-danger">{{ $message }}</span> @enderror
+</div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Course Tag</label>
+                            <select class="form-control" name="tag">
+                                <option value="popular" {{ old('tag')=='popular'?'selected':'' }}>Popular</option>
+                                <option value="featured" {{ old('tag')=='featured'?'selected':'' }}>Featured</option>
+                                <option value="upcoming" {{ old('tag')=='upcoming'?'selected':'' }}>Upcoming</option>
+                            </select>
+                            @error('tag') <span class="text-danger">{{ $message }}</span> @enderror
+                        </div>
 
-                                <div class="col-lg-6">
-                                    <label class="form-label">Old Price</label>
-                                    <input type="number" min="0" class="form-control" name="courseOldPrice"
-                                           value="{{ old('courseOldPrice') }}">
-                                </div>
+                        <div class="col-lg-6">
+                            <label class="form-label">Status</label>
+                            <select class="form-control" name="status" required>
+                                <option value="0" {{ old('status', 2) == 0 ? 'selected' : '' }}>Pending</option>
+                                <option value="1" {{ old('status', 2) == 1 ? 'selected' : '' }}>Inactive</option>
+                                <option value="2" {{ old('status', 2) == 2 ? 'selected' : '' }}>Active</option>
+                            </select>
+                            @error('status') <span class="text-danger">{{ $message }}</span> @enderror
+                        </div>
 
-                                <div class="col-lg-6">
-                                    <label class="form-label">Subscription Price</label>
-                                    <input type="number" min="0" class="form-control" name="subscription_price"
-                                           value="{{ old('subscription_price') }}">
-                                </div>
+                        <div class="col-lg-6">
+    <label class="form-label">Image</label>
+    <input type="file" class="dropify" name="image" accept="image/*"
+           data-allowed-file-extensions="jpg jpeg png gif" required>
+    <small class="text-muted">Max size: 2MB, Formats: JPG, JPEG, PNG, GIF</small>
+    @error('image') <span class="text-danger">{{ $message }}</span> @enderror
+</div>
+<div class="col-lg-6">
+    <label class="form-label">Thumbnail Image</label>
+    <input type="file" class="dropify" name="thumbnail_image" accept="image/*"
+           data-allowed-file-extensions="jpg jpeg png gif">
+    <small class="text-muted">Max size: 2MB, Formats: JPG, JPEG, PNG, GIF</small>
+    @error('thumbnail_image') <span class="text-danger">{{ $message }}</span> @enderror
+</div>
 
-                                <div class="col-lg-6">
-                                    <label class="form-label">Start From</label>
-                                    <input type="date" class="form-control" name="start_from"
-                                           value="{{ old('start_from') }}" required>
-                                </div>
-
-                                <div class="col-lg-6">
-                                    <label class="form-label">Duration (days)</label>
-                                    <input type="number" min="1" class="form-control" name="duration"
-                                           value="{{ old('duration') }}" required>
-                                </div>
-
-                                <div class="col-lg-6">
-                                    <label class="form-label">Number of Lessons</label>
-                                    <input type="number" min="1" class="form-control" name="lesson"
-                                           value="{{ old('lesson') }}" required>
-                                </div>
-
-                                <div class="col-lg-6">
-                                    <label class="form-label">Course Code</label>
-                                    <input type="text" class="form-control" name="course_code"
-                                           value="{{ old('course_code') }}" required>
-                                </div>
-
-                                <div class="col-lg-6">
-                                    <label class="form-label">YouTube Video URL</label>
-                                    <input type="url" class="form-control" name="thumbnail_video_url"
-                                           value="{{ old('thumbnail_video_url') }}">
-                                </div>
-
-                                <div class="col-lg-6">
-                                    <label class="form-label">Upload Video</label>
-                                    <input type="file" class="form-control" name="thumbnail_video_file" accept="video/*">
-                                </div>
-
-                                <div class="col-lg-6">
-                                    <label class="form-label">Course Tag</label>
-                                    <select class="form-control" name="tag">
-                                        <option value="popular" {{ old('tag')=='popular'?'selected':'' }}>Popular</option>
-                                        <option value="featured" {{ old('tag')=='featured'?'selected':'' }}>Featured</option>
-                                        <option value="upcoming" {{ old('tag')=='upcoming'?'selected':'' }}>Upcoming</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-lg-6">
-                                    <label class="form-label">Image</label>
-                                    <input type="file" class="dropify" name="image" accept="image/*" required>
-                                </div>
-
-                                <div class="col-lg-6">
-                                    <label class="form-label">Thumbnail Image</label>
-                                    <input type="file" class="dropify" name="thumbnail_image" accept="image/*">
-                                </div>
-
-                                <div class="col-lg-12 mt-3">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                    <button type="button" onclick="window.history.back();" class="btn btn-light">Cancel</button>
-                                </div>
-                            </div>
-                        </form>
+                        <div class="col-lg-12 mt-3">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="button" onclick="window.history.back();" class="btn btn-light">Cancel</button>
+                        </div>
+                    </div>
+                </form>
                     </div>
                 </div>
             </div>
