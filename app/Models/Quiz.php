@@ -92,4 +92,25 @@ public function translations(): HasMany
                $this->translations->first()->description ??
                null;
     }
+public function getTranslation(string $locale, string $field = 'title'): ?string
+{
+    if (!$this->relationLoaded('translations')) {
+        $this->load('translations');
+    }
+
+    // Сначала ищем перевод для запрошенного языка
+    $translation = $this->translations->where('locale', $locale)->first();
+
+    // Если нет, ищем английский перевод
+    if (!$translation && $locale !== 'en') {
+        $translation = $this->translations->where('locale', 'en')->first();
+    }
+
+    // Если все еще нет, берем первый доступный перевод
+    if (!$translation) {
+        $translation = $this->translations->first();
+    }
+
+    return $translation ? $translation->{$field} : null;
+}
 }

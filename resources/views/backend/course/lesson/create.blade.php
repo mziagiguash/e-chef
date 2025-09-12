@@ -41,16 +41,16 @@
                     <div class="tab-pane fade {{ $localeCode === $appLocale ? 'show active' : '' }}" id="locale-{{ $localeCode }}" role="tabpanel">
                         <div class="form-group">
                             <label>Title ({{ $localeName }}) *</label>
-                            <input type="text" name="title_{{ $localeCode }}" class="form-control"
-                                   value="{{ old('title_'.$localeCode) }}" required>
+                            <input type="text" name="translations[{{ $localeCode }}][title]" class="form-control"
+                                   value="{{ old('translations.'.$localeCode.'.title') }}" required>
                         </div>
                         <div class="form-group">
                             <label>Description ({{ $localeName }})</label>
-                            <textarea name="description_{{ $localeCode }}" class="form-control summernote">{{ old('description_'.$localeCode) }}</textarea>
+                            <textarea name="translations[{{ $localeCode }}][description]" class="form-control summernote">{{ old('translations.'.$localeCode.'.description') }}</textarea>
                         </div>
                         <div class="form-group">
                             <label>Notes ({{ $localeName }})</label>
-                            <textarea name="notes_{{ $localeCode }}" class="form-control summernote">{{ old('notes_'.$localeCode) }}</textarea>
+                            <textarea name="translations[{{ $localeCode }}][notes]" class="form-control summernote">{{ old('translations.'.$localeCode.'.notes') }}</textarea>
                         </div>
                     </div>
                 @endforeach
@@ -59,11 +59,14 @@
             {{-- Course Selector --}}
             <div class="form-group">
                 <label>Course *</label>
-                <select name="course_id" class="form-control" required>
+                <select name="course_id" class="form-control" required id="courseSelect">
                     <option value="">Select Course</option>
                     @foreach($courses as $course)
-                        <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
-                            {{ $course->getTitleAttribute() }}
+                        <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}
+                                data-title-en="{{ $course->getTranslation('en', 'title') }}"
+                                data-title-ru="{{ $course->getTranslation('ru', 'title') }}"
+                                data-title-ka="{{ $course->getTranslation('ka', 'title') }}">
+                            {{ $course->getTranslation($appLocale, 'title') }}
                         </option>
                     @endforeach
                 </select>
@@ -86,6 +89,25 @@ $(document).ready(function(){
         let target = $(e.target).attr('href');
         $(target+' .summernote').summernote({height:150});
     });
+
+    // Обновление названий курсов при переключении языка
+    $('#lessonLangTabs a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        const locale = $(e.target).attr('id').replace('tab-', '');
+        updateCourseTitles(locale);
+    });
+
+    function updateCourseTitles(locale) {
+        $('#courseSelect option').each(function() {
+            if ($(this).val() !== '') {
+                const title = $(this).data('title-' + locale) || $(this).data('title-en');
+                $(this).text(title);
+            }
+        });
+    }
+
+    // Инициализация при загрузке
+    const currentLocale = $('#lessonLangTabs .nav-link.active').attr('id').replace('tab-', '');
+    updateCourseTitles(currentLocale);
 });
 </script>
 @endpush

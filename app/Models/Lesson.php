@@ -31,9 +31,10 @@ class Lesson extends Model
         return $this->hasMany(LessonTranslation::class);
     }
 
+    // Отношение с материалами и их переводами
     public function materials(): HasMany
     {
-        return $this->hasMany(Material::class);
+        return $this->hasMany(Material::class)->with('translations');
     }
 
     // Правильное отношение с квизом (через lesson_id в quizzes)
@@ -42,8 +43,8 @@ class Lesson extends Model
         return $this->hasOne(Quiz::class, 'lesson_id');
     }
 
-    // Упрощенный accessor для перевода
-    protected function getTranslation($field)
+    // Универсальный метод для получения перевода (для accessors)
+    protected function getTranslatedField(string $field): ?string
     {
         $locale = app()->getLocale();
         $defaultLocale = config('app.fallback_locale', 'en');
@@ -58,24 +59,59 @@ class Lesson extends Model
         return $translation->{$field} ?? null;
     }
 
+    // Метод для blade шаблона с указанием локали
+    public function getTranslation(string $locale, string $field = 'title'): ?string
+    {
+        if (!$this->relationLoaded('translations')) {
+            $this->load('translations');
+        }
+
+        $translation = $this->translations->where('locale', $locale)->first();
+
+        if (!$translation) {
+            // Fallback на английский
+            $translation = $this->translations->where('locale', 'en')->first();
+        }
+
+        if (!$translation) {
+            // Fallback на первый доступный перевод
+            $translation = $this->translations->first();
+        }
+
+        return $translation ? $translation->{$field} : null;
+    }
+
+    // Accessors
     public function getTitleAttribute()
     {
-        return $this->getTranslation('title') ?? 'Lesson #' . $this->id;
+        return $this->getTranslatedField('title') ?? 'Lesson #' . $this->id;
     }
 
     public function getDescriptionAttribute()
     {
-        return $this->getTranslation('description');
+        return $this->getTranslatedField('description');
     }
 
     public function getNotesAttribute()
     {
-        return $this->getTranslation('notes');
+        return $this->getTranslatedField('notes');
     }
 
     // Проверка наличия квиза
     public function getHasQuizAttribute(): bool
     {
         return $this->quiz()->exists();
+    }
+
+    // Количество материалов в уроке
+    public function getMaterialsCountAttribute(): int
+    {
+        return $this->materials->count();
+    }
+
+    // Типы материалов в уроке
+    public function getMaterialTypesAttribute(): array
+    {
+        return $this->materials->pluck('type')->unique()->toArray();
     }
 }

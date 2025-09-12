@@ -16,9 +16,9 @@ return new class extends Migration
                 $table->boolean('is_active')->default(true);
                 $table->integer('time_limit')->nullable()->comment('Time limit in minutes');
                 $table->integer('passing_score')->default(70);
-                $table->integer('max_attempts')->default(1); 
-                $table->string('title')->nullable();
-                $table->string('description')->nullable();
+                $table->integer('max_attempts')->default(1);
+                $table->text('title')->nullable(); // ✅ nullable
+                $table->text('description')->nullable(); // ✅ nullable
                 $table->timestamps();
                 $table->softDeletes();
 

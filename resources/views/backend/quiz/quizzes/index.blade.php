@@ -44,7 +44,7 @@
                 <ul class="nav nav-tabs" id="quizLangTabs" role="tablist">
                     @foreach($locales as $localeCode => $localeName)
                         <li class="nav-item" role="presentation">
-                            <a href="{{ request()->fullUrlWithQuery(['lang' => $localeCode]) }}"
+                            <a href="{{ route('quiz.index', ['lang' => $localeCode]) }}"
                                class="nav-link {{ $localeCode === $locale ? 'active' : '' }}"
                                data-locale="{{ $localeCode }}">
                                 {{ $localeName }}
@@ -52,6 +52,28 @@
                         </li>
                     @endforeach
                 </ul>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show">
+                        {{ session('success') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        {{ session('error') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -84,15 +106,25 @@
                                             <td>{{ $quiz->id }}</td>
                                             <td>
                                                 @php
+                                                    // Получаем перевод для текущего языка
                                                     $translation = $quiz->translations->firstWhere('locale', $locale);
-                                                    $quizTitle = $translation ? $translation->title : ($quiz->translations->first() ? $quiz->translations->first()->title : 'No Title');
+                                                    $quizTitle = $translation ? $translation->title : null;
+                                                    $hasTranslation = (bool)$translation;
+                                                    $hasAnyTranslation = $quiz->translations->count() > 0;
+
+                                                    // Если нет перевода, используем fallback
+                                                    if (!$quizTitle) {
+                                                        // Пытаемся получить английский перевод
+                                                        $enTranslation = $quiz->translations->firstWhere('locale', 'en');
+                                                        $quizTitle = $enTranslation ? $enTranslation->title : ('Quiz #' . $quiz->id);
+                                                    }
                                                 @endphp
 
                                                 <strong>{{ $quizTitle }}</strong>
 
-                                                @if(!$translation && $quiz->translations->count() > 0)
+                                                @if(!$hasTranslation && $hasAnyTranslation)
                                                     <span class="badge badge-warning ml-1">No {{ $locale }} translation</span>
-                                                @elseif($quiz->translations->count() === 0)
+                                                @elseif(!$hasAnyTranslation)
                                                     <span class="badge badge-danger ml-1">No translations</span>
                                                 @endif
 
@@ -101,34 +133,48 @@
                                                 @endif
                                             </td>
                                             <td>
-    @if($quiz->lesson)
-        @php
-            $lessonTranslation = $quiz->lesson->translations->firstWhere('locale', $locale);
-            $lessonTitle = $lessonTranslation ? $lessonTranslation->title : ($quiz->lesson->translations->first() ? $quiz->lesson->translations->first()->title : 'No Lesson Title');
-            $hasLessonTranslation = (bool)$lessonTranslation;
-        @endphp
-        {{ $lessonTitle }}
-        @if(!$hasLessonTranslation)
-            <span class="badge badge-warning ml-1">No {{ $locale }} translation</span>
-        @endif
-        <br>
-        <small class="text-muted">Lesson ID: {{ $quiz->lesson->id }}</small>
-        <br>
-        <small class="text-muted">Course:
-            @if($quiz->lesson->course)
-                @php
-                    $courseTranslation = $quiz->lesson->course->translations->firstWhere('locale', $locale);
-                    $courseTitle = $courseTranslation ? $courseTranslation->title : ($quiz->lesson->course->translations->first() ? $quiz->lesson->course->translations->first()->title : 'No Course Title');
-                @endphp
-                {{ $courseTitle }} (ID: {{ $quiz->lesson->course->id }})
-            @else
-                No Course
-            @endif
-        </small>
-    @else
-        <span class="text-danger">No lesson assigned</span>
-    @endif
-</td>
+                                                @if($quiz->lesson)
+                                                    @php
+                                                        $lessonTranslation = $quiz->lesson->translations->firstWhere('locale', $locale);
+                                                        $lessonTitle = $lessonTranslation ? $lessonTranslation->title : null;
+                                                        $hasLessonTranslation = (bool)$lessonTranslation;
+                                                        $hasAnyLessonTranslation = $quiz->lesson->translations->count() > 0;
+
+                                                        if (!$lessonTitle) {
+                                                            $enLessonTranslation = $quiz->lesson->translations->firstWhere('locale', 'en');
+                                                            $lessonTitle = $enLessonTranslation ? $enLessonTranslation->title : ('Lesson #' . $quiz->lesson->id);
+                                                        }
+                                                    @endphp
+                                                    {{ $lessonTitle }}
+                                                    @if(!$hasLessonTranslation && $hasAnyLessonTranslation)
+                                                        <span class="badge badge-warning ml-1">No {{ $locale }} translation</span>
+                                                    @elseif(!$hasAnyLessonTranslation)
+                                                        <span class="badge badge-danger ml-1">No lesson translations</span>
+                                                    @endif
+                                                    <br>
+                                                    <small class="text-muted">Lesson ID: {{ $quiz->lesson->id }}</small>
+                                                    <br>
+                                                    <small class="text-muted">Course:
+                                                        @if($quiz->lesson->course)
+                                                            @php
+                                                                $courseTranslation = $quiz->lesson->course->translations->firstWhere('locale', $locale);
+                                                                $courseTitle = $courseTranslation ? $courseTranslation->title : null;
+                                                                if (!$courseTitle) {
+                                                                    $enCourseTranslation = $quiz->lesson->course->translations->firstWhere('locale', 'en');
+                                                                    $courseTitle = $enCourseTranslation ? $enCourseTranslation->title : ('Course #' . $quiz->lesson->course->id);
+                                                                }
+                                                            @endphp
+                                                            {{ $courseTitle }} (ID: {{ $quiz->lesson->course->id }})
+                                                        @else
+                                                            <span class="text-warning">No Course</span>
+                                                        @endif
+                                                    </small>
+                                                @else
+                                                    <span class="text-danger">No lesson assigned</span>
+                                                    <br>
+                                                    <small class="text-muted">Please assign a lesson to this quiz</small>
+                                                @endif
+                                            </td>
                                             <td>
                                                 <span class="badge badge-info">{{ $quiz->questions_count }}</span>
                                             </td>
@@ -195,15 +241,23 @@
                         <div class="card">
                             <div class="card-body">
                                 @php
+                                    // Получаем перевод для текущего языка
                                     $translation = $quiz->translations->firstWhere('locale', $locale);
-                                    $quizTitle = $translation ? $translation->title : ($quiz->translations->first() ? $quiz->translations->first()->title : 'No Title');
+                                    $quizTitle = $translation ? $translation->title : null;
+                                    $hasTranslation = (bool)$translation;
+                                    $hasAnyTranslation = $quiz->translations->count() > 0;
+
+                                    if (!$quizTitle) {
+                                        $enTranslation = $quiz->translations->firstWhere('locale', 'en');
+                                        $quizTitle = $enTranslation ? $enTranslation->title : ('Quiz #' . $quiz->id);
+                                    }
                                 @endphp
 
                                 <h5 class="card-title">{{ $quizTitle }}</h5>
 
-                                @if(!$translation && $quiz->translations->count() > 0)
+                                @if(!$hasTranslation && $hasAnyTranslation)
                                     <span class="badge badge-warning">No {{ $locale }} translation</span>
-                                @elseif($quiz->translations->count() === 0)
+                                @elseif(!$hasAnyTranslation)
                                     <span class="badge badge-danger">No translations</span>
                                 @endif
 
@@ -212,15 +266,23 @@
                                     @if($quiz->lesson)
                                         @php
                                             $lessonTranslation = $quiz->lesson->translations->firstWhere('locale', $locale);
-                                            $lessonTitle = $lessonTranslation ? $lessonTranslation->title : ($quiz->lesson->translations->first() ? $quiz->lesson->translations->first()->title : 'No Lesson');
+                                            $lessonTitle = $lessonTranslation ? $lessonTranslation->title : null;
                                             $hasLessonTranslation = (bool)$lessonTranslation;
+                                            $hasAnyLessonTranslation = $quiz->lesson->translations->count() > 0;
+
+                                            if (!$lessonTitle) {
+                                                $enLessonTranslation = $quiz->lesson->translations->firstWhere('locale', 'en');
+                                                $lessonTitle = $enLessonTranslation ? $enLessonTranslation->title : ('Lesson #' . $quiz->lesson->id);
+                                            }
                                         @endphp
                                         {{ $lessonTitle }}
-                                        @if(!$hasLessonTranslation)
+                                        @if(!$hasLessonTranslation && $hasAnyLessonTranslation)
                                             <span class="badge badge-warning">No {{ $locale }} translation</span>
+                                        @elseif(!$hasAnyLessonTranslation)
+                                            <span class="badge badge-danger">No lesson translations</span>
                                         @endif
                                     @else
-                                        No lesson
+                                        <span class="text-danger">No lesson assigned</span>
                                     @endif
                                     <br>
                                     <strong>Questions:</strong> <span class="badge badge-info">{{ $quiz->questions_count }}</span><br>
@@ -258,3 +320,19 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Обработка переключения языковых табов
+    document.addEventListener('DOMContentLoaded', function() {
+        const langTabs = document.querySelectorAll('#quizLangTabs .nav-link');
+
+        langTabs.forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = this.href;
+            });
+        });
+    });
+</script>
+@endpush

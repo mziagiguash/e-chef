@@ -31,9 +31,9 @@
             $appLocale = app()->getLocale();
         @endphp
 
-        {{-- Language Tabs --}}
+        {{-- Language Tabs and Add Button --}}
         <div class="row mb-3">
-            <div class="col-lg-12">
+            <div class="col-md-6">
                 <ul class="nav nav-tabs" id="lessonLangTabs" role="tablist">
                     @foreach($locales as $localeCode => $localeName)
                         <li class="nav-item" role="presentation">
@@ -43,94 +43,102 @@
                     @endforeach
                 </ul>
             </div>
+            <div class="col-md-6 text-end">
+                <a href="{{localeRoute('lesson.create')}}" class="btn btn-primary">+ Add new</a>
+            </div>
         </div>
 
         {{-- List View --}}
-        <div class="row tab-content">
-            <div id="list-view" class="tab-pane fade active show col-lg-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4 class="card-title mb-0">All Course Lessons List</h4>
-                        <a href="{{localeRoute('lesson.create')}}" class="btn btn-primary">+ Add new</a>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table id="example3" class="display" style="min-width: 845px">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Title</th>
-                                        <th>Course</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($lessons as $lesson)
-                                        @php
-                                            // Получаем переводы для текущей локали
-                                            $lessonTitle = $lesson->title; // используем accessor из модели
-                                            $courseTitle = $lesson->course ? $lesson->course->title : 'No Course'; // используем accessor из модели Course
-                                        @endphp
-                                        <tr class="lesson-row">
-                                            <td>{{ $lesson->id }}</td>
-                                            <td class="lesson-title">{{ $lessonTitle }}</td>
-                                            <td class="lesson-course">{{ $courseTitle }}</td>
-                                            <td>
-                                                <a href="{{localeRoute('lesson.edit', encryptor('encrypt',$lesson->id))}}" class="btn btn-sm btn-primary" title="Edit"><i class="la la-pencil"></i></a>
-                                                <a href="javascript:void(0);" class="btn btn-sm btn-danger" title="Delete" onclick="$('#form{{$lesson->id}}').submit()"><i class="la la-trash-o"></i></a>
-                                                <form id="form{{$lesson->id}}" action="{{localeRoute('lesson.destroy', encryptor('encrypt',$lesson->id))}}" method="post">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="text-center">No Course Lesson Found</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Grid View --}}
-            <div id="grid-view" class="tab-pane fade col-lg-12">
-                <div class="row">
-                    @forelse ($lessons as $lesson)
-                        @php
-                                            // Получаем переводы для текущей локали
-                                            $lessonTitle = $lesson->title; // используем accessor из модели
-                                            $courseTitle = $lesson->course ? $lesson->course->title : 'No Course'; // используем accessor из модели Course
-                                        @endphp
-                        <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
-                            <div class="card card-profile h-100 lesson-card">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title lesson-title">{{ $lessonTitle }}</h5>
-                                    <p class="mb-1"><strong>Course:</strong>
-                                        <span class="lesson-course">{{ $courseTitle }}</span>
-                                    </p>
-                                    <div class="mt-3">
-                                        <a href="{{localeRoute('lesson.edit', encryptor('encrypt',$lesson->id))}}" class="btn btn-sm btn-primary" title="Edit"><i class="la la-pencil"></i></a>
-                                        <a href="javascript:void(0);" class="btn btn-sm btn-danger" title="Delete" onclick="$('#form{{$lesson->id}}').submit()"><i class="la la-trash-o"></i></a>
-                                        <form id="form{{$lesson->id}}" action="{{localeRoute('lesson.destroy', encryptor('encrypt',$lesson->id))}}" method="post">
-                                            @csrf
-                                            @method('DELETE')
-                                        </form>
-                                    </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="row tab-content">
+                    <div id="list-view" class="tab-pane fade active show col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">All Course Lessons List</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="example3" class="display" style="min-width: 845px">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Title</th>
+                                                <th>Course</th>
+                                                <th>Materials</th>
+                                                <th>Quiz</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse ($lessons as $lesson)
+                                                <tr>
+                                                    <td><strong>{{ $lesson->id }}</strong></td>
+                                                    <td>
+                                                        @foreach ($locales as $localeCode => $localeName)
+                                                            @php
+                                                                $title = $lesson->getTranslation($localeCode, 'title') ?? 'Lesson #' . $lesson->id;
+                                                            @endphp
+                                                            <span class="lesson-title lang-{{ $localeCode }}"
+                                                                  style="{{ $localeCode === $appLocale ? '' : 'display:none' }}">
+                                                                {{ $title }}
+                                                            </span>
+                                                        @endforeach
+                                                    </td>
+                                                    <td>
+                                                        @foreach ($locales as $localeCode => $localeName)
+                                                            @php
+                                                                $courseTitle = $lesson->course->getTranslation($localeCode, 'title') ?? 'No Course';
+                                                            @endphp
+                                                            <span class="lesson-course lang-{{ $localeCode }}"
+                                                                  style="{{ $localeCode === $appLocale ? '' : 'display:none' }}">
+                                                                {{ $courseTitle }}
+                                                            </span>
+                                                        @endforeach
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge badge-info">
+                                                            {{ $lesson->materials_count }} materials
+                                                        </span>
+                                                        @if($lesson->material_types)
+                                                            <br>
+                                                            <small>
+                                                                Types: {{ implode(', ', $lesson->material_types) }}
+                                                            </small>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if($lesson->has_quiz)
+                                                            @php
+                                                                $quizTitle = $lesson->quiz ? ($lesson->quiz->getTranslation($appLocale, 'title') ?? 'Quiz') : 'Quiz';
+                                                            @endphp
+                                                            <span class="badge badge-success" title="{{ $quizTitle }}">Has Quiz</span>
+                                                        @else
+                                                            <span class="badge badge-secondary">No Quiz</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <a href="{{localeRoute('lesson.edit', encryptor('encrypt',$lesson->id))}}" class="btn btn-sm btn-primary" title="Edit"><i class="la la-pencil"></i></a>
+                                                        <a href="javascript:void(0);" class="btn btn-sm btn-danger" title="Delete" onclick="$('#form{{$lesson->id}}').submit()"><i class="la la-trash-o"></i></a>
+                                                        <form id="form{{$lesson->id}}" action="{{localeRoute('lesson.destroy', encryptor('encrypt',$lesson->id))}}" method="post">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="6" class="text-center">No Course Lesson Found</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
-                    @empty
-                        <div class="col-12 text-center">
-                            <p>No Course Lesson Found</p>
-                        </div>
-                    @endforelse
+                    </div>
                 </div>
             </div>
-
         </div>
 
     </div>
@@ -143,19 +151,44 @@
 <script src="{{asset('js/plugins-init/datatables.init.js')}}"></script>
 
 <script>
-$(document).ready(function() {
-    // Переключение между языками
-    $('.lang-tab').click(function(e) {
-        e.preventDefault();
-        const locale = $(this).data('locale');
+document.addEventListener('DOMContentLoaded', function() {
+    const initialLocale = localStorage.getItem('lessons_lang') || '{{ $appLocale }}';
 
-        // Активируем таб
-        $('.lang-tab').removeClass('active');
-        $(this).addClass('active');
+    function setActiveLocale(locale) {
+        // Активируем табы
+        document.querySelectorAll('.lang-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.locale === locale);
+        });
 
-        // Обновляем страницу с выбранной локалью
-        window.location.href = "{{ route('lesson.index') }}?lang=" + locale;
+        // Показываем/скрываем переводы уроков
+        document.querySelectorAll('.lesson-title').forEach(el => {
+            el.style.display = el.classList.contains('lang-' + locale) ? '' : 'none';
+        });
+
+        // Показываем/скрываем переводы курсов
+        document.querySelectorAll('.lesson-course').forEach(el => {
+            el.style.display = el.classList.contains('lang-' + locale) ? '' : 'none';
+        });
+
+        // Обновляем заголовки квизов (если нужно)
+        document.querySelectorAll('.badge-success').forEach(badge => {
+            // Здесь можно добавить логику для обновления заголовков квизов
+            // если они отображаются в разных языках
+        });
+    }
+
+    // Обработчик клика по табам
+    document.querySelectorAll('.lang-tab').forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            const locale = this.dataset.locale;
+            localStorage.setItem('lessons_lang', locale);
+            setActiveLocale(locale);
+        });
     });
+
+    // Устанавливаем начальную локаль
+    setActiveLocale(initialLocale);
 });
 </script>
 @endpush

@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('lessons', function (Blueprint $table) {
     $table->id();
-    $table->text('title')->nullable(); // изменено на text
+    $table->text('title')->nullable();
     $table->unsignedBigInteger('course_id');
     $table->unsignedBigInteger('quiz_id')->nullable();
-    $table->text('description')->nullable(); // изменено на text
-    $table->text('notes')->nullable(); // изменено на text
+    $table->integer('order')->default(1);
+    $table->boolean('is_active')->default(true); // Добавьте это поле
+    $table->text('description')->nullable();
+    $table->text('notes')->nullable();
     $table->timestamps();
     $table->softDeletes();
 

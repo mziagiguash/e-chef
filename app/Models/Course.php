@@ -97,7 +97,26 @@ public function getPrevLesson($currentLessonOrder)
     {
         return $this->getTranslationValue('keywords');
     }
+public function getTranslation(string $locale, string $field = 'title'): ?string
+{
+    if (!$this->relationLoaded('translations')) {
+        $this->load('translations');
+    }
 
+    $translation = $this->translations->where('locale', $locale)->first();
+
+    if (!$translation) {
+        // Fallback на английский
+        $translation = $this->translations->where('locale', 'en')->first();
+    }
+
+    if (!$translation) {
+        // Fallback на первый доступный перевод
+        $translation = $this->translations->first();
+    }
+
+    return $translation ? $translation->{$field} : null;
+}
     protected function getTranslationValue($field, $locale = null)
     {
         $locale = $locale ?: app()->getLocale();
@@ -162,33 +181,7 @@ public function getPrevLesson($currentLessonOrder)
     {
         return $query->with('translations');
     }
-     public function getTranslation($field = null, $locale = null)
-    {
-        $locale = $locale ?: app()->getLocale();
 
-        // Загружаем переводы если еще не загружены
-        if (!$this->relationLoaded('translations')) {
-            $this->load('translations');
-        }
-
-        $translation = $this->translations->firstWhere('locale', $locale);
-
-        if (!$translation) {
-            // Fallback на английский
-            $translation = $this->translations->firstWhere('locale', 'en');
-        }
-
-        if (!$translation) {
-            // Fallback на первый доступный перевод
-            $translation = $this->translations->first();
-        }
-
-        if (!$translation) {
-            return $field ? null : null;
-        }
-
-        return $field ? $translation->$field : $translation;
-    }
 
     // Добавим также accessor для удобства
     public function getTranslatedTitleAttribute()

@@ -6,13 +6,11 @@ use Illuminate\Database\Seeder;
 use App\Models\Lesson;
 use App\Models\LessonTranslation;
 use App\Models\Course;
-use App\Models\Quiz;
 
 class LessonSeeder extends Seeder
 {
     public function run(): void
     {
-        // Получаем существующие курсы
         $courses = Course::all();
 
         if ($courses->isEmpty()) {
@@ -20,46 +18,25 @@ class LessonSeeder extends Seeder
             return;
         }
 
-        // Получаем существующие квизы
-        $quizzes = Quiz::all();
-        $quizIds = $quizzes->pluck('id')->toArray();
-
         $totalLessons = 0;
 
         foreach ($courses as $course) {
-            // Создаем 8-12 уроков для каждого курса
             $lessonCount = rand(8, 12);
 
             for ($i = 0; $i < $lessonCount; $i++) {
                 $lessonNumber = $i + 1;
 
-                // Каждый 3-4 урок получает квиз
-                $quizId = ($lessonNumber % 3 === 0 || $lessonNumber % 4 === 0) && !empty($quizIds)
-                    ? $quizIds[array_rand($quizIds)]
-                    : null;
-
                 $lesson = Lesson::create([
-                    'title' => json_encode([
-                        'en' => "Lesson {$lessonNumber}: " . $this->getLessonTitle('en', $i),
-                        'ru' => "Урок {$lessonNumber}: " . $this->getLessonTitle('ru', $i),
-                        'ka' => "გაკვეთილი {$lessonNumber}: " . $this->getLessonTitle('ka', $i)
-                    ]),
                     'course_id' => $course->id,
-                    'quiz_id' => $quizId,
-                    'description' => json_encode([
-                        'en' => "This is lesson {$lessonNumber} of the course. Learn important concepts and techniques.",
-                        'ru' => "Это урок {$lessonNumber} курса. Изучите важные концепции и техники.",
-                        'ka' => "ეს არის კურსის {$lessonNumber} გაკვეთილი. ისწავლეთ მნიშვნელოვანი კონცეფციები და ტექნიკა."
-                    ]),
-                    'notes' => json_encode([
-                        'en' => "Key points for lesson {$lessonNumber}",
-                        'ru' => "Ключевые моменты урока {$lessonNumber}",
-                        'ka' => "გაკვეთილის {$lessonNumber} ძირითადი მომენტები"
-                    ]),
+                    'quiz_id' => null,
+                    'order' => $lessonNumber, // теперь поле order существует
+                    'is_active' => true,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
 
+                // Создаем переводы для урока
+                $this->createLessonTranslations($lesson, $lessonNumber);
                 $totalLessons++;
             }
 
@@ -70,7 +47,7 @@ class LessonSeeder extends Seeder
         $this->command->info("📊 For {$courses->count()} courses");
     }
 
-    private function getLessonTitle(string $locale, int $index): string
+    private function createLessonTranslations(Lesson $lesson, int $lessonNumber): void
     {
         $titles = [
             'en' => [
@@ -117,6 +94,30 @@ class LessonSeeder extends Seeder
             ]
         ];
 
-        return $titles[$locale][$index % count($titles[$locale])];
+        $descriptions = [
+            'en' => "This is lesson {$lessonNumber} of the course. Learn important concepts and techniques.",
+            'ru' => "Это урок {$lessonNumber} курса. Изучите важные концепции и техники.",
+            'ka' => "ეს არის კურსის {$lessonNumber} გაკვეთილი. ისწავლეთ მნიშვნელოვანი კონცეფციები და ტექნიკა."
+        ];
+
+        $notes = [
+            'en' => "Key points for lesson {$lessonNumber}",
+            'ru' => "Ключевые моменты урока {$lessonNumber}",
+            'ka' => "გაკვეთილის {$lessonNumber} ძირითადი მომენტები"
+        ];
+
+        foreach (['en', 'ru', 'ka'] as $locale) {
+            $titleIndex = ($lessonNumber - 1) % count($titles[$locale]);
+
+            LessonTranslation::create([
+                'lesson_id' => $lesson->id,
+                'locale' => $locale,
+                'title' => "Lesson {$lessonNumber}: " . $titles[$locale][$titleIndex],
+                'description' => $descriptions[$locale],
+                'notes' => $notes[$locale],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 }
