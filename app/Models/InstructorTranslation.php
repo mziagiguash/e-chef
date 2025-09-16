@@ -16,18 +16,14 @@ class InstructorTranslation extends Model
         'locale',
         'name',
         'bio',
-        'designation',
-        'title'
+        'title',
+        'designation'
     ];
 
-    // Добавляем casts для правильного отображения типов данных
-    protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    public $timestamps = true;
 
     public function instructor()
     {
-        return $this->belongsTo(Instructor::class, 'instructor_id');
+        return $this->belongsTo(Instructor::class);
     }
 }

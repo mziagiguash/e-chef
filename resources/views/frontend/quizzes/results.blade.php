@@ -4,123 +4,70 @@
 
 @section('content')
 <div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url("/$locale") }}">{{ __('Home') }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('frontend.courses.show', [$locale, $course->id]) }}">{{ $course->translations->firstWhere('locale', $locale)->title ?? $course->title }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('lessons.show', [$locale, $course->id, $lesson->id]) }}">{{ $lesson->translations->firstWhere('locale', $locale)->title ?? $lesson->title }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('frontend.quizzes.show', [$locale, $course->id, $lesson->id, $quiz->id]) }}">{{ $quiz->translations->firstWhere('locale', $locale)->title ?? $quiz->title }}</a></li>
+            <li class="breadcrumb-item active">{{ __('Results') }}</li>
+        </ol>
+    </nav>
+
     <div class="row justify-content-center">
         <div class="col-lg-8">
-
-            {{-- Results Card --}}
             <div class="card">
-                <div class="card-header {{ $passed ? 'bg-success' : 'bg-danger' }} text-white">
-                    <h1 class="h3 mb-0">
+                <div class="card-header bg-{{ $passed ? 'success' : 'danger' }} text-white">
+                    <h3 class="mb-0">
                         <i class="fas fa-{{ $passed ? 'check-circle' : 'times-circle' }} me-2"></i>
-                        {{ $passed ? __('Passed') : __('Failed') }}
-                    </h1>
+                        {{ $passed ? __('Quiz Passed!') : __('Quiz Failed') }}
+                    </h3>
                 </div>
                 <div class="card-body">
-                    {{-- Quiz Info --}}
                     <div class="text-center mb-4">
-                        <h2>{{ $quiz->translations->firstWhere('locale', $locale)->title ?? $quiz->title ?? 'Quiz' }}</h2>
-                        @php
-                            $quizDescription = $quiz->translations->firstWhere('locale', $locale)->description ?? null;
-                        @endphp
-                        @if($quizDescription)
-                            <p class="text-muted">{{ $quizDescription }}</p>
-                        @endif
-                    </div>
-
-                    {{-- Score --}}
-                    <div class="text-center mb-4">
-                        <div class="display-1 {{ $passed ? 'text-success' : 'text-danger' }} fw-bold">
+                        <div class="display-4 fw-bold text-{{ $passed ? 'success' : 'danger' }}">
                             {{ $attempt->score }}%
                         </div>
-                        <p class="lead">
-                            {{ $attempt->correct_answers }} {{ __('out of') }} {{ $attempt->total_questions }} {{ __('questions correct') }}
-                        </p>
-                        <p class="text-muted">
-                            {{ __('Passing score') }}: {{ $quiz->passing_score }}%
-                        </p>
-
-                        @if($attempt->time_taken)
-                            <p class="text-muted">
-                                <i class="fas fa-clock me-1"></i>
-                                {{ __('Time taken') }}: {{ $attempt->time_taken_formatted }}
-                            </p>
-                        @endif
+                        <p class="text-muted">{{ __('Passing Score: :score%', ['score' => $quiz->passing_score]) }}</p>
                     </div>
 
-                    {{-- Actions --}}
-                    <div class="text-center">
-                        @if($passed)
-                            <div class="alert alert-success">
-                                <i class="fas fa-trophy me-2"></i>
-                                {{ __('Congratulations! You passed the quiz.') }}
-                            </div>
-                        @else
-                            <div class="alert alert-warning">
-                                <i class="fas fa-info-circle me-2"></i>
-                                {{ __('Keep studying! You can try again.') }}
-                            </div>
-                        @endif
-
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                            <a href="{{ route('lessons.show', [
-                                'locale' => $locale,
-                                'course' => $course->id,
-                                'lesson' => $lesson->id
-                            ]) }}" class="btn btn-secondary me-md-2">
-                                <i class="fas fa-arrow-left me-2"></i> {{ __('Back to Lesson') }}
-                            </a>
-
-                            @if(!$passed && ($quiz->max_attempts === 0 || $quiz->attempts()->where('user_id', auth()->id())->count() < $quiz->max_attempts))
-                                <a href="{{ route('frontend.quizzes.show', [
-                                    'locale' => $locale,
-                                    'course' => $course->id,
-                                    'lesson' => $lesson->id,
-                                    'quiz' => $quiz->id
-                                ]) }}" class="btn btn-primary">
-                                    <i class="fas fa-redo me-2"></i> {{ __('Try Again') }}
-                                </a>
-                            @endif
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="fw-bold">{{ __('Correct Answers') }}</div>
+                            <div class="h4">{{ $attempt->correct_answers }}/{{ $attempt->total_questions }}</div>
                         </div>
-
-                        {{-- Next Lesson --}}
-                        @if($passed && $course && $lesson)
-                            @php
-                                $nextLesson = \App\Models\Lesson::where('course_id', $course->id)
-                                    ->where('id', '>', $lesson->id)
-                                    ->orderBy('id')
-                                    ->first();
-                            @endphp
-
-                            @if($nextLesson)
-                                <div class="mt-4">
-                                    <a href="{{ route('lessons.show', [
-                                        'locale' => $locale,
-                                        'course' => $course->id,
-                                        'lesson' => $nextLesson->id
-                                    ]) }}" class="btn btn-success">
-                                        <i class="fas fa-arrow-right me-2"></i> {{ __('Continue to Next Lesson') }}
-                                    </a>
-                                    <p class="text-muted mt-2">
-                                        {{ __('Next') }}: {{ $nextLesson->translations->firstWhere('locale', $locale)->title ?? $nextLesson->title ?? 'Next Lesson' }}
-                                    </p>
-                                </div>
-                            @else
-                                <div class="alert alert-info mt-3">
-                                    <i class="fas fa-graduation-cap me-2"></i>
-                                    {{ __("Congratulations! You've completed this course.") }}
-                                    <a href="{{ route('frontend.watchCourse', [
-                                        'locale' => $locale,
-                                        'id' => $course->id
-                                    ]) }}" class="btn btn-outline-info btn-sm ms-2">
-                                        {{ __('View Course') }}
-                                    </a>
-                                </div>
-                            @endif
-                        @endif
+                        <div class="col-md-4">
+                            <div class="fw-bold">{{ __('Time Taken') }}</div>
+                            <div class="h4">{{ $attempt->time_taken_formatted }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="fw-bold">{{ __('Attempt') }}</div>
+                            <div class="h4">#{{ $attempt->id }}</div>
+                        </div>
                     </div>
+
+                    <hr>
+
+                    <h5 class="mb-3">{{ __('Question Review') }}</h5>
+                    @foreach($attempt->answers as $answer)
+                        @php
+                            $question = $answer->question;
+                            $questionTranslation = $question->translations->firstWhere('locale', $locale);
+                            $questionText = $questionTranslation->content ?? $question->question_text;
+                        @endphp
+
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ $questionText }}</h6>
+                                <p class="text-{{ $answer->is_correct ? 'success' : 'danger' }}">
+                                    <i class="fas fa-{{ $answer->is_correct ? 'check' : 'times' }} me-2"></i>
+                                    {{ $answer->is_correct ? __('Correct') : __('Incorrect') }}
+                                </p>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
-
         </div>
     </div>
 </div>

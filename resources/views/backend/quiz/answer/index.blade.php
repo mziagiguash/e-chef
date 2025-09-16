@@ -3,7 +3,7 @@
 
 @push('styles')
 <!-- Datatable -->
-<link href="{{asset('vendor/datatables/css/jquery.dataTables.min.css')}}" rel="stylesheet">
+<link href="{{asset('vendor/datatables/css/jquery.dataTables.min.css')}}" rel="stylesheet>
 @endpush
 
 @section('content')
@@ -67,6 +67,7 @@
                                     <tr>
                                         <th>{{__('#')}}</th>
                                         <th>{{__('Student')}}</th>
+                                        <th>{{__('Quiz Attempt')}}</th>
                                         <th>{{__('Question')}}</th>
                                         <th>{{__('Answer')}}</th>
                                         <th>{{__('Correct')}}</th>
@@ -92,15 +93,24 @@
                                             </div>
                                         </td>
                                         <td>
-                                            {{ Str::limit($a->question->getTranslation('content', $locale) ?? 'N/A', 50) }}
+                                            <small>Attempt #{{ $a->attempt->id }}</small>
+                                            <br>
+                                            <small class="text-muted">Score: {{ $a->attempt->score }}%</small>
                                         </td>
                                         <td>
-                                            @if($a->option)
-                                                {{ Str::limit($a->option->getTranslation('text', $locale) ?? 'N/A', 30) }}
-                                            @elseif($a->text)
-                                                {{ Str::limit($a->text, 30) }}
+                                            @php
+                                                $questionTranslation = $a->question->translations->firstWhere('locale', $locale);
+                                                $questionText = $questionTranslation->content ?? $a->question->translations->first()->content ?? $a->question->question_text ?? 'N/A';
+                                            @endphp
+                                            {{ Str::limit($questionText, 50) }}
+                                        </td>
+                                        <td>
+                                            @if($a->text_answer)
+                                                {{ Str::limit($a->text_answer, 30) }}
+                                            @elseif($a->rating_answer)
+                                                Rating: {{ $a->rating_answer }}
                                             @else
-                                                <em>No answer</em>
+                                                <em>No answer provided</em>
                                             @endif
                                         </td>
                                         <td>
@@ -116,42 +126,22 @@
                                             <small class="text-muted">{{ $a->created_at->format('H:i') }}</small>
                                         </td>
                                         <td>
-                                            <div class="d-flex">
-                                                <!-- View Button -->
-                                                <a href="{{ localeRoute('answer.show', encryptor('encrypt', $a->id)) }}"
-                                                   class="btn btn-primary shadow btn-xs sharp mr-1"
-                                                   title="View Details">
-                                                    <i class="la la-eye"></i>
-                                                </a>
-
-                                                <!-- Archive Button -->
-                                                <form action="{{ localeRoute('answer.archive', encryptor('encrypt', $a->id)) }}"
-                                                      method="POST" class="mr-1">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-warning shadow btn-xs sharp"
-                                                            title="Move to Archive"
-                                                            onclick="return confirm('Move this answer to archive?')">
-                                                        <i class="la la-archive"></i>
-                                                    </button>
-                                                </form>
-
-                                                <!-- Delete Button -->
-                                                <form action="{{ localeRoute('answer.destroy', encryptor('encrypt', $a->id)) }}"
-                                                      method="POST" id="delete-form-{{ $a->id }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="button" class="btn btn-danger shadow btn-xs sharp"
-                                                            title="Delete Permanently"
-                                                            onclick="confirmDelete({{ $a->id }})">
-                                                        <i class="la la-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
+                                            <!-- Delete Button -->
+                                            <form action="{{ localeRoute('answer.destroy', encryptor('encrypt', $a->id)) }}"
+                                                  method="POST" id="delete-form-{{ $a->id }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="btn btn-danger shadow btn-xs sharp"
+                                                        title="Delete Permanently"
+                                                        onclick="confirmDelete({{ $a->id }})">
+                                                    <i class="la la-trash"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="7" class="text-center py-4">
+                                        <td colspan="8" class="text-center py-4">
                                             <div class="empty-state">
                                                 <i class="la la-inbox" style="font-size: 3rem;"></i>
                                                 <h3>No Answers Found</h3>
@@ -164,10 +154,83 @@
                             </table>
                         </div>
 
+                        <!-- Pagination Info -->
+                        @if($answers->hasPages())
+                        <div class="pagination-info text-center mb-2">
+                            Showing {{ $answers->firstItem() }} to {{ $answers->lastItem() }} of {{ $answers->total() }} results
+                        </div>
+                        @endif
+
                         <!-- Pagination -->
                         @if($answers->hasPages())
                         <div class="d-flex justify-content-center mt-3">
-                            {{ $answers->links() }}
+                            <nav aria-label="Answers pagination">
+                                <ul class="pagination pagination-sm">
+                                    {{-- Previous Page Link --}}
+                                    @if($answers->onFirstPage())
+                                        <li class="page-item disabled">
+                                            <span class="page-link">&laquo;</span>
+                                        </li>
+                                    @else
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $answers->previousPageUrl() }}" rel="prev">&laquo;</a>
+                                        </li>
+                                    @endif
+
+                                    {{-- First Page --}}
+                                    @if($answers->currentPage() > 3)
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $answers->url(1) }}">1</a>
+                                        </li>
+                                        @if($answers->currentPage() > 4)
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        @endif
+                                    @endif
+
+                                    {{-- Pagination Elements --}}
+                                    @php
+                                        $start = max(1, $answers->currentPage() - 2);
+                                        $end = min($answers->lastPage(), $answers->currentPage() + 2);
+                                    @endphp
+
+                                    @for($page = $start; $page <= $end; $page++)
+                                        @if($page == $answers->currentPage())
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ $page }}</span>
+                                            </li>
+                                        @else
+                                            <li class="page-item">
+                                                <a class="page-link" href="{{ $answers->url($page) }}">{{ $page }}</a>
+                                            </li>
+                                        @endif
+                                    @endfor
+
+                                    {{-- Last Page --}}
+                                    @if($answers->currentPage() < $answers->lastPage() - 2)
+                                        @if($answers->currentPage() < $answers->lastPage() - 3)
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        @endif
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $answers->url($answers->lastPage()) }}">{{ $answers->lastPage() }}</a>
+                                        </li>
+                                    @endif
+
+                                    {{-- Next Page Link --}}
+                                    @if($answers->hasMorePages())
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ $answers->nextPageUrl() }}" rel="next">&raquo;</a>
+                                        </li>
+                                    @else
+                                        <li class="page-item disabled">
+                                            <span class="page-link">&raquo;</span>
+                                        </li>
+                                    @endif
+                                </ul>
+                            </nav>
                         </div>
                         @endif
                     </div>
@@ -183,8 +246,6 @@
 @push('scripts')
 <!-- Datatable -->
 <script src="{{asset('vendor/datatables/js/jquery.dataTables.min.js')}}"></script>
-<script src="{{asset('js/plugins-init/datatables.init.js')}}"></script>
-
 <script>
 function confirmDelete(answerId) {
     if (confirm('Are you sure you want to delete this answer permanently? This action cannot be undone.')) {
@@ -195,13 +256,17 @@ function confirmDelete(answerId) {
 // Initialize DataTable
 $(document).ready(function() {
     $('#example3').DataTable({
-        "paging": false, // Disable DataTable pagination since we use Laravel pagination
+        "paging": false,
         "searching": true,
         "ordering": true,
         "info": false,
         "autoWidth": false,
+        "language": {
+            "emptyTable": "No answers available",
+            "zeroRecords": "No matching answers found"
+        },
         "columnDefs": [
-            { "orderable": false, "targets": [6] } // Disable sorting for actions column
+            { "orderable": false, "targets": [7] } // Actions column
         ]
     });
 });
@@ -223,6 +288,45 @@ $(document).ready(function() {
 
 .shadow {
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+/* Стили для пагинации */
+.pagination {
+    margin: 0;
+}
+
+.page-item .page-link {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+    border: 1px solid #dee2e6;
+    color: #007bff;
+    margin: 0 2px;
+}
+
+.page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+    border-color: #dee2e6;
+}
+
+.page-link:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.pagination-info {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
 }
 </style>
 @endpush

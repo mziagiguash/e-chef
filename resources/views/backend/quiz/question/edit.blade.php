@@ -59,26 +59,28 @@
                             @method('PUT')
                             <input type="hidden" name="current_locale" value="{{ $currentLocale }}">
 
-                            <!-- Основные поля (не зависят от языка) -->
                             <div class="row">
                                 <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label class="form-label">{{ __('Quiz') }} <span class="text-danger">*</span></label>
-                                        <select class="form-control @error('quiz_id') is-invalid @enderror" name="quiz_id" required>
-                                            <option value="">{{ __('Select Quiz') }}</option>
-                                            @forelse ($quizzes as $quiz)
-                                            <option value="{{ $quiz->id }}" {{ old('quiz_id', $question->quiz_id) == $quiz->id ? 'selected' : '' }}>
-                                                {{ $quiz->title }}
-                                            </option>
-                                            @empty
-                                            <option value="">{{ __('No Quizzes Found') }}</option>
-                                            @endforelse
-                                        </select>
-                                        @error('quiz_id')
-                                        <span class="invalid-feedback">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
+    <div class="form-group">
+        <label class="form-label">{{ __('Quiz') }} <span class="text-danger">*</span></label>
+        <select class="form-control @error('quiz_id') is-invalid @enderror" name="quiz_id" required id="quizSelect">
+            <option value="">{{ __('Select Quiz') }}</option>
+            @forelse ($quizzes as $quiz)
+            <option value="{{ $quiz->id }}" {{ old('quiz_id', $question->quiz_id) == $quiz->id ? 'selected' : '' }}
+                    data-title-en="{{ $quiz->getTranslation('en', 'title') }}"
+                    data-title-ru="{{ $quiz->getTranslation('ru', 'title') }}"
+                    data-title-ka="{{ $quiz->getTranslation('ka', 'title') }}">
+                {{ $quiz->getTranslation($currentLocale, 'title') }}
+            </option>
+            @empty
+            <option value="">{{ __('No Quizzes Found') }}</option>
+            @endforelse
+        </select>
+        @error('quiz_id')
+        <span class="invalid-feedback">{{ $message }}</span>
+        @enderror
+    </div>
+</div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">{{ __('Question Type') }} <span class="text-danger">*</span></label>
@@ -284,6 +286,39 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('{{ __("Please fill required fields") }}');
         }
     });
+});
+// Обновление названий квизов при переключении языковых табов
+document.addEventListener('DOMContentLoaded', function() {
+    const questionTabs = document.querySelectorAll('#questionLangTabs .nav-link');
+    const quizSelect = document.getElementById('quizSelect');
+
+    function updateQuizTitles(locale) {
+        if (!quizSelect) return;
+
+        const options = quizSelect.querySelectorAll('option');
+        options.forEach(option => {
+            if (option.value !== '') {
+                const title = option.getAttribute('data-title-' + locale) ||
+                             option.getAttribute('data-title-en');
+                option.textContent = title;
+            }
+        });
+    }
+
+    questionTabs.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function (event) {
+            const target = event.target;
+            const locale = target.id.replace('tab-', '');
+            updateQuizTitles(locale);
+        });
+    });
+
+    // Инициализация при загрузке
+    const activeTab = document.querySelector('#questionLangTabs .nav-link.active');
+    if (activeTab) {
+        const currentLocale = activeTab.id.replace('tab-', '');
+        updateQuizTitles(currentLocale);
+    }
 });
 </script>
 

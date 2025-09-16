@@ -11,16 +11,20 @@ return new class extends Migration
         Schema::create('instructor_translations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('instructor_id');
-            $table->string('locale', 5);
+            $table->string('locale', 2); // en, ru, ka
             $table->string('name');
             $table->text('bio')->nullable();
-            $table->text('designation')->nullable();
+            $table->string('title')->nullable();
+            $table->string('designation')->nullable();
             $table->timestamps();
 
-            // Правильный способ указать внешний ключ
+            // Уникальный индекс для предотвращения дубликатов
+            $table->unique(['instructor_id', 'locale']);
+
+            // Внешний ключ
             $table->foreign('instructor_id')
                   ->references('id')
-                  ->on('instructors') // имя основной таблицы
+                  ->on('instructors')
                   ->onDelete('cascade');
         });
     }

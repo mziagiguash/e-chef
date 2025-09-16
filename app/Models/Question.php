@@ -19,6 +19,7 @@ class Question extends Model
 
     protected $fillable = [
         'quiz_id',
+        'content',
         'type',
         'order',
         'points',
@@ -26,6 +27,7 @@ class Question extends Model
         'max_choices',
         'min_rating',
         'max_rating'
+
     ];
 
     protected $dates = ['deleted_at'];

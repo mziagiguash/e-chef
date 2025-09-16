@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class QuestionTranslation extends Model
 {
-    use HasFactory; 
+    use HasFactory;
     protected $table = 'questions_translations';
     protected $fillable = [
         'question_id',
         'locale',
-        'content'
+        'content' 
     ];
 
     public $timestamps = true;

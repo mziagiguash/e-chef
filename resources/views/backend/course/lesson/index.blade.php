@@ -65,6 +65,7 @@
                                                 <th>#</th>
                                                 <th>Title</th>
                                                 <th>Course</th>
+                                                <th>Video</th> {{-- Новая колонка --}}
                                                 <th>Materials</th>
                                                 <th>Quiz</th>
                                                 <th>Action</th>
@@ -96,6 +97,22 @@
                                                             </span>
                                                         @endforeach
                                                     </td>
+                                                    {{-- В секции tbody --}}
+<td>
+    @if($lesson->video_url)
+        @if(str_contains($lesson->video_url, 'youtube.com') || str_contains($lesson->video_url, 'youtu.be'))
+            <span class="badge badge-danger">
+                <i class="fab fa-youtube"></i> YouTube
+            </span>
+        @else
+            <span class="badge badge-primary">
+                <i class="fas fa-video"></i> Uploaded
+            </span>
+        @endif
+    @else
+        <span class="badge badge-secondary">No Video</span>
+    @endif
+</td>
                                                     <td>
                                                         <span class="badge badge-info">
                                                             {{ $lesson->materials_count }} materials

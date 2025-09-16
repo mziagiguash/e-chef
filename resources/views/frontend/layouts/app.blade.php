@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ app()->getLocale() }}">
 
 <head>
     <meta charset="UTF-8" />
@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>{{ENV('APP_NAME')}} | @yield('title', 'Home')</title>
     <link rel="stylesheet" href="{{asset('frontend/dist/main.css')}}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/png" href="{{asset('frontend/dist/images/favicon/favicon.png')}}" />
     <link rel="stylesheet" href="{{asset('frontend/fontawesome-free-5.15.4-web/css/all.min.css')}}">
     <style>
@@ -23,8 +24,6 @@
             box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
             z-index: 1;
             left: -160px;
-            /* Adjust this value based on your design */
-
         }
 
         .dropdown-content a {
@@ -42,69 +41,71 @@
             display: block;
         }
 
-.language-menu {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    min-width: auto !important;
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    flex-direction: column;
-    z-index: 1050;
-}
+        .language-menu {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            min-width: auto !important;
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            flex-direction: column;
+            z-index: 1050;
+        }
 
-.language-switcher:hover .language-menu {
-    display: flex !important;
-}
+        .language-switcher:hover .language-menu {
+            display: flex !important;
+        }
 
-.language-menu a {
-    padding: 0px 0px !important;
-    margin: 0px 0;
-    border-radius: 8%;
-    color: inherit !important;
-    transition: background-color 0.3s;
-    font-size: 22px;
-    display: inline-block;
-    line-height: 1;
-    text-align: center;
-}
+        .language-menu a {
+            padding: 0px 0px !important;
+            margin: 0px 0;
+            border-radius: 8%;
+            color: inherit !important;
+            transition: background-color 0.3s;
+            font-size: 22px;
+            display: inline-block;
+            line-height: 1;
+            text-align: center;
+        }
 
-.language-menu a:hover {
-    background-color: rgba(0, 0, 0, 0.1) !important;
-}
+        .language-menu a:hover {
+            background-color: rgba(0, 0, 0, 0.1) !important;
+        }
 
+        /* Новые стили для правильного отображения */
+        .navbar-nav.mx-auto {
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
 
+        .rightContent {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .language-switcher {
+            margin-right: 15px;
+        }
     </style>
     @stack('styles')
-
 </head>
 
 <body @yield('body-attr')>
+    <!-- Header Starts Here -->
+    <header @yield('header-attr')>
+        <nav class="navbar navbar-expand-xl navbar-light bg-transparent">
+            <div class="container">
+                @php
+                    $currentLocale = app()->getLocale();
+                    $locales = config('app.locales', ['en' => 'English', 'ru' => 'Russian', 'ka' => 'Georgian']);
+                @endphp
 
-   <body @yield('body-attr')>
-
-@stack('scripts')
-<!-- Header Starts Here -->
-<header @yield('header-attr')>
-    <nav class="navbar navbar-expand-xl navbar-light bg-transparent">
-        <div class="container">
-
-            @php
-                $currentLocale = app()->getLocale();
-                $path = request()->path();
-                $segments = explode('/', $path);
-                if (in_array($segments[0] ?? '', array_keys($locales))) {
-                    array_shift($segments);
-                }
-                $pathWithoutLocale = implode('/', $segments);
-            @endphp
-
-            <!-- Language Switcher -->
 <!-- Language Switcher -->
-<div class="nav-item position-relative language-switcher" style="cursor: pointer;">
+<div class="nav-item position-relative language-switcher me-3" style="cursor: pointer;">
     <div class="d-flex align-items-center" style="font-size: 24px;">
         @php
             $localeFlags = [
@@ -123,10 +124,18 @@
             @if ($localeCode !== $currentLocale)
                 @php
                     $flag = $localeFlags[$localeCode] ?? '🌐';
-                    // Формируем URL с правильным языковым префиксом
-                    $url = url("/{$localeCode}/{$pathWithoutLocale}");
-                    if(request()->query()) {
-                        $url .= '?' . http_build_query(request()->query());
+
+                    // Генерация URL с учетом текущего маршрута и параметров
+                    $routeName = Route::currentRouteName();
+                    $routeParams = request()->route()->parameters();
+
+                    // Для маршрутов с {locale} заменяем locale, для остальных добавляем параметр
+                    if (isset($routeParams['locale'])) {
+                        $routeParams['locale'] = $localeCode;
+                        $url = route($routeName, $routeParams);
+                    } else {
+                        // Для маршрутов без {locale} используем query parameter
+                        $url = request()->fullUrlWithQuery(['lang' => $localeCode]);
                     }
                 @endphp
                 <a href="{{ $url }}"
@@ -138,62 +147,60 @@
         @endforeach
     </div>
 </div>
-            <!-- Logo -->
-            <a class="navbar-brand" href="{{ localeRoute('home') }}">
+                <!-- Logo -->
+                <a class="navbar-brand" href="{{ localeRoute('home') }}">
                 <img src="{{ asset('frontend/dist/images/logo/logo.png') }}" alt="Logo" class="img-fluid" />
             </a>
 
-            <button class="menu-icon-container">
-                <span class="menu-icon"></span>
-            </button>
-
-            <!-- Navbar Items -->
-            <div class="collapse navbar-collapse d-none d-xl-block" id="navbarSupportedContent">
-                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ localeRoute('home') }}">{{ __('menu.home') }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ localeRoute('searchCourse') }}">{{ __('menu.courses') }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ localeRoute('about') }}">{{ __('menu.about_us') }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ localeRoute('contact') }}">{{ __('menu.contacts') }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ localeRoute('dashboard') }}">{{ __('menu.admin') }}</a>
-                    </li>
-                </ul>
-
-                <div class="d-flex align-items-center justify-content-between rightContent">
-
-    {{-- Search Form --}}
-    <form class="header__Search-form" id="searchForm">
-        <button type="button" class="border-0 bg-transparent header__Search-button" onclick="openSearch()">
-            {{-- SVG Search Icon --}}
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="9.19522" cy="9.19518" r="7.61714" stroke="#35343E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M15.0493 15.4866L18.3493 18.778" stroke="#35343E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
-
-        <div id="myOverlay" class="overlay">
-            <span class="closebtn" onclick="closeSearch()" title="Close Overlay">×</span>
-            <div class="overlay-content">
-                <input type="text" placeholder="Search.." name="search" />
-                <button type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
+                <button class="menu-icon-container">
+                    <span class="menu-icon"></span>
                 </button>
-            </div>
-        </div>
-    </form>
 
-    {{-- Cart --}}
+                <!-- Navbar Items -->
+                <div class="collapse navbar-collapse d-none d-xl-block" id="navbarSupportedContent">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('home', ['locale' => $currentLocale]) }}">{{ __('menu.home') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('searchCourse', ['locale' => $currentLocale]) }}">{{ __('menu.courses') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('about', ['locale' => $currentLocale]) }}">{{ __('menu.about_us') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('contact', ['locale' => $currentLocale]) }}">{{ __('menu.contacts') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('dashboard', ['locale' => $currentLocale]) }}">{{ __('menu.admin') }}</a>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex align-items-center justify-content-between rightContent">
+                        {{-- Search Form --}}
+                        <form class="header__Search-form" id="searchForm">
+                            <button type="button" class="border-0 bg-transparent header__Search-button" onclick="openSearch()">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="9.19522" cy="9.19518" r="7.61714" stroke="#35343E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M15.0493 15.4866L18.3493 18.778" stroke="#35343E" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+
+                            <div id="myOverlay" class="overlay">
+                                <span class="closebtn" onclick="closeSearch()" title="Close Overlay">×</span>
+                                <div class="overlay-content">
+                                    <input type="text" placeholder="Search.." name="search" />
+                                    <button type="button">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        {{-- Cart --}}
     <a href="{{ localeRoute('cart') }}" class="cart-nav border-0 bg-transparent mx-3">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M2.87778 2.51099L2.77634 2.50038C2.40716 2.48688 2.07562 2.74796 2.01087 3.12209L2.00026 3.22354C1.98676 3.59272 2.24784 3.92426 2.62197 3.98901L4.13098 4.25L5.04551 15.1457L5.06443 15.3095C5.24843 16.5519 6.31708 17.486 7.58988 17.486H18.5019L18.6662 17.4808C19.8626 17.4044 20.8545 16.4996 21.0291 15.2978L21.9781 8.73941L21.9945 8.58877C22.0819 7.38969 21.132 6.349 19.9089 6.349H5.81198L5.57725 3.54727L5.55956 3.43641C5.49112 3.14809 5.25673 2.92273 4.95778 2.87099L2.87778 2.51099ZM7.47394 15.9797C6.97867 15.9255 6.58258 15.5277 6.54028 15.0207L5.93798 7.849H19.9089L19.997 7.85548C20.3128 7.90242 20.5409 8.19769 20.4936 8.52465L19.5446 15.0826L19.5208 15.1998C19.4005 15.6584 18.985 15.986 18.5019 15.986H7.58988L7.47394 15.9797ZM5.90828 20.5853C5.90828 19.7492 6.58595 19.0703 7.42228 19.0703C8.25849 19.0703 8.93728 19.7491 8.93728 20.5853C8.93728 21.4216 8.25838 22.0993 7.42228 22.0993C6.58606 22.0993 5.90828 21.4215 5.90828 20.5853ZM17.1597 20.5853C17.1597 19.7491 17.8385 19.0703 18.6747 19.0703C19.5109 19.0703 20.1897 19.7491 20.1897 20.5853C20.1897 21.4216 19.5108 22.0993 18.6747 22.0993C17.8386 22.0993 17.1597 21.4216 17.1597 20.5853ZM17.6484 10.795C17.6484 10.3808 17.3126 10.045 16.8984 10.045H14.1254L14.0236 10.0518C13.6575 10.1015 13.3754 10.4153 13.3754 10.795C13.3754 11.2092 13.7112 11.545 14.1254 11.545H16.8984L17.0001 11.5382C17.3662 11.4885 17.6484 11.1747 17.6484 10.795Z" fill="#35343E"/>
@@ -259,17 +266,17 @@
         <div class="navbar-mobile__menu">
             <ul class="navbar-mobile__menu-list">
                 <li class="active navbar-mobile__menu-item">
-                    <a href="{{ localeRoute('home') }}">
+                    <a href="{{ route('home', ['locale' => $currentLocale]) }}">
                         <span class="navbar-mobile__menu-link">{{ __('menu.home') }}</span>
                     </a>
                 </li>
                 <li class="navbar-mobile__menu-item">
-                    <a href="{{ localeRoute('searchCourse') }}">
+                    <a href="{{ route('searchCourse', ['locale' => $currentLocale]) }}">
                         <span class="navbar-mobile__menu-link">{{ __('menu.courses') }}</span>
                     </a>
                 </li>
                 <li class="navbar-mobile__menu-item">
-                    <a href="{{ localeRoute('about') }}">
+                    <a href="{{ route('about', ['locale' => $currentLocale]) }}">
                         <span class="navbar-mobile__menu-link">{{ __('menu.about_us') }}</span>
                     </a>
                 </li>
@@ -287,14 +294,14 @@
                         </span>
                     </a>
                     <ul class="navbar-mobile__menu-dropmenu">
-                        <li><a href="{{ localeRoute('searchCourse') }}">{{ __('menu.courses') }}</a></li>
-                        <li><a href="{{ localeRoute('student_profile') }}">{{ __('menu.profile') }}</a></li>
-                        <li><a href="{{ localeRoute('about') }}">{{ __('menu.about_us') }}</a></li>
-                        <li><a href="{{ localeRoute('contact') }}">{{ __('menu.contacts') }}</a></li>
+                        <li><a href="{{ route('searchCourse', ['locale' => $currentLocale]) }}">{{ __('menu.courses') }}</a></li>
+                        <li><a href="{{ route('student_profile', ['locale' => $currentLocale]) }}">{{ __('menu.profile') }}</a></li>
+                        <li><a href="{{ route('about', ['locale' => $currentLocale]) }}">{{ __('menu.about_us') }}</a></li>
+                        <li><a href="{{ route('contact', ['locale' => $currentLocale]) }}">{{ __('menu.contacts') }}</a></li>
                     </ul>
                 </li>
                 <li class="navbar-mobile__menu-item">
-                    <a href="{{ localeRoute('contact') }}">
+                    <a href="{{ route('contact', ['locale' => $currentLocale]) }}">
                         <span class="navbar-mobile__menu-link">{{ __('menu.contacts') }}</span>
                     </a>
                 </li>
@@ -461,8 +468,8 @@
                 <div class="footer__list">
                     <h6>{{ __('footer.company') }}</h6>
                     <ul>
-                        <li><a href="{{ localeRoute('about') }}">{{ __('menu.about_us') }}</a></li>
-                        <li><a href="{{ localeRoute('searchCourse') }}">{{ __('menu.courses') }}</a></li>
+                        <li><a href="{{ route('about', ['locale' => app()->getLocale()]) }}">{{ __('menu.about_us') }}</a></li>
+                        <li><a href="{{ route('searchCourse', ['locale' => app()->getLocale()]) }}">{{ __('menu.courses') }}</a></li>
                         <li><a href="#">{{ __('footer.career') }}</a></li>
                         <li><a href="#">{{ __('footer.affiliate') }}</a></li>
                     </ul>
@@ -477,7 +484,7 @@
                         <li><a href="#">{{ __('footer.help_support') }}</a></li>
                         <li><a href="#">{{ __('footer.privacy_policy') }}</a></li>
                         <li><a href="faq.html">{{ __('footer.faqs') }}</a></li>
-                        <li><a href="{{ localeRoute('contact') }}">{{ __('menu.contacts') }}</a></li>
+                        <li><a href="{{ route('contact', ['locale' => app()->getLocale()]) }}">{{ __('menu.contacts') }}</a></li>
                     </ul>
                 </div>
             </div>
@@ -602,6 +609,20 @@
             });
         }
     });
+    // Добавьте в конец файла
+document.addEventListener('DOMContentLoaded', function() {
+    // Language switcher hover functionality
+    const languageSwitcher = document.querySelector('.language-switcher');
+    if (languageSwitcher) {
+        languageSwitcher.addEventListener('mouseenter', function() {
+            this.querySelector('.language-menu').style.display = 'flex';
+        });
+
+        languageSwitcher.addEventListener('mouseleave', function() {
+            this.querySelector('.language-menu').style.display = 'none';
+        });
+    }
+});
 </script>
 
 <!-- Core JS Files -->

@@ -94,12 +94,12 @@ public function getTranslatedNameAttribute()
         return $this->translated_name ?: 'No Name';
     }
 
-    
+
 
     public function frontShow(): string
     {
-        $name = $this->translated_name ?: 'No Instructor';
-        $designation = $this->translated_designation ?: '';
+        $name = $this->name ?: 'No Instructor';
+        $designation = $this->designation ?: '';
 
         return $designation ? "$name — $designation" : $name;
     }
@@ -123,4 +123,33 @@ public function getTranslatedNameAttribute()
     {
         return $query->with('translations');
     }
+        public function getNameAttribute()
+    {
+        $locale = app()->getLocale();
+        $translation = $this->translations->where('locale', $locale)->first();
+        return $translation->name ?? $this->translations->first()->name ?? '';
+    }
+
+    public function getBioAttribute()
+    {
+        $locale = app()->getLocale();
+        $translation = $this->translations->where('locale', $locale)->first();
+        return $translation->bio ?? $this->translations->first()->bio ?? '';
+    }
+
+    public function getTitleAttribute()
+    {
+        $locale = app()->getLocale();
+        $translation = $this->translations->where('locale', $locale)->first();
+        return $translation->title ?? $this->translations->first()->title ?? '';
+    }
+
+    public function getDesignationAttribute()
+    {
+        $locale = app()->getLocale();
+        $translation = $this->translations->where('locale', $locale)->first();
+        return $translation->designation ?? $this->translations->first()->designation ?? '';
+    }
+
+
 }

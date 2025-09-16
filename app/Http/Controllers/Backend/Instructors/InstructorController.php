@@ -12,13 +12,48 @@ use App\Http\Requests\Backend\Instructors\UpdateRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Http\Request;
 use Exception;
 
 class InstructorController extends Controller
 {
-public function index()
+public function index(Request $request)
 {
-    $instructors = Instructor::with('translations', 'role')->get();
+    // Установка языка из параметра
+    if ($request->has('lang')) {
+        $lang = $request->get('lang');
+        if (in_array($lang, ['en', 'ru', 'ka'])) {
+            app()->setLocale($lang);
+            session()->put('locale', $lang);
+        }
+    }
+
+    $query = Instructor::with(['translations', 'role']);
+
+    // Поиск по email
+    if ($request->has('search_email') && !empty($request->search_email)) {
+        $query->where('email', 'like', '%' . $request->search_email . '%');
+    }
+
+    // Поиск по имени (простой вариант через ID)
+    if ($request->has('search_name') && !empty($request->search_name)) {
+        $searchName = $request->search_name;
+
+        // Находим ID инструкторов с подходящими именами
+        $matchingIds = InstructorTranslation::where('name', 'like', '%' . $searchName . '%')
+            ->pluck('instructor_id')
+            ->toArray();
+
+        if (!empty($matchingIds)) {
+            $query->whereIn('id', $matchingIds);
+        } else {
+            // Если нет совпадений, возвращаем пустой результат
+            $query->where('id', 0);
+        }
+    }
+
+    $instructors = $query->orderBy('id', 'desc')->get();
+
     return view('backend.instructor.index', compact('instructors'));
 }
 
@@ -150,9 +185,4 @@ public function index()
         }
     }
 
-public function frontShow($id)
-{
-    $instructor = Instructor::with('translations')->findOrFail($id);
-    return view('frontend.instructorProfile', compact('instructor'));
-}
 }

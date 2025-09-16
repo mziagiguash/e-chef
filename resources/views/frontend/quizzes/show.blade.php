@@ -14,17 +14,17 @@
                 </a>
             </li>
             <li class="breadcrumb-item">
-                <a href="{{ route('frontend.watchCourse', [$locale, $course->id]) }}">
-                    {{ $course->translations->firstWhere('locale', $locale)->title ?? $course->title ?? 'Course' }}
+                <a href="{{ route('frontend.courses.show', [$locale, $course->id]) }}">
+                    {{ $course->translations->firstWhere('locale', $locale)->title ?? $course->translations->first()->title ?? $course->title ?? 'Course' }}
                 </a>
             </li>
             <li class="breadcrumb-item">
                 <a href="{{ route('lessons.show', [$locale, $course->id, $lesson->id]) }}">
-                    {{ $lesson->translations->firstWhere('locale', $locale)->title ?? $lesson->title ?? 'Lesson' }}
+                    {{ $lesson->translations->firstWhere('locale', $locale)->title ?? $lesson->translations->first()->title ?? $lesson->title ?? 'Lesson' }}
                 </a>
             </li>
             <li class="breadcrumb-item active" aria-current="page">
-                {{ $quiz->translations->firstWhere('locale', $locale)->title ?? $quiz->title ?? 'Quiz' }}
+                {{ $quiz->translations->firstWhere('locale', $locale)->title ?? $quiz->translations->first()->title ?? $quiz->title ?? 'Quiz' }}
             </li>
         </ol>
     </nav>
@@ -44,7 +44,7 @@
                 <div class="card-header bg-primary text-white">
                     <h1 class="h3 mb-0">
                         <i class="fas fa-graduation-cap me-2"></i>
-                        {{ $quiz->translations->firstWhere('locale', $locale)->title ?? $quiz->title ?? 'Quiz' }}
+                        {{ $quiz->translations->firstWhere('locale', $locale)->title ?? $quiz->translations->first()->title ?? $quiz->title ?? 'Quiz' }}
                     </h1>
                 </div>
                 <div class="card-body">
@@ -54,6 +54,8 @@
 
                     @if($quizTranslation && $quizTranslation->description)
                         <p class="lead">{{ $quizTranslation->description }}</p>
+                    @elseif($quiz->translations->first() && $quiz->translations->first()->description)
+                        <p class="lead">{{ $quiz->translations->first()->description }}</p>
                     @endif
 
                     <div class="row">
@@ -81,21 +83,105 @@
             </div>
 
             @if($canAttempt)
-                {{-- Start Quiz Button --}}
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h4>{{ __('Ready to take the quiz?') }}</h4>
-                        <p class="text-muted">{{ __('This quiz contains :count questions', ['count' => $quiz->questions->count()]) }}</p>
+                {{-- Quiz Questions Form --}}
+                <form action="{{ route('frontend.quizzes.start', [
+                    'locale' => $locale,
+                    'course' => $course->id,
+                    'lesson' => $lesson->id,
+                    'quiz' => $quiz->id
+                ]) }}" method="POST" id="quiz-form">
+                    @csrf
 
-<form action="/{{ $locale }}/courses/{{ $course->id }}/lessons/{{ $lesson->id }}/quizzes/{{ $quiz->id }}/start" method="POST">
-    @csrf
-    <button type="submit" class="btn btn-primary btn-lg">
-        <i class="fas fa-play me-2"></i> {{ __('Start Quiz') }}
-    </button>
-</form>
+                    {{-- Timer --}}
+                    @if($quiz->time_limit)
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-clock me-2"></i>
+                        {{ __('Time remaining') }}:
+                        <span id="timer">{{ $quiz->time_limit }}:00</span>
                     </div>
-                </div>
+                    @endif
 
+                    {{-- Questions --}}
+                    @foreach($quiz->questions as $index => $question)
+                        @php
+                            $questionTranslation = $question->translations->firstWhere('locale', $locale);
+                            $questionText = $questionTranslation->content ?? $question->translations->first()->content ?? $question->question_text ?? 'Question';
+                        @endphp
+
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    {{ __('Question') }} {{ $index + 1 }}: {{ $questionText }}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                @if($questionTranslation && $questionTranslation->explanation)
+                                    <p class="text-muted mb-3">
+                                        <small>{{ $questionTranslation->explanation }}</small>
+                                    </p>
+                                @endif
+
+                                <div class="options-list">
+                                    @switch($question->type)
+                                        @case('multiple_choice')
+                                            @foreach($question->options as $option)
+                                                @php
+                                                    $optionTranslation = $option->translations->firstWhere('locale', $locale);
+                                                    $optionText = $optionTranslation->option_text ?? $option->translations->first()->option_text ?? $option->option_text ?? 'Option';
+                                                @endphp
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio"
+                                                           name="answers[{{ $question->id }}]"
+                                                           id="option_{{ $option->id }}"
+                                                           value="{{ $option->id }}" required>
+                                                    <label class="form-check-label" for="option_{{ $option->id }}">
+                                                        {{ $optionText }}
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                            @break
+
+                                        @case('true_false')
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio"
+                                                       name="answers[{{ $question->id }}]"
+                                                       id="true_{{ $question->id }}"
+                                                       value="true" required>
+                                                <label class="form-check-label" for="true_{{ $question->id }}">
+                                                    {{ __('True') }}
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio"
+                                                       name="answers[{{ $question->id }}]"
+                                                       id="false_{{ $question->id }}"
+                                                       value="false" required>
+                                                <label class="form-check-label" for="false_{{ $question->id }}">
+                                                    {{ __('False') }}
+                                                </label>
+                                            </div>
+                                            @break
+
+                                        @case('short_answer')
+                                            <div class="form-group">
+                                                <input type="text" class="form-control"
+                                                       name="answers[{{ $question->id }}]"
+                                                       placeholder="{{ __('Your answer') }}" required>
+                                            </div>
+                                            @break
+                                    @endswitch
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+
+                    {{-- Submit Button --}}
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i> {{ __('Submit Quiz') }}
+                        </button>
+                    </div>
+                </form>
             @else
                 {{-- Results Link --}}
                 <div class="text-center">
@@ -114,7 +200,7 @@
         </div>
     </div>
 </div>
-{{-- Стили для радио-кнопок --}}
+
 <style>
 .form-check-input {
     width: 20px !important;

@@ -9,85 +9,98 @@ use App\Models\Question;
 
 class OptionSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        // Получаем существующие вопросы
-        $questions = Question::all();
+        // Получаем вопросы, которые требуют опций (multiple choice)
+        $questions = Question::whereIn('type', ['single', 'multiple'])
+                            ->whereDoesntHave('options')
+                            ->get();
 
         if ($questions->isEmpty()) {
-            $this->command->info('No questions found. Please seed questions first.');
+            $this->command->info('No questions found that need options. Please run QuestionSeeder first.');
             return;
         }
 
-        $totalOptions = 0;
+        $createdOptions = 0;
+        $createdTranslations = 0;
 
         foreach ($questions as $question) {
-            // Создаем 4 опции для каждого вопроса
-            $correctIndex = rand(0, 3); // Случайный индекс для правильного ответа
+            $optionCount = rand(3, 5);
+            $correctCount = $question->type === 'single' ? 1 : rand(1, 2);
 
-            for ($i = 0; $i < 4; $i++) {
-                $isCorrect = ($i === $correctIndex);
+            for ($i = 1; $i <= $optionCount; $i++) {
+                $isCorrect = $i <= $correctCount;
 
-                // Создаем опцию (без текста, только метаданные)
+                // Создаем опцию
                 $option = Option::create([
                     'question_id' => $question->id,
                     'is_correct' => $isCorrect,
-                    'order' => $i + 1,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'order' => $i
                 ]);
 
-                // Создаем переводы для опции
-                $this->createOptionTranslations($option, $i, $isCorrect);
+                $createdOptions++;
 
-                $totalOptions++;
+                // Создаем переводы для всех языков
+                foreach (['en', 'ru', 'ka'] as $locale) {
+                    OptionTranslation::create([
+                        'option_id' => $option->id,
+                        'locale' => $locale,
+                        'option_text' => $this->generateOptionText($locale, $i, $isCorrect)
+                    ]);
+
+                    $createdTranslations++;
+                }
             }
-
-            $this->command->info("Created 4 options for question ID: {$question->id}");
         }
 
-        $this->command->info("✅ Total {$totalOptions} options with translations seeded successfully!");
-        $this->command->info("📊 For {$questions->count()} questions");
+        $this->command->info("Options seeded successfully.");
+        $this->command->info("Created: {$createdOptions} options");
+        $this->command->info("Created: {$createdTranslations} translations");
     }
 
-    private function createOptionTranslations($option, int $index, bool $isCorrect): void
+    private function generateOptionText(string $locale, int $order, bool $isCorrect): string
     {
-        $locales = ['en', 'ru', 'ka'];
+        $prefix = $isCorrect ? '[CORRECT] ' : '';
 
-        foreach ($locales as $locale) {
-            OptionTranslation::create([
-                'option_id' => $option->id,
-                'locale' => $locale,
-                'option_text' => $this->generateOptionText($locale, $index, $isCorrect),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-    }
-
-    private function generateOptionText(string $locale, int $index, bool $isCorrect): string
-    {
-        $options = [
+        $options = match($locale) {
             'en' => [
-                'Correct answer for this question',
-                'Incorrect option A',
-                'Incorrect option B',
-                'Incorrect option C'
+                'To track changes in code',
+                'Yes, it supports multiple paradigms',
+                'Classes and objects',
+                'Data integrity and relationships',
+                'Using callbacks and promises',
+                'Model-View-Controller separation',
+                'HTTPS provides encryption',
+                'Adapts to different screen sizes',
+                'Readability and maintainability',
+                'Reduces database queries'
             ],
             'ru' => [
-                'Правильный ответ на этот вопрос',
-                'Неправильный вариант A',
-                'Неправильный вариант B',
-                'Неправильный вариант C'
+                'Для отслеживания изменений в коде',
+                'Да, поддерживает несколько парадигм',
+                'Классы и объекты',
+                'Целостность данных и отношения',
+                'С использованием колбэков и промисов',
+                'Разделение Model-View-Controller',
+                'HTTPS обеспечивает шифрование',
+                'Адаптируется к разным размерам экранов',
+                'Читаемость и поддерживаемость',
+                'Уменьшает количество запросов к базе данных'
             ],
             'ka' => [
-                'სწორი პასუხი ამ კითხვაზე',
-                'არასწორი ვარიანტი A',
-                'არასწორი ვარიანტი B',
-                'არასწორი ვარიანტი C'
+                'კოდში ცვლილებების თვალყურის დევნებისთვის',
+                'დიახ, მხარს უჭერს მრავალ პარადიგმას',
+                'კლასები და ობიექტები',
+                'მონაცემთა მთლიანობა და ურთიერთობები',
+                'კოლბეკების და პრომისების გამოყენებით',
+                'Model-View-Controller გაყოფა',
+                'HTTPS უზრუნველყოფს დაშიფვრას',
+                'ეგუოდება სხვადასხვა ეკრანის ზომებს',
+                'წაკითხვადობა და მოვლა',
+                'ამცირებს მონაცემთა ბაზის მოთხოვნებს'
             ]
-        ];
+        };
 
-        return $options[$locale][$index];
+        return $prefix . $options[array_rand($options)] . " (Option #{$order})";
     }
 }

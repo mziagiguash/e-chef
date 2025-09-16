@@ -3,35 +3,60 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Models\QuizAttempt;
+use App\Models\Quiz;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class QuizAttemptSeeder extends Seeder
 {
     public function run()
     {
-        // Отключаем проверку внешних ключей
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        $quizzes = Quiz::all();
 
-        // Очищаем таблицу
-        QuizAttempt::truncate();
+        // Получаем всех студентов (role_id = 4)
+        $students = User::where('role_id', 4)->get();
 
-        // Включаем проверку внешних ключей обратно
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        if ($students->isEmpty()) {
+            $this->command->info('No students found! Please run UserSeeder first.');
+            return;
+        }
 
-        // Создаем 50 попыток через фабрику
-        $attempts = QuizAttempt::factory()->count(50)->create();
+        if ($quizzes->isEmpty()) {
+            $this->command->info('No quizzes found! Please run QuizSeeder first.');
+            return;
+        }
 
-        $this->command->info("✅ Created {$attempts->count()} quiz attempts");
+        foreach ($students as $student) {
+            foreach ($quizzes as $quiz) {
+                $attemptCount = rand(1, 3); // 1-3 попытки на квиз
 
-        // Статистика
-        $completed = QuizAttempt::where('status', QuizAttempt::STATUS_COMPLETED)->count();
-        $inProgress = QuizAttempt::where('status', QuizAttempt::STATUS_IN_PROGRESS)->count();
-        $expired = QuizAttempt::where('status', QuizAttempt::STATUS_EXPIRED)->count();
+                for ($i = 0; $i < $attemptCount; $i++) {
+                    $totalQuestions = $quiz->questions()->count();
 
-        $this->command->info("📊 Statistics:");
-        $this->command->info("   • Completed: {$completed}");
-        $this->command->info("   • In Progress: {$inProgress}");
-        $this->command->info("   • Expired: {$expired}");
+                    // Если нет вопросов, пропускаем
+                    if ($totalQuestions === 0) {
+                        continue;
+                    }
+
+                    $correctAnswers = rand(0, $totalQuestions);
+                    $score = $totalQuestions > 0 ? round(($correctAnswers / $totalQuestions) * 100) : 0;
+
+                    QuizAttempt::create([
+                        'quiz_id' => $quiz->id,
+                        'user_id' => $student->id,
+                        'score' => $score,
+                        'total_questions' => $totalQuestions,
+                        'correct_answers' => $correctAnswers,
+                        'started_at' => fake()->dateTimeBetween('-1 month', 'now'),
+                        'completed_at' => fake()->dateTimeBetween('-1 month', 'now'),
+                        'time_taken' => rand(60, 1800),
+                        'status' => 'completed',
+                    ]);
+                }
+            }
+        }
+
+        $this->command->info('Quiz attempts seeded successfully!');
     }
 }

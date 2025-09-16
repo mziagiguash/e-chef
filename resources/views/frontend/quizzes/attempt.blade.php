@@ -24,7 +24,7 @@
                 <div class="card-header bg-primary text-white">
                     <h1 class="h3 mb-0">
                         <i class="fas fa-graduation-cap me-2"></i>
-                        {{ $quiz->translations->firstWhere('locale', $locale)->title ?? $quiz->title }}
+                        {{ $quiz->translations->firstWhere('locale', $locale)->title ?? $quiz->translations->first()->title ?? $quiz->title }}
                     </h1>
                 </div>
                 <div class="card-body">
@@ -38,6 +38,8 @@
 
                     @if($quizTranslation && $quizTranslation->description)
                         <p class="lead">{{ $quizTranslation->description }}</p>
+                    @elseif($quiz->translations->first() && $quiz->translations->first()->description)
+                        <p class="lead">{{ $quiz->translations->first()->description }}</p>
                     @endif
 
                     <div class="row">

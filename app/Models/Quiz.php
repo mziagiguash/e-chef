@@ -15,6 +15,8 @@ class Quiz extends Model
 
     protected $fillable = [
         'lesson_id',
+        'title',
+        'description',
         'order',
         'is_active',
         'time_limit',
@@ -92,6 +94,7 @@ public function translations(): HasMany
                $this->translations->first()->description ??
                null;
     }
+
 public function getTranslation(string $locale, string $field = 'title'): ?string
 {
     if (!$this->relationLoaded('translations')) {

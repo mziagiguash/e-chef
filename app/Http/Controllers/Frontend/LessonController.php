@@ -29,11 +29,9 @@ class LessonController extends Controller
                 abort(404, 'Lesson does not belong to this course');
             }
 
-            // Получаем перевод урока
-            $lessonTranslation = $lesson->translations->first();
-            if (!$lessonTranslation) {
-                $lessonTranslation = $lesson->translations()->where('locale', 'en')->first();
-            }
+            // Получаем переводы
+            $courseTranslation = $course->translations->first() ?? $course->translations()->where('locale', 'en')->first();
+            $lessonTranslation = $lesson->translations->first() ?? $lesson->translations()->where('locale', 'en')->first();
 
             // Проверяем тип видео (YouTube или загруженное)
             $isYouTube = false;
@@ -59,7 +57,12 @@ class LessonController extends Controller
             $previousLesson = $currentIndex > 0 ? $lessons[$currentIndex - 1] : null;
             $nextLesson = $currentIndex < $lessons->count() - 1 ? $lessons[$currentIndex + 1] : null;
 
-            $instructorName = $course->instructor->translated_name ?? 'No Instructor';
+            // Получаем перевод имени инструктора
+            $instructor = $course->instructor;
+            $instructorTranslation = $instructor->translations->where('locale', $locale)->first()
+                ?? $instructor->translations->where('locale', 'en')->first();
+
+            $instructorName = $instructorTranslation->name ?? $instructor->name ?? __('No Instructor');
 
             $currentProgress = 0;
 
@@ -67,16 +70,15 @@ class LessonController extends Controller
                 'locale',
                 'course',
                 'lesson',
-                'instructorName',
+                'courseTranslation',
                 'lessonTranslation',
+                'instructorName',
                 'previousLesson',
                 'nextLesson',
                 'currentProgress',
                 'isYouTube',
                 'youTubeId'
             ));
-
-
 
         } catch (\Exception $e) {
             abort(404, 'Course or lesson not found');

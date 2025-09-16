@@ -4,95 +4,137 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use Illuminate\Http\Request;
+use App\Http\Helpers\CurrencyHelper;
 
 class WatchCourseController extends Controller
 {
-    public function watchCourse($locale, $id)
+    /**
+     * Display a listing of the courses.
+     */
+    public function index($locale)
     {
         try {
-            $course = Course::with([
-                // Загружаем инструктора с его переводом
-                'instructor.translations' => function($query) use ($locale) {
-                    $query->where('locale', $locale);
-                },
-                // Загружаем категорию курса с ее переводом
-                'courseCategory.translations' => function($query) use ($locale) {
-                    $query->where('locale', $locale);
-                },
-                // Загружаем уроки с их переводами и материалами
-                'lessons' => function($query) {
-                    $query->orderBy('id');
-                },
-                'lessons.quiz',
-                'lessons.materials',
-                'lessons.translations' => function($query) use ($locale) {
-                    $query->where('locale', $locale);
-                },
-                // Загружаем переводы самого курса
-                'translations' => function($query) use ($locale) {
-                    $query->where('locale', $locale);
-                }
-            ])->findOrFail($id);
+            // Установка языка
+            $this->setLocale($locale);
 
-            // Проверка статуса курса
-            if ($course->status != 2) {
-                abort(404, 'Course is not active');
-            }
+            $courses = Course::with([
+                'instructor.translations',
+                'courseCategory.translations',
+                'translations'
+            ])
+            ->where('status', 2) // Only active courses
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
 
-            // Получаем перевод курса для текущей локали
-            $courseTranslation = $course->translations->first();
-            if (!$courseTranslation) {
-                $courseTranslation = $course->translations()->where('locale', 'en')->first();
-            }
+            // Prepare translated data for each course
+            $courses->each(function($course) use ($locale) {
+                $courseTranslation = $course->translations->where('locale', $locale)->first();
+                $instructorTranslation = $course->instructor ? $course->instructor->translations->where('locale', $locale)->first() : null;
+                $categoryTranslation = $course->courseCategory ? $course->courseCategory->translations->where('locale', $locale)->first() : null;
 
-            // Получаем перевод инструктора
-            $instructorTranslation = $course->instructor->translations->first();
-            if (!$instructorTranslation && $course->instructor) {
-                $instructorTranslation = $course->instructor->translations()->where('locale', 'en')->first();
-            }
+                $course->currentTitle = $courseTranslation->title ?? $course->translations->first()->title ?? $course->title ?? __('No Title');
+                $course->currentDescription = $courseTranslation->description ?? $course->translations->first()->description ?? $course->description ?? __('No Description');
+                $course->instructorName = $instructorTranslation->name ?? $course->instructor->translations->first()->name ?? $course->instructor->name ?? __('No Instructor');
+                $course->categoryName = $categoryTranslation->category_name ?? $course->courseCategory->translations->first()->name ?? $course->courseCategory->category_name ?? __('No Category');
+            });
 
-            // Получаем перевод категории курса
-            $categoryTranslation = $course->courseCategory->translations->first();
-            if (!$categoryTranslation && $course->courseCategory) {
-                $categoryTranslation = $course->courseCategory->translations()->where('locale', 'en')->first();
-            }
+            // Для совместимости с существующим шаблоном
+            $allCourses = $courses;
 
-            // Используем методы моделей для получения переведенных данных
-            $currentTitle = $courseTranslation->title ?? 'No Title';
-            $currentDescription = $courseTranslation->description ?? 'No Description';
-            $currentPrerequisites = $courseTranslation->prerequisites ?? 'No Prerequisites';
-            $currentKeywords = $courseTranslation->keywords ?? '';
+            // Используем хелпер для получения символа валюты
+            $currencySymbol = CurrencyHelper::getSymbol();
 
-            // Получаем переведенное имя инструктора
-            $instructorName = $course->instructor->translated_name ?? 'No Instructor';
-            $instructorBio = $course->instructor->translated_bio ?? '';
-            $instructorDesignation = $course->instructor->translated_designation ?? '';
-
-            // Получаем переведенное название категории
-            $categoryName = $course->courseCategory->translated_category_name ?? 'No Category';
-
-            $progress = 0;
-            $completedLessons = 0;
-            $totalLessons = $course->lessons->count();
-
-            return view('frontend.watch-course', compact(
-                'course',
-                'progress',
-                'completedLessons',
-                'totalLessons',
-                'currentTitle',
-                'currentDescription',
-                'currentPrerequisites',
-                'currentKeywords',
-                'instructorName',
-                'instructorBio',
-                'instructorDesignation',
-                'categoryName',
-                'locale'
-            ));
+            return view('frontend.courses.index', compact('courses', 'allCourses', 'locale', 'currencySymbol'));
 
         } catch (\Exception $e) {
-            abort(404, 'Course not found: ' . $e->getMessage());
+            abort(500, 'Error loading courses: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Display the specified course.
+     */
+public function show($locale, Course $course) // Используем привязку модели
+{
+    try {
+        // Установка языка
+        $this->setLocale($locale);
+
+        // Проверяем статус курса
+        if ($course->status != 2) {
+            abort(404, 'Course is not active');
+        }
+
+        // Загружаем отношения
+        $course->load([
+            'instructor.translations',
+            'courseCategory.translations',
+            'lessons' => function($query) {
+                $query->orderBy('order');
+            },
+            'lessons.quiz',
+            'lessons.materials',
+            'lessons.translations',
+            'translations'
+        ]);
+
+        // Получаем переводы для текущего языка
+        $courseTranslation = $course->translations->where('locale', $locale)->first();
+        $instructorTranslation = $course->instructor ? $course->instructor->translations->where('locale', $locale)->first() : null;
+        $categoryTranslation = $course->courseCategory ? $course->courseCategory->translations->where('locale', $locale)->first() : null;
+
+        // Используем переведенные данные или fallback
+        $currentTitle = $courseTranslation->title ?? $course->translations->first()->title ?? $course->title ?? __('No Title');
+        $currentDescription = $courseTranslation->description ?? $course->translations->first()->description ?? $course->description ?? __('No Description');
+        $currentPrerequisites = $courseTranslation->prerequisites ?? $course->translations->first()->prerequisites ?? $course->prerequisites ?? __('No Prerequisites');
+        $currentKeywords = $courseTranslation->keywords ?? $course->translations->first()->keywords ?? $course->keywords ?? '';
+
+        // Инструктор
+        $instructorName = $instructorTranslation->name ?? $course->instructor->translations->first()->name ?? $course->instructor->name ?? __('No Instructor');
+        $instructorBio = $instructorTranslation->bio ?? $course->instructor->translations->first()->bio ?? $course->instructor->bio ?? __('No biography available.');
+        $instructorDesignation = $instructorTranslation->designation ?? $course->instructor->translations->first()->designation ?? $course->instructor->designation ?? '';
+
+        // Категория
+        $categoryName = $categoryTranslation->category_name ?? $course->courseCategory->translations->first()->name ?? $course->courseCategory->category_name ?? __('No Category');
+
+        $progress = 0;
+        $completedLessons = 0;
+        $totalLessons = $course->lessons->count();
+
+        // Используем хелпер для получения символа валюты
+        $currencySymbol = CurrencyHelper::getSymbol();
+
+        return view('frontend.courses.watch-course', compact(
+            'course',
+            'progress',
+            'completedLessons',
+            'totalLessons',
+            'currentTitle',
+            'currentDescription',
+            'currentPrerequisites',
+            'currentKeywords',
+            'instructorName',
+            'instructorBio',
+            'instructorDesignation',
+            'categoryName',
+            'locale',
+            'currencySymbol'
+        ));
+
+    } catch (\Exception $e) {
+        abort(404, 'Course not found: ' . $e->getMessage());
+    }
+}
+
+    /**
+     * Set the application locale
+     */
+    private function setLocale($locale)
+    {
+        $lang = $locale ?? request()->get('lang', session('locale', 'en'));
+        if (in_array($lang, ['en', 'ru', 'ka'])) {
+            app()->setLocale($lang);
+            session()->put('locale', $lang);
         }
     }
 }

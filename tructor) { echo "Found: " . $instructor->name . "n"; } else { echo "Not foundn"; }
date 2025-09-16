@@ -1,0 +1,16 @@
+[90m= [39m[34;4mApp\Models\Instructor[39;24m {#6464
+    [34mid[39m: [35m2[39m,
+    [34mcontact[39m: "[32m678.445.0161[39m",
+    [34memail[39m: "[32mgarrick.harber@example.org[39m",
+    [34mrole_id[39m: [35m3[39m,
+    [34mimage[39m: "[32mhttps://via.placeholder.com/640x480.png/0055dd?text=ut[39m",
+    [34mstatus[39m: [35m1[39m,
+    #[33mpassword[39m: "[32m$2y$12$ZUZdsGjMPocKpZcHpK5f9OW4JsUj1hvx4MoiarpMw/t0y3bkKfvam[39m",
+    [34mlanguage[39m: "[32men[39m",
+    [34maccess_block[39m: [36mnull[39m,
+    #[33mremember_token[39m: [36mnull[39m,
+    [34mcreated_at[39m: "[32m2025-09-14 03:05:42[39m",
+    [34mupdated_at[39m: "[32m2025-09-14 03:05:42[39m",
+    [34mdeleted_at[39m: [36mnull[39m,
+  }
+

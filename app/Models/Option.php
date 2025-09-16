@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Option extends Model
 {
-    use HasFactory; // Убираем SoftDeletes
+    use HasFactory;
 
     protected $table = 'options';
 
@@ -18,9 +18,6 @@ class Option extends Model
         'is_correct',
         'order'
     ];
-
-    // Убираем deleted_at, так как его нет в таблице
-    // protected $dates = ['deleted_at'];
 
     public function question(): BelongsTo
     {
@@ -32,30 +29,28 @@ class Option extends Model
         return $this->hasMany(OptionTranslation::class, 'option_id');
     }
 
-    // Accessor для получения перевода
-    public function getTranslatedAttribute($locale = null)
+    // Accessor для получения текста опции на текущем языке
+    public function getTextAttribute()
     {
-        $locale = $locale ?? app()->getLocale();
-        $defaultLocale = config('app.fallback_locale', 'en');
+        $locale = app()->getLocale();
 
         if (!$this->relationLoaded('translations')) {
             $this->load('translations');
         }
 
         $translation = $this->translations->where('locale', $locale)->first();
+        return $translation->option_text ?? $this->translations->first()->option_text ?? '';
+    }
 
-        if (!$translation && $locale !== $defaultLocale) {
-            $translation = $this->translations->where('locale', $defaultLocale)->first();
+    // Получение перевода для конкретного языка
+    public function getTranslation($locale = null)
+    {
+        $locale = $locale ?? app()->getLocale();
+
+        if (!$this->relationLoaded('translations')) {
+            $this->load('translations');
         }
 
-        return $translation ?: new OptionTranslation();
+        return $this->translations->where('locale', $locale)->first();
     }
-
-
-    public function getTranslation(string $locale, string $field = 'option_text'): ?string
-    {
-        $translation = $this->translations->where('locale', $locale)->first();
-        return $translation ? $translation->{$field} : null;
-    }
-
 }

@@ -26,7 +26,7 @@ use App\Http\Controllers\CouponController as coupon;
 
 use App\Http\Controllers\Frontend\WatchCourseController as WatchCourseController;
 use App\Http\Controllers\Frontend\LessonController as LessonController;
-use App\Http\Controllers\LessonController as lesson;
+use App\Http\Controllers\Backend\LessonController as lesson;
 use App\Http\Controllers\EnrollmentController as enrollment;
 use App\Http\Controllers\EventSearchController;
 use App\Http\Controllers\EventController as event;
@@ -39,7 +39,7 @@ use App\Http\Controllers\Students\ProfileController as stu_profile;
 use App\Http\Controllers\Students\sslController as sslcz;
 
 use App\Http\Controllers\Frontend\QuizController;
-
+use App\Http\Controllers\Frontend\FrontendInstructorController;
 /*
 |--------------------------------------------------------------------------
 | Debug Route
@@ -71,6 +71,7 @@ Route::get('/logout', [auth::class, 'signOut'])->name('logOut');
 | Admin Protected Routes
 |--------------------------------------------------------------------------
 */
+
 Route::middleware(['checkauth'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [dashboard::class, 'index'])->name('dashboard');
     Route::get('/userProfile', [auth::class, 'show'])->name('userProfile');
@@ -92,6 +93,7 @@ Route::middleware(['checkrole'])->prefix('admin')->group(function () {
     // Destroy
     Route::delete('instructor/{id}', [InstructorController::class, 'destroy'])
         ->name('instructor.destroy');
+
 
     // Остальные маршруты resource без edit/update/destroy
     Route::resource('instructor', InstructorController::class)
@@ -168,59 +170,60 @@ Route::get('{locale}/event-search', [EventSearchController::class, 'index'])
     ->where('locale', 'en|ru|ka')
     ->name('event.search');
 
+
 Route::prefix('{locale}')
     ->where(['locale' => 'en|ru|ka'])
     ->middleware('setlocale')
     ->group(function () {
 
-        // Главная страница курса
-        Route::get('/watch-course/{id}', [WatchCourseController::class, 'watchCourse'])
-            ->name('frontend.watchCourse');
+ // Маршруты инструкторов
 
-        // Маршруты для уроков и квизов
-        Route::prefix('courses/{course}/lessons/{lesson}')->group(function () {
+Route::get('/instructors', [FrontendInstructorController::class, 'index'])->name('frontend.instructors');
+Route::get('/instructor/{id}', [FrontendInstructorController::class, 'show'])->name('frontend.instructor.show');
 
-            // Просмотр урока
-            Route::get('/', [LessonController::class, 'show'])
-                ->name('lessons.show');
+// Главная страница курса
+Route::get('/courses', [WatchCourseController::class, 'index'])->name('frontend.courses');
 
-            // Прогресс урока
-            Route::post('progress', [LessonController::class, 'updateProgress'])
-                ->name('lessons.progress.update');
+// Используйте 'courses' вместо 'course' для consistency
+Route::get('/courses/{course}', [WatchCourseController::class, 'show'])->name('frontend.courses.show');
+// Маршруты для уроков и квизов (остаются без изменений)
+Route::prefix('courses/{course}/lessons/{lesson}')->group(function () {
+    // Просмотр урока
+    Route::get('/', [LessonController::class, 'show'])
+        ->name('lessons.show');
 
-            // Завершение урока
-            Route::post('complete', [LessonController::class, 'completeLesson'])
-                ->name('lessons.complete');
+    // Прогресс урока
+    Route::post('progress', [LessonController::class, 'updateProgress'])
+        ->name('lessons.progress.update');
 
-            // Маршруты для квизов
-            Route::prefix('quizzes/{quiz}')->group(function () {
+    // Завершение урока
+    Route::post('complete', [LessonController::class, 'completeLesson'])
+        ->name('lessons.complete');
 
-                // Просмотр квиза
-                Route::get('/', [QuizController::class, 'show'])
-                    ->name('frontend.quizzes.show');
+    // Маршруты для квизов
+    Route::prefix('quizzes/{quiz}')->group(function () {
+        // Просмотр квиза
+        Route::get('/', [QuizController::class, 'show'])->name('frontend.quizzes.show');
+        Route::post('/start', [QuizController::class, 'start'])->name('frontend.quizzes.start');
 
-                // Начало квиза
-                Route::post('/start', [QuizController::class, 'start'])
-                    ->name('frontend.quizzes.start');
+        // Прохождение квиза
+        Route::get('/attempt/{attempt}', [QuizController::class, 'attempt'])
+            ->name('frontend.quizzes.attempt');
 
-                // Прохождение квиза
-                Route::get('/attempt/{attempt}', [QuizController::class, 'attempt'])
-                    ->name('frontend.quizzes.attempt');
+        // Отправка ответов
+        Route::post('/attempt/{attempt}/submit', [QuizController::class, 'submitAttempt'])
+            ->name('frontend.quizzes.submit');
 
-                // Отправка ответов
-                Route::post('/attempt/{attempt}/submit', [QuizController::class, 'submitAttempt'])
-                    ->name('frontend.quizzes.submit');
+        // Результаты
+        Route::get('/results/{attempt?}', [QuizController::class, 'results'])
+            ->name('frontend.quizzes.results');
+    });
+});
 
-                // Результаты
-                Route::get('/results/{attempt?}', [QuizController::class, 'results'])
-                    ->name('frontend.quizzes.results');
-            });
-        });
-
-        // Этот маршрут должен быть вне группы, так как он не соответствует префиксу
-        Route::get('course/{id}/back', function ($locale, $id) {
-            return redirect()->to("/$locale/watchCourse/$id");
-        })->name('course.back');
+// Редирект
+Route::get('courses/{id}/back', function ($locale, $id) {
+    return redirect()->to("/$locale/courses/$id");
+})->name('course.back');
 
         // 🔐 Student Auth
         Route::get('/student/register', [sauth::class, 'signUpForm'])->name('studentRegister');

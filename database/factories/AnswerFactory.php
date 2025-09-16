@@ -3,33 +3,35 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Answer;
+use App\Models\QuestionAnswer;
 use App\Models\Question;
+use App\Models\QuizAttempt;
+use App\Models\User;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Answer>
- */
 class AnswerFactory extends Factory
 {
-    protected $model = Answer::class;
+    protected $model = QuestionAnswer::class;
 
     public function definition()
     {
         return [
+            'attempt_id' => QuizAttempt::factory(),
             'question_id' => Question::factory(),
-            'text' => $this->faker->sentence(6),
-            'is_correct' => $this->faker->boolean(25), // 25% chance of being correct
-            'order' => $this->faker->numberBetween(1, 10),
-            'explanation' => $this->faker->boolean(50) ? $this->faker->paragraph(2) : null,
+            'user_id' => User::factory(),
+            'option_id' => null,
+            'text_answer' => $this->faker->sentence(3),
+            'rating_answer' => null,
+            'is_correct' => $this->faker->boolean(30),
+            'points_earned' => $this->faker->numberBetween(0, 5),
         ];
     }
 
-    // Состояния для фабрики
     public function correct()
     {
         return $this->state(function (array $attributes) {
             return [
                 'is_correct' => true,
+                'points_earned' => $this->faker->numberBetween(3, 5),
             ];
         });
     }
@@ -39,6 +41,27 @@ class AnswerFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'is_correct' => false,
+                'points_earned' => 0,
+            ];
+        });
+    }
+
+    public function withOption()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'option_id' => \App\Models\Option::factory(),
+                'text_answer' => null,
+            ];
+        });
+    }
+
+    public function withTextAnswer()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'option_id' => null,
+                'text_answer' => $this->faker->sentence(6),
             ];
         });
     }

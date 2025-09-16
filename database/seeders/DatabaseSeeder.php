@@ -16,15 +16,17 @@ class DatabaseSeeder extends Seeder
 
     RoleSeeder::class,
     UserSeeder::class,
+    InstructorSeeder::class,
     CourseCategorySeeder::class,
     InstructorSeeder::class,
     CourseSeeder::class,
-    QuizSeeder::class,
-    LessonSeeder::class,       // ← Сначала квизы
+    LessonSeeder::class,
+    QuizSeeder::class,      // ← Сначала квизы
     QuestionSeeder::class,    // ← Потом вопросы
-    OptionSeeder::class,      // ← Потом опции
+    OptionSeeder::class,
     MaterialSeeder::class,
-    QuizAttemptSeeder::class, // ← В конце попытки
+    QuizAttemptSeeder::class,
+    AnswerSeeder::class,
         ]);
     }
 }

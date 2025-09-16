@@ -8,109 +8,62 @@ use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\Question;
 use App\Models\QuizAttempt;
+use App\Models\QuestionAnswer;
+use App\Models\Option;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class QuizController extends Controller
 {
-public function show($locale, $courseId, $lessonId, $quizId)
-{
-    try {
-        $course = Course::findOrFail($courseId);
-        $lesson = Lesson::findOrFail($lessonId);
-        $quiz = Quiz::findOrFail($quizId);
-
-        // Проверяем принадлежность урока курсу и квиза уроку
-        if ($lesson->course_id != $course->id) {
-            abort(404, 'Lesson does not belong to this course');
-        }
-
-        if ($quiz->lesson_id != $lesson->id) {
-            abort(404, 'Quiz does not belong to this lesson');
-        }
-
-        // Загружаем отношения с переводами
-        $quiz->load([
-            'translations' => function($query) use ($locale) {
-                $query->where('locale', $locale);
-            },
-            'questions' => function($query) {
-                $query->orderBy('order', 'asc')->with(['options' => function($q) {
-                    $q->orderBy('order', 'asc');
-                }]);
-            },
-            'questions.translations' => function($query) use ($locale) {
-                $query->where('locale', $locale);
-            },
-            'questions.options.translations' => function($query) use ($locale) {
-                $query->where('locale', $locale);
+    public function show($locale, Course $course, Lesson $lesson, Quiz $quiz)
+    {
+        try {
+            // Проверяем принадлежность урока курсу и квиза уроку
+            if ($lesson->course_id != $course->id) {
+                abort(404, 'Lesson does not belong to this course');
             }
-        ]);
 
-        // Получаем количество попыток пользователя через QuizAttempt
-        $attemptsCount = $quiz->attempts()
-            ->where('user_id', auth()->id())
-            ->count();
+            if ($quiz->lesson_id != $lesson->id) {
+                abort(404, 'Quiz does not belong to this lesson');
+            }
 
-        $canAttempt = $quiz->max_attempts === 0 || $attemptsCount < $quiz->max_attempts;
+            // Загружаем вопросы с опциями и переводами
+            $quiz->load([
+                'translations' => function($query) use ($locale) {
+                    $query->where('locale', $locale);
+                },
+                'questions' => function($query) use ($locale) {
+                    $query->orderBy('order', 'asc')
+                          ->with(['translations' => function($q) use ($locale) {
+                              $q->where('locale', $locale);
+                          }, 'options' => function($q) use ($locale) {
+                              $q->orderBy('order', 'asc')
+                                ->with(['translations' => function($q2) use ($locale) {
+                                    $q2->where('locale', $locale);
+                                }]);
+                          }]);
+                }
+            ]);
 
-        return view('frontend.quizzes.show', compact(
-            'quiz', 'course', 'lesson', 'attemptsCount', 'canAttempt', 'locale'
-        ));
+            // Получаем количество попыток пользователя
+            $attemptsCount = $quiz->attempts()
+                ->where('user_id', auth()->id())
+                ->count();
 
-    } catch (\Exception $e) {
-        abort(404, 'Quiz not found: ' . $e->getMessage());
+            $canAttempt = $quiz->max_attempts === 0 || $attemptsCount < $quiz->max_attempts;
+
+            return view('frontend.quizzes.show', compact(
+                'quiz', 'course', 'lesson', 'attemptsCount', 'canAttempt', 'locale'
+            ));
+
+        } catch (\Exception $e) {
+            abort(404, 'Quiz not found: ' . $e->getMessage());
+        }
     }
-}
 
-public function results($locale, $courseId, $lessonId, $quizId, $attemptId = null)
+    public function start(Request $request, $locale, Course $course, Lesson $lesson, Quiz $quiz)
 {
     try {
-        $course = Course::findOrFail($courseId);
-        $lesson = Lesson::findOrFail($lessonId);
-        $quiz = Quiz::findOrFail($quizId);
-
-        // Проверяем принадлежность
-        if ($lesson->course_id != $course->id || $quiz->lesson_id != $lesson->id) {
-            abort(404, 'Invalid course, lesson or quiz relationship');
-        }
-
-        // Если attemptId не передан, берем последнюю попытку
-        if (!$attemptId) {
-            $attempt = $quiz->attempts()
-                ->where('user_id', auth()->id())
-                ->latest()
-                ->firstOrFail();
-        } else {
-            $attempt = QuizAttempt::where('id', $attemptId)
-                ->where('quiz_id', $quiz->id)
-                ->where('user_id', auth()->id())
-                ->firstOrFail();
-        }
-
-        $passed = $attempt->score >= $quiz->passing_score;
-
-        return view('frontend.quizzes.results', compact(
-            'quiz',
-            'locale',
-            'passed',
-            'attempt',
-            'course',
-            'lesson'
-        ));
-
-    } catch (\Exception $e) {
-        abort(404, 'Results not found: ' . $e->getMessage());
-    }
-}
-
-
-public function start(Request $request, $locale, $course, $lesson, $quiz)
-{
-    try {
-        $course = Course::findOrFail($course);
-        $lesson = Lesson::findOrFail($lesson);
-        $quiz = Quiz::findOrFail($quiz);
         $user = Auth::user();
 
         // Проверяем принадлежность
@@ -141,117 +94,31 @@ public function start(Request $request, $locale, $course, $lesson, $quiz)
             'total_questions' => $quiz->questions()->count()
         ]);
 
-        return redirect()->route('frontend.quizzes.attempt', [
-            'locale' => $locale,
-            'course' => $course->id,
-            'lesson' => $lesson->id,
-            'quiz' => $quiz->id,
-            'attempt' => $attempt->id
-        ]);
-
-    } catch (\Exception $e) {
-        abort(404, 'Error starting quiz: ' . $e->getMessage());
-    }
-}
-
-public function attempt($locale, $courseId, $lessonId, $quizId, $attemptId)
-{
-    try {
-        $course = Course::findOrFail($courseId);
-        $lesson = Lesson::findOrFail($lessonId);
-        $quiz = Quiz::findOrFail($quizId);
-        $attempt = QuizAttempt::findOrFail($attemptId);
-
-        // Проверяем принадлежность
-        if ($lesson->course_id != $course->id) {
-            abort(404, 'Lesson does not belong to this course');
-        }
-
-        if ($quiz->lesson_id != $lesson->id) {
-            abort(404, 'Quiz does not belong to this lesson');
-        }
-
-        // Проверяем, что попытка принадлежит пользователю
-        if ($attempt->user_id != Auth::id()) {
-            abort(403, 'This attempt does not belong to you');
-        }
-
-        // Проверяем, что попытка еще активна
-        if ($attempt->status === QuizAttempt::STATUS_COMPLETED) {
-            abort(400, 'This attempt has already been completed');
-        }
-
-        // Загружаем вопросы и варианты ответов
-        $quiz->load([
-            'questions' => function($query) {
-                $query->orderBy('order', 'asc')->with(['options' => function($q) {
-                    $q->orderBy('order', 'asc');
-                }]);
-            },
-            'questions.translations' => function($q) use ($locale) {
-                $q->where('locale', $locale);
-            },
-            'questions.options.translations' => function($q) use ($locale) {
-                $q->where('locale', $locale);
-            }
-        ]);
-
-        return view('frontend.quizzes.attempt', compact(
-            'quiz',
-            'locale',
-            'attempt',
-            'course',
-            'lesson'
-        ));
-
-    } catch (\Exception $e) {
-        abort(404, 'Error loading quiz attempt: ' . $e->getMessage());
-    }
-}
-
-public function submitAttempt(Request $request, $locale, $courseId, $lessonId, $quizId, $attemptId)
-{
-    try {
-        $course = Course::findOrFail($courseId);
-        $lesson = Lesson::findOrFail($lessonId);
-        $quiz = Quiz::with('questions')->findOrFail($quizId);
-        $user = Auth::user();
-        $attempt = QuizAttempt::findOrFail($attemptId);
-
-        // Проверяем принадлежность и права доступа
-        if ($lesson->course_id != $course->id ||
-            $quiz->lesson_id != $lesson->id ||
-            $attempt->quiz_id != $quiz->id ||
-            $attempt->user_id != $user->id) {
-            abort(403, 'Invalid attempt');
-        }
-
-        // Проверяем, что попытка еще активна
-        if ($attempt->status === QuizAttempt::STATUS_COMPLETED) {
-            abort(400, 'This attempt has already been completed');
-        }
-
-        // Обрабатываем ответы
+        // Обрабатываем ответы из формы
         $answers = $request->input('answers', []);
         $correctAnswers = 0;
-        $totalQuestions = $quiz->questions->count();
+        $totalQuestions = $quiz->questions()->count();
 
         foreach ($answers as $questionId => $answerData) {
-            $isCorrect = $this->checkAnswer($questionId, $answerData);
+            $question = Question::find($questionId);
+            if (!$question) continue;
+
+            $isCorrect = $this->checkAnswer($question, $answerData);
 
             if ($isCorrect) {
                 $correctAnswers++;
             }
 
-            // Сохраняем ответ (здесь нужно использовать вашу модель для ответов)
-            // Answer::create([
-            //     'student_id' => $user->id,
-            //     'question_id' => $questionId,
-            //     'option_id' => is_array($answerData) ? null : $answerData,
-            //     'answer_text' => is_array($answerData) ? json_encode($answerData) : null,
-            //     'is_correct' => $isCorrect,
-            //     'created_at' => now()
-            // ]);
+            // Сохраняем ответ пользователя в question_answers
+            QuestionAnswer::create([
+                'attempt_id' => $attempt->id,
+                'question_id' => $questionId,
+                'user_id' => $user->id,
+                'option_id' => $question->type === 'multiple_choice' ? $answerData : null,
+                'text_answer' => $question->type === 'short_answer' ? $answerData : null,
+                'is_correct' => $isCorrect,
+                'points_earned' => $isCorrect ? 1 : 0
+            ]);
         }
 
         // Рассчитываем результат
@@ -268,42 +135,75 @@ public function submitAttempt(Request $request, $locale, $courseId, $lessonId, $
 
         return redirect()->route('frontend.quizzes.results', [
             'locale' => $locale,
-            'courseId' => $courseId,
-            'lessonId' => $lessonId,
-            'quizId' => $quizId,
-            'attemptId' => $attemptId
+            'course' => $course,
+            'lesson' => $lesson,
+            'quiz' => $quiz,
+            'attempt' => $attempt
         ]);
 
     } catch (\Exception $e) {
-        abort(404, 'Error submitting quiz: ' . $e->getMessage());
+        abort(404, 'Error starting quiz: ' . $e->getMessage());
     }
 }
 
-
-    private function checkAnswer($questionId, $answerData)
+    public function results($locale, Course $course, Lesson $lesson, Quiz $quiz, $attempt = null)
     {
-        $question = Question::with('options')->find($questionId);
+        try {
+            // Проверяем принадлежность
+            if ($lesson->course_id != $course->id || $quiz->lesson_id != $lesson->id) {
+                abort(404, 'Invalid course, lesson or quiz relationship');
+            }
 
-        if (!$question) {
-            return false;
-        }
+            // Если attemptId не передан, берем последнюю попытку
+            if (!$attempt) {
+                $attempt = $quiz->attempts()
+                    ->where('user_id', auth()->id())
+                    ->latest()
+                    ->firstOrFail();
+            } else {
+                $attempt = QuizAttempt::where('id', $attempt)
+                    ->where('quiz_id', $quiz->id)
+                    ->where('user_id', auth()->id())
+                    ->firstOrFail();
+            }
 
-        switch ($question->type) {
-            case 'multiple_choice':
-                $selectedOption = \App\Models\Option::find($answerData);
-                return $selectedOption && $selectedOption->is_correct;
+            // Загружаем ответы с вопросами и опциями
+            $attempt->load(['answers.question', 'answers.option']);
 
-            case 'true_false':
-                $correctAnswer = $question->correct_answer;
-                return $answerData === $correctAnswer;
+            $passed = $attempt->score >= $quiz->passing_score;
 
-            case 'short_answer':
-                $correctAnswer = strtolower(trim($question->correct_answer));
-                $userAnswer = strtolower(trim($answerData));
-                return $userAnswer === $correctAnswer;
+            return view('frontend.quizzes.results', compact(
+                'quiz',
+                'locale',
+                'passed',
+                'attempt',
+                'course',
+                'lesson'
+            ));
 
-            default:
-                return false;
+        } catch (\Exception $e) {
+            abort(404, 'Results not found: ' . $e->getMessage());
         }
     }
+
+    private function checkAnswer(Question $question, $answerData)
+{
+    switch ($question->type) {
+        case 'multiple_choice':
+            $selectedOption = Option::find($answerData);
+            return $selectedOption && $selectedOption->is_correct;
+
+        case 'true_false':
+            $correctAnswer = $question->correct_answer; // предполагая, что есть поле correct_answer в questions
+            return $answerData === $correctAnswer;
+
+        case 'short_answer':
+            $correctAnswer = strtolower(trim($question->correct_answer)); // предполагая, что есть поле correct_answer
+            $userAnswer = strtolower(trim($answerData));
+            return $userAnswer === $correctAnswer;
+
+        default:
+            return false;
+    }
+}
 }

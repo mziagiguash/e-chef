@@ -12,7 +12,7 @@ class HomeController extends Controller
     public function index()
     {
         $course = Course::get();
-        $instructor = Instructor::get();
+        $instructors = Instructor::get();
         $category = CourseCategory::get();
         $popularCourses = Course::where('tag', 'popular')->get();
 
@@ -30,7 +30,7 @@ class HomeController extends Controller
 
         return view(
             'frontend.home',
-            compact('course', 'instructor', 'category', 'popularCourses', 'designCourses', 'developmentCourses', 'businessCourses', 'itCourses')
+            compact('course', 'instructors', 'category', 'popularCourses', 'designCourses', 'developmentCourses', 'businessCourses', 'itCourses')
         );
     }
 }
