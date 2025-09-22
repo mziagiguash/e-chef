@@ -19,8 +19,8 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ localeRoute('dashboard') }}">Home</a></li>
-                    <li class="breadcrumb-item"><a href="{{ localeRoute('course.index') }}">Courses</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url('admin/courses') }}">Courses</a></li>
                     <li class="breadcrumb-item active">Add Course</li>
                 </ol>
             </div>
@@ -44,7 +44,7 @@
             </div>
 
             <div class="card-body">
-                <form action="{{ localeRoute('course.store') }}" method="post" enctype="multipart/form-data">
+                <form action="{{ url('admin/courses') }}" method="post" enctype="multipart/form-data">
                     @csrf
 
                     {{-- Локализации --}}
@@ -225,7 +225,7 @@
 
                         <div class="col-lg-12 mt-3">
                             <button type="submit" class="btn btn-primary">Submit</button>
-                            <button type="button" onclick="window.history.back();" class="btn btn-light">Cancel</button>
+                            <a href="{{ url('admin/courses') }}" class="btn btn-light">Cancel</a>
                         </div>
                     </div>
                 </form>

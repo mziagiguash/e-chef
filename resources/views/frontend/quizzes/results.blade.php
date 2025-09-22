@@ -5,14 +5,16 @@
 @section('content')
 <div class="container py-5">
     <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url("/$locale") }}">{{ __('Home') }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('frontend.courses.show', [$locale, $course->id]) }}">{{ $course->translations->firstWhere('locale', $locale)->title ?? $course->title }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('lessons.show', [$locale, $course->id, $lesson->id]) }}">{{ $lesson->translations->firstWhere('locale', $locale)->title ?? $lesson->title }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('frontend.quizzes.show', [$locale, $course->id, $lesson->id, $quiz->id]) }}">{{ $quiz->translations->firstWhere('locale', $locale)->title ?? $quiz->title }}</a></li>
-            <li class="breadcrumb-item active">{{ __('Results') }}</li>
-        </ol>
-    </nav>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url("/$locale") }}">{{ __('Home') }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('frontend.courses.show', [$locale, $course->id]) }}">{{ $course->translations->firstWhere('locale', $locale)->title ?? $course->title }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('lessons.show', [$locale, $course->id, $lesson->id]) }}">{{ $lesson->translations->firstWhere('locale', $locale)->title ?? $lesson->title }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('frontend.quizzes.show', [$locale, $course->id, $lesson->id, $quiz->id]) }}">
+            {{ $quiz->translations->firstWhere('locale', $locale)->title ?? $quiz->getTranslation($locale, 'title') ?? $quiz->title }}
+        </a></li>
+        <li class="breadcrumb-item active">{{ __('Results') }}</li>
+    </ol>
+</nav>
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -63,9 +65,37 @@
                                     <i class="fas fa-{{ $answer->is_correct ? 'check' : 'times' }} me-2"></i>
                                     {{ $answer->is_correct ? __('Correct') : __('Incorrect') }}
                                 </p>
+
+                                @if($answer->user_answer)
+                                    <p><strong>{{ __('Your answer') }}:</strong> {{ $answer->user_answer }}</p>
+                                @endif
+
+                                @if(!$answer->is_correct && $answer->question->correct_answer)
+                                    <p><strong>{{ __('Correct answer') }}:</strong> {{ $answer->question->correct_answer }}</p>
+                                @endif
                             </div>
                         </div>
                     @endforeach
+
+                    {{-- Navigation Buttons --}}
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ route('frontend.quizzes.show', [
+                            'locale' => $locale,
+                            'course' => $course->id,
+                            'lesson' => $lesson->id,
+                            'quiz' => $quiz->id
+                        ]) }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> {{ __('Back to Quiz') }}
+                        </a>
+
+                        <a href="{{ route('lessons.show', [
+                            'locale' => $locale,
+                            'course' => $course->id,
+                            'lesson' => $lesson->id
+                        ]) }}" class="btn btn-primary">
+                            <i class="fas fa-book me-2"></i> {{ __('Back to Lesson') }}
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

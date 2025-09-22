@@ -20,13 +20,13 @@ class DatabaseSeeder extends Seeder
     CourseCategorySeeder::class,
     InstructorSeeder::class,
     CourseSeeder::class,
-    LessonSeeder::class,
-    QuizSeeder::class,      // ← Сначала квизы
-    QuestionSeeder::class,    // ← Потом вопросы
-    OptionSeeder::class,
-    MaterialSeeder::class,
-    QuizAttemptSeeder::class,
-    AnswerSeeder::class,
+    //LessonSeeder::class,
+   // QuizSeeder::class,      // ← Сначала квизы
+    //QuestionSeeder::class,    // ← Потом вопросы
+   // OptionSeeder::class,
+    //MaterialSeeder::class,
+   // QuizAttemptSeeder::class,
+   // AnswerSeeder::class,
         ]);
     }
 }

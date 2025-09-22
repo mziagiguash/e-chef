@@ -30,9 +30,9 @@
                 <div class="card-body">
                     @php
                         $quizTranslation = $quiz->translations->firstWhere('locale', $locale);
-                    $timeLimit = $quiz->time_limit ? $quiz->time_limit . ' ' . __('minutes') : __('No limit');
-                    $passingScore = $quiz->passing_score . '%';
-                    $currentAttempt = $quiz->attempts()->where('user_id', auth()->id())->count() + 1;
+                        $timeLimit = $quiz->time_limit ? $quiz->time_limit . ' ' . __('minutes') : __('No limit');
+                        $passingScore = $quiz->passing_score . '%';
+                        $currentAttempt = $quiz->attempts()->where('user_id', auth()->id())->count() + 1;
                         $maxAttempts = $quiz->max_attempts > 0 ? $quiz->max_attempts : '∞';
                     @endphp
 
@@ -65,7 +65,7 @@
                 'course' => $course->id,
                 'lesson' => $lesson->id,
                 'quiz' => $quiz->id,
-                'attempt' => $attempt->id
+                'attempt' => $attemptId // Изменено с attempt->id на attemptId
             ]) }}" method="POST" id="quiz-form">
                 @csrf
 
@@ -87,64 +87,93 @@
 
                             {{-- Options --}}
                             <div class="options-list">
-                                @if($question->type === 'multiple_choice')
-                                    @if($question->options->count() > 0)
-                                        @foreach($question->options as $option)
-                                            @php
-                                                $optionTranslation = $option->translations->firstWhere('locale', $locale);
-                                                $optionText = $optionTranslation ? $optionTranslation->option_text : ($option->translations->first() ? $option->translations->first()->option_text : __('No option text'));
-                                            @endphp
+                                @switch($question->type)
+                                    @case('single')
+                                        @if($question->options->count() > 0)
+                                            @foreach($question->options as $option)
+                                                @php
+                                                    $optionTranslation = $option->translations->firstWhere('locale', $locale);
+                                                    $optionText = $optionTranslation ? $optionTranslation->option_text : ($option->translations->first() ? $option->translations->first()->option_text : __('No option text'));
+                                                @endphp
 
-                                            <div class="form-check mb-3 p-3 option-item">
-                                                <input class="form-check-input" type="radio"
-                                                       name="answers[{{ $question->id }}]"
-                                                       value="{{ $option->id }}"
-                                                       id="option_{{ $option->id }}_{{ $question->id }}"
-                                                       required>
-                                                <label class="form-check-label w-100" for="option_{{ $option->id }}_{{ $question->id }}">
-                                                    {{ $optionText }}
-                                                </label>
+                                                <div class="form-check mb-3 p-3 option-item">
+                                                    <input class="form-check-input" type="radio"
+                                                           name="answers[{{ $question->id }}]"
+                                                           value="{{ $option->id }}"
+                                                           id="option_{{ $option->id }}_{{ $question->id }}"
+                                                           required>
+                                                    <label class="form-check-label w-100" for="option_{{ $option->id }}_{{ $question->id }}">
+                                                        {{ $optionText }}
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            <div class="alert alert-danger">
+                                                {{ __('No options available for this question!') }}
                                             </div>
-                                        @endforeach
-                                    @else
-                                        <div class="alert alert-danger">
-                                            {{ __('No options available for this question!') }}
+                                        @endif
+                                        @break
+
+                                    @case('multiple')
+                                        @if($question->options->count() > 0)
+                                            @foreach($question->options as $option)
+                                                @php
+                                                    $optionTranslation = $option->translations->firstWhere('locale', $locale);
+                                                    $optionText = $optionTranslation ? $optionTranslation->option_text : ($option->translations->first() ? $option->translations->first()->option_text : __('No option text'));
+                                                @endphp
+
+                                                <div class="form-check mb-3 p-3 option-item">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           name="answers[{{ $question->id }}][]"
+                                                           value="{{ $option->id }}"
+                                                           id="option_{{ $option->id }}_{{ $question->id }}">
+                                                    <label class="form-check-label w-100" for="option_{{ $option->id }}_{{ $question->id }}">
+                                                        {{ $optionText }}
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            <div class="alert alert-danger">
+                                                {{ __('No options available for this question!') }}
+                                            </div>
+                                        @endif
+                                        @break
+
+                                    @case('true_false')
+                                        <div class="form-check mb-3 p-3 option-item">
+                                            <input class="form-check-input" type="radio"
+                                                   name="answers[{{ $question->id }}]"
+                                                   value="true"
+                                                   id="true_{{ $question->id }}"
+                                                   required>
+                                            <label class="form-check-label w-100" for="true_{{ $question->id }}">
+                                                {{ __('True') }}
+                                            </label>
                                         </div>
-                                    @endif
+                                        <div class="form-check mb-3 p-3 option-item">
+                                            <input class="form-check-input" type="radio"
+                                                   name="answers[{{ $question->id }}]"
+                                                   value="false"
+                                                   id="false_{{ $question->id }}"
+                                                   required>
+                                            <label class="form-check-label w-100" for="false_{{ $question->id }}">
+                                                {{ __('False') }}
+                                            </label>
+                                        </div>
+                                        @break
 
-                                @elseif($question->type === 'true_false')
-                                    <div class="form-check mb-3 p-3 option-item">
-                                        <input class="form-check-input" type="radio"
-                                               name="answers[{{ $question->id }}]"
-                                               value="true"
-                                               id="true_{{ $question->id }}"
-                                               required>
-                                        <label class="form-check-label w-100" for="true_{{ $question->id }}">
-                                            {{ __('True') }}
-                                        </label>
-                                    </div>
-                                    <div class="form-check mb-3 p-3 option-item">
-                                        <input class="form-check-input" type="radio"
-                                               name="answers[{{ $question->id }}]"
-                                               value="false"
-                                               id="false_{{ $question->id }}"
-                                               required>
-                                        <label class="form-check-label w-100" for="false_{{ $question->id }}">
-                                            {{ __('False') }}
-                                        </label>
-                                    </div>
-
-                                @elseif($question->type === 'short_answer')
-                                    <div class="form-group">
-                                        <label for="answer_{{ $question->id }}" class="form-label">{{ __('Your answer') }}:</label>
-                                        <input type="text"
-                                               class="form-control form-control-lg"
-                                               name="answers[{{ $question->id }}]"
-                                               id="answer_{{ $question->id }}"
-                                               required
-                                               placeholder="{{ __('Type your answer here') }}">
-                                    </div>
-                                @endif
+                                    @case('text')
+                                        <div class="form-group">
+                                            <label for="answer_{{ $question->id }}" class="form-label">{{ __('Your answer') }}:</label>
+                                            <textarea class="form-control form-control-lg"
+                                                   name="answers[{{ $question->id }}]"
+                                                   id="answer_{{ $question->id }}"
+                                                   required
+                                                   rows="3"
+                                                   placeholder="{{ __('Type your answer here') }}"></textarea>
+                                        </div>
+                                        @break
+                                @endswitch
                             </div>
                         </div>
                     </div>

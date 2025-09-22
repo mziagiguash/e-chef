@@ -105,7 +105,7 @@
                     @foreach($quiz->questions as $index => $question)
                         @php
                             $questionTranslation = $question->translations->firstWhere('locale', $locale);
-                            $questionText = $questionTranslation->content ?? $question->translations->first()->content ?? $question->question_text ?? 'Question';
+                            $questionText = $questionTranslation->question_text ?? $questionTranslation->content ?? $question->translations->first()->question_text ?? $question->translations->first()->content ?? $question->question_text ?? 'Question';
                         @endphp
 
                         <div class="card mb-4">
@@ -115,15 +115,15 @@
                                 </h5>
                             </div>
                             <div class="card-body">
-                                @if($questionTranslation && $questionTranslation->explanation)
+                                @if($questionTranslation && ($questionTranslation->explanation || $questionTranslation->hint))
                                     <p class="text-muted mb-3">
-                                        <small>{{ $questionTranslation->explanation }}</small>
+                                        <small>{{ $questionTranslation->explanation ?? $questionTranslation->hint }}</small>
                                     </p>
                                 @endif
 
                                 <div class="options-list">
                                     @switch($question->type)
-                                        @case('multiple_choice')
+                                        @case('single')
                                             @foreach($question->options as $option)
                                                 @php
                                                     $optionTranslation = $option->translations->firstWhere('locale', $locale);
@@ -134,6 +134,24 @@
                                                            name="answers[{{ $question->id }}]"
                                                            id="option_{{ $option->id }}"
                                                            value="{{ $option->id }}" required>
+                                                    <label class="form-check-label" for="option_{{ $option->id }}">
+                                                        {{ $optionText }}
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                            @break
+
+                                        @case('multiple')
+                                            @foreach($question->options as $option)
+                                                @php
+                                                    $optionTranslation = $option->translations->firstWhere('locale', $locale);
+                                                    $optionText = $optionTranslation->option_text ?? $option->translations->first()->option_text ?? $option->option_text ?? 'Option';
+                                                @endphp
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           name="answers[{{ $question->id }}][]"
+                                                           id="option_{{ $option->id }}"
+                                                           value="{{ $option->id }}">
                                                     <label class="form-check-label" for="option_{{ $option->id }}">
                                                         {{ $optionText }}
                                                     </label>
@@ -162,11 +180,11 @@
                                             </div>
                                             @break
 
-                                        @case('short_answer')
+                                        @case('text')
                                             <div class="form-group">
-                                                <input type="text" class="form-control"
-                                                       name="answers[{{ $question->id }}]"
-                                                       placeholder="{{ __('Your answer') }}" required>
+                                                <textarea class="form-control" rows="3"
+                                                          name="answers[{{ $question->id }}]"
+                                                          placeholder="{{ __('Your answer') }}" required></textarea>
                                             </div>
                                             @break
                                     @endswitch
@@ -240,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
         timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
         if (timeLeft <= 0) {
+            clearInterval(timer);
             document.getElementById('quiz-form').submit();
         }
 
@@ -254,10 +273,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const timer = setInterval(function() {
         timeLeft--;
         updateTimer();
-
-        if (timeLeft <= 0) {
-            clearInterval(timer);
-        }
     }, 1000);
 });
 </script>

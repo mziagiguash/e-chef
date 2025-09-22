@@ -55,68 +55,60 @@ class Course extends Model
     {
         return $this->belongsTo(Instructor::class, 'instructor_id');
     }
-public function lessons()
-{
-    return $this->hasMany(Lesson::class);
-}
 
+    public function lessons()
+    {
+        return $this->hasMany(Lesson::class);
+    }
 
     public function translations()
     {
         return $this->hasMany(CourseTranslation::class, 'course_id');
     }
 
-    public function translation($locale = null)
+    public function getTranslationModel($locale = null)
     {
         $locale = $locale ?: app()->getLocale();
-        return $this->translations()->where('locale', $locale)->first();
+        return $this->translations->where('locale', $locale)->first();
     }
 
-public function getNextLesson($currentLessonOrder)
-{
-    return $this->lessons()
-        ->where('order', '>', $currentLessonOrder)
-        ->orderBy('order')
-        ->first();
-}
-
-public function getPrevLesson($currentLessonOrder)
-{
-    return $this->lessons()
-        ->where('order', '<', $currentLessonOrder)
-        ->orderBy('order', 'desc')
-        ->first();
-}
-
-    public function getTranslatedPrerequisitesAttribute()
+    public function getNextLesson($currentLessonOrder)
     {
-        return $this->getTranslationValue('prerequisites');
+        return $this->lessons()
+            ->where('order', '>', $currentLessonOrder)
+            ->orderBy('order')
+            ->first();
     }
 
-    public function getTranslatedKeywordsAttribute()
+    public function getPrevLesson($currentLessonOrder)
     {
-        return $this->getTranslationValue('keywords');
-    }
-public function getTranslation(string $locale, string $field = 'title'): ?string
-{
-    if (!$this->relationLoaded('translations')) {
-        $this->load('translations');
+        return $this->lessons()
+            ->where('order', '<', $currentLessonOrder)
+            ->orderBy('order', 'desc')
+            ->first();
     }
 
-    $translation = $this->translations->where('locale', $locale)->first();
-
-    if (!$translation) {
-        // Fallback на английский
-        $translation = $this->translations->where('locale', 'en')->first();
+    // Accessors
+    public function getTitleAttribute()
+    {
+        return $this->getTranslationValue('title') ?? 'No Title';
     }
 
-    if (!$translation) {
-        // Fallback на первый доступный перевод
-        $translation = $this->translations->first();
+    public function getDescriptionAttribute()
+    {
+        return $this->getTranslationValue('description') ?? '';
     }
 
-    return $translation ? $translation->{$field} : null;
-}
+    public function getPrerequisitesAttribute()
+    {
+        return $this->getTranslationValue('prerequisites') ?? '';
+    }
+
+    public function getKeywordsAttribute()
+    {
+        return $this->getTranslationValue('keywords') ?? '';
+    }
+
     protected function getTranslationValue($field, $locale = null)
     {
         $locale = $locale ?: app()->getLocale();
@@ -163,6 +155,19 @@ public function getTranslation(string $locale, string $field = 'title'): ?string
         };
     }
 
+    public function getFormattedStartFromAttribute()
+    {
+        if (!$this->start_from) {
+            return '';
+        }
+
+        try {
+            return \Carbon\Carbon::parse($this->start_from)->format('Y-m-d');
+        } catch (\Exception $e) {
+            return $this->start_from;
+        }
+    }
+
     // Scopes
     public function scopeActive($query)
     {
@@ -181,41 +186,4 @@ public function getTranslation(string $locale, string $field = 'title'): ?string
     {
         return $query->with('translations');
     }
-
-
-    // Добавим также accessor для удобства
-    public function getTranslatedTitleAttribute()
-    {
-        return $this->getTranslation('title') ?? 'No Title';
-    }
-    public function getTitleAttribute()
-{
-    $locale = app()->getLocale();
-
-    if (!$this->relationLoaded('translations')) {
-        $this->load('translations');
-    }
-
-    $translation = $this->translations->where('locale', $locale)->first();
-    return $translation->title ??
-           $this->translations->first()->title ??
-           'No title';
-}
-
-    public function getTranslatedDescriptionAttribute()
-    {
-        return $this->getTranslation('description') ?? '';
-    }
-    public function getFormattedStartFromAttribute()
-{
-    if (!$this->start_from) {
-        return '';
-    }
-
-    try {
-        return \Carbon\Carbon::parse($this->start_from)->format('Y-m-d');
-    } catch (\Exception $e) {
-        return $this->start_from;
-    }
-}
 }

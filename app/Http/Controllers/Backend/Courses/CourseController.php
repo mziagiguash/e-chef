@@ -18,13 +18,37 @@ class CourseController extends Controller
 {
     public function index()
     {
-        $courses = Course::with(['translations', 'instructor.translations', 'courseCategory.translations'])->paginate(10);
+        $query = Course::with(['translations', 'instructor.translations', 'courseCategory.translations', 'lessons'])
+            ->withCount('lessons');
+
+
+
+        $courses = $query->paginate(10);
+
         return view('backend.course.courses.index', compact('courses'));
     }
 
-    public function indexForAdmin()
+    public function indexForAdmin(Request $request)
     {
-        $courses = Course::with(['translations', 'instructor.translations', 'courseCategory.translations'])->paginate(10);
+        $query = Course::with(['translations', 'instructor.translations', 'courseCategory.translations', 'lessons'])
+            ->withCount('lessons');
+
+        // Поиск по названию курса
+        if ($request->has('search_title') && !empty($request->search_title)) {
+            $query->whereHas('translations', function($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search_title . '%');
+            });
+        }
+
+        // Поиск по инструктору
+        if ($request->has('search_instructor') && !empty($request->search_instructor)) {
+            $query->whereHas('instructor.translations', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search_instructor . '%');
+            });
+        }
+
+        $courses = $query->paginate(10);
+
         return view('backend.course.courses.indexForAdmin', compact('courses'));
     }
 
@@ -41,12 +65,25 @@ class CourseController extends Controller
         return $this->saveCourse(new Course(), $request);
     }
 
+public function show($id)
+{
+    $course = Course::with([
+            'translations',
+            'instructor.translations',
+            'courseCategory.translations',
+            'lessons'
+        ])
+        ->withCount('lessons')
+        ->findOrFail(encryptor('decrypt', $id));
+
+    return view('backend.course.courses.show', compact('course'));
+}
+
     public function edit($id)
     {
         $course = Course::with('translations')->findOrFail(encryptor('decrypt', $id));
-        $courseCategory = CourseCategory::with('translations')->get(); // Добавляем эту строку
+        $courseCategory = CourseCategory::with('translations')->get();
         $instructors = Instructor::with('translations')->get();
-
         $locales = config('app.available_locales', ['en', 'ru', 'ka']);
         return view('backend.course.courses.edit', compact('course', 'courseCategory', 'instructors', 'locales'));
     }
@@ -57,96 +94,87 @@ class CourseController extends Controller
         return $this->saveCourse($course, $request);
     }
 
-    public function updateforAdmin(UpdateRequest $request, $id)
+    protected function saveCourse(Course $course, Request $request)
     {
-        $course = Course::findOrFail(encryptor('decrypt', $id));
-        return $this->saveCourse($course, $request, true);
-    }
+        DB::beginTransaction();
+        try {
+            // Основные поля
+            $course->course_category_id = $request->course_category_id;
+            $course->instructor_id = $request->instructor_id;
+            $course->courseType = $request->courseType ?? $course->courseType ?? 'free';
+            $course->coursePrice = $request->coursePrice ?? $course->coursePrice ?? 0;
+            $course->courseOldPrice = $request->courseOldPrice ?? $course->courseOldPrice ?? 0;
+            $course->subscription_price = $request->subscription_price ?? $course->subscription_price ?? 0;
+            $course->start_from = $request->start_from;
+            $course->duration = $request->duration;
+            $course->lesson = $request->lesson;
+            $course->course_code = $request->course_code;
+            $course->tag = $request->tag;
+            $course->status = is_numeric($request->input('status')) ? (int) $request->input('status') : 2;
 
-protected function saveCourse(Course $course, Request $request, $isAdmin = false)
-{
-    DB::beginTransaction();
-    try {
-        // Основные поля - используем правильные названия столбцов
-        $course->course_category_id = $request->course_category_id;
-        $course->instructor_id = $request->instructor_id;
-        $course->courseType = $request->courseType ?? $course->courseType ?? 'free';
-        $course->coursePrice = $request->coursePrice ?? $course->coursePrice ?? 0;
-        $course->courseOldPrice = $request->courseOldPrice ?? $course->courseOldPrice ?? 0;
-        $course->subscription_price = $request->subscription_price ?? $course->subscription_price ?? 0;$course->start_from = $request->start_from;
-        $course->duration = $request->duration;
-        $course->lesson = $request->lesson;
-        $course->course_code = $request->course_code;
-        $course->tag = $request->tag;
-        $course->status = is_numeric($request->input('status')) ? (int) $request->input('status') : 2;
-
-
-        // Видео - проверьте названия полей
-        if ($request->hasFile('thumbnail_video_file')) {
-            $course->thumbnail_video_file = $request->file('thumbnail_video_file')->store('uploads/videos', 'public');
-        } elseif ($request->filled('thumbnail_video_url')) {
-            $course->thumbnail_video_url = $request->thumbnail_video_url;
-        }
-
-        // Изображения
-        if ($request->hasFile('image')) {
-            if ($course->image && File::exists(public_path('uploads/courses/'.$course->image))) {
-                File::delete(public_path('uploads/courses/'.$course->image));
+            // Видео
+            if ($request->hasFile('thumbnail_video_file')) {
+                $course->thumbnail_video_file = $request->file('thumbnail_video_file')->store('uploads/videos', 'public');
+            } elseif ($request->filled('thumbnail_video_url')) {
+                $course->thumbnail_video_url = $request->thumbnail_video_url;
             }
-            $imageName = rand(111, 999) . time() . '.' . $request->image->extension();
-            $request->image->move(public_path('uploads/courses'), $imageName);
-            $course->image = $imageName;
-        }
 
-        if ($request->hasFile('thumbnail_image')) {
-            if ($course->thumbnail_image && File::exists(public_path('uploads/courses/'.$course->thumbnail_image))) {
-                File::delete(public_path('uploads/courses/'.$course->thumbnail_image));
+            // Изображения
+            if ($request->hasFile('image')) {
+                if ($course->image && File::exists(public_path('uploads/courses/'.$course->image))) {
+                    File::delete(public_path('uploads/courses/'.$course->image));
+                }
+                $imageName = rand(111, 999) . time() . '.' . $request->image->extension();
+                $request->image->move(public_path('uploads/courses'), $imageName);
+                $course->image = $imageName;
             }
-            $thumbName = rand(111, 999) . time() . '.' . $request->thumbnail_image->extension();
-            $request->thumbnail_image->move(public_path('uploads/courses'), $thumbName);
-            $course->thumbnail_image = $thumbName;
-        }
 
-        $course->save();
+            if ($request->hasFile('thumbnail_image')) {
+                if ($course->thumbnail_image && File::exists(public_path('uploads/courses/'.$course->thumbnail_image))) {
+                    File::delete(public_path('uploads/courses/'.$course->thumbnail_image));
+                }
+                $thumbName = rand(111, 999) . time() . '.' . $request->thumbnail_image->extension();
+                $request->thumbnail_image->move(public_path('uploads/courses'), $thumbName);
+                $course->thumbnail_image = $thumbName;
+            }
 
-        // Сохраняем переводы в отдельную таблицу
-        if ($request->has('translations')) {
-            foreach ($request->translations as $locale => $translationData) {
-                if (isset($translationData['id'])) {
-                    // Обновляем существующий перевод
-                    $translation = CourseTranslation::find($translationData['id']);
-                    if ($translation) {
-                        $translation->update([
+            $course->save();
+
+            // Сохраняем переводы
+            if ($request->has('translations')) {
+                foreach ($request->translations as $locale => $translationData) {
+                    if (isset($translationData['id'])) {
+                        $translation = CourseTranslation::find($translationData['id']);
+                        if ($translation) {
+                            $translation->update([
+                                'title' => $translationData['title'] ?? '',
+                                'description' => $translationData['description'] ?? '',
+                                'prerequisites' => $translationData['prerequisites'] ?? '',
+                                'keywords' => $translationData['keywords'] ?? '',
+                            ]);
+                        }
+                    } else {
+                        $course->translations()->create([
+                            'locale' => $locale,
                             'title' => $translationData['title'] ?? '',
                             'description' => $translationData['description'] ?? '',
                             'prerequisites' => $translationData['prerequisites'] ?? '',
                             'keywords' => $translationData['keywords'] ?? '',
                         ]);
                     }
-                } else {
-                    // Создаем новый перевод
-                    $course->translations()->create([
-                        'locale' => $locale,
-                        'title' => $translationData['title'] ?? '',
-                        'description' => $translationData['description'] ?? '',
-                        'prerequisites' => $translationData['prerequisites'] ?? '',
-                        'keywords' => $translationData['keywords'] ?? '',
-                    ]);
                 }
             }
+
+            DB::commit();
+
+            // Всегда редиректим на админский маршрут
+            return redirect()->route('courses.index')->with('success', 'Course saved successfully.');
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Error: '.$e->getMessage());
         }
-
-        DB::commit();
-
-        $route = $isAdmin ? 'courseList' : 'course.index';
-        $message = $isAdmin ? 'Data Saved' : 'Course saved successfully.';
-        return redirect()->route($route)->with('success', $message);
-
-    } catch (Exception $e) {
-        DB::rollBack();
-        return redirect()->back()->withInput()->with('error', 'Error: '.$e->getMessage());
     }
-}
 
     public function destroy($id)
     {
@@ -168,17 +196,11 @@ protected function saveCourse(Course $course, Request $request, $isAdmin = false
             $course->delete();
 
             DB::commit();
-            return redirect()->back()->with('success', 'Course deleted successfully.');
+            return redirect()->route('admin.courses')->with('success', 'Course deleted successfully.');
 
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Error: '.$e->getMessage());
+            return redirect()->route('admin.courses')->with('error', 'Error: '.$e->getMessage());
         }
-    }
-
-    public function frontShow($id)
-    {
-        $course = Course::with('translations')->findOrFail(encryptor('decrypt', $id));
-        return view('frontend.courseDetails', compact('course'));
     }
 }

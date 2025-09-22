@@ -9,7 +9,7 @@ use App\Http\Controllers\Backend\Setting\PermissionController as permission;
 use App\Http\Controllers\Backend\Students\StudentController as student;
 use App\Http\Controllers\Backend\Instructors\InstructorController;
 use App\Http\Controllers\Backend\Courses\CourseCategoryController as courseCategory;
-use App\Http\Controllers\Backend\Courses\CourseController as course;
+use App\Http\Controllers\Backend\Courses\CourseController;
 use App\Http\Controllers\Backend\Courses\MaterialController as material;
 use App\Http\Controllers\Backend\Quizzes\QuizController as quiz;
 use App\Http\Controllers\Backend\Quizzes\QuestionController as question;
@@ -100,9 +100,9 @@ Route::middleware(['checkrole'])->prefix('admin')->group(function () {
         ->except(['edit','update','destroy']);
 
     Route::resource('courseCategory', courseCategory::class);
-    Route::resource('course', course::class);
-    Route::get('/courseList', [course::class, 'indexForAdmin'])->name('courseList');
-    Route::patch('/courseList/{update}', [course::class, 'updateforAdmin'])->name('course.updateforAdmin');
+    Route::get('courses', [CourseController::class, 'indexForAdmin'])->name('courses.index');
+    Route::resource('courses', CourseController::class); // ✅ Правильно
+    Route::resource('courses', CourseController::class)->except(['index']);
     Route::resource('material', material::class);
     Route::resource('lesson', lesson::class);
     Route::resource('event', event::class);
