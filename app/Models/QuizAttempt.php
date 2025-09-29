@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory; // ← Добавляем
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class QuizAttempt extends Model
 {
-    use HasFactory; // ← Добавляем этот трейт
+    use HasFactory;
+
+    protected $table = 'quiz_attempts'; // ← явно указать таблицу
 
     const STATUS_IN_PROGRESS = 'in_progress';
     const STATUS_COMPLETED = 'completed';
@@ -32,13 +34,20 @@ class QuizAttempt extends Model
         'completed_at' => 'datetime',
     ];
 
-    // Добавляем accessors для вычисляемых атрибутов
     protected $appends = ['percentage', 'time_taken_formatted'];
 
-    public function quiz(): BelongsTo
-    {
-        return $this->belongsTo(Quiz::class);
-    }
+public function quiz(): BelongsTo
+{
+    return $this->belongsTo(Quiz::class)->withDefault([
+        'passing_score' => 70,
+        'title' => 'Deleted Quiz'
+    ]);
+}
+
+public function isPassed(): bool
+{
+    return $this->score >= $this->quiz->passing_score;
+}
 
     public function user(): BelongsTo
     {
@@ -48,11 +57,6 @@ class QuizAttempt extends Model
     public function answers(): HasMany
     {
         return $this->hasMany(QuestionAnswer::class, 'attempt_id');
-    }
-
-    public function isPassed(): bool
-    {
-        return $this->score >= ($this->quiz->passing_score ?? 70);
     }
 
     public function getPercentageAttribute(): float

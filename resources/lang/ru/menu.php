@@ -27,5 +27,5 @@ return [
     'instructor_name_3' => 'Дев Таер',
     'instructor_role' => 'Преподаватель Adobe',
     'cart' => 'Корзина','courses_in_cart' => ':count курсов в корзине',
-
+    'events' => 'События',
 ];

@@ -16,9 +16,12 @@ class LessonController extends Controller
 {
     public function index()
     {
-        $lessons = Lesson::with(['course', 'translations' => function($query) {
-            $query->where('locale', app()->getLocale());
-        }])->latest()->paginate(20);
+        $lessons = Lesson::with([
+            'translations', // ← обязательно добавить
+            'course.translations', // ← если нужно название курса на разных языках
+            'materials', // ← для материалов
+            'quiz.translations' // ← если нужны переводы квиза
+        ])->latest()->paginate(20);
 
         return view('backend.course.lesson.index', compact('lessons'));
     }

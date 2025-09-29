@@ -14,7 +14,14 @@
             <nav aria-label="breadcrumb" class="mb-4">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
-                        <a href="{{ route('home', ['locale' => $locale]) }}">{{ __('Home') }}</a>
+                        <a href="{{ route('home', ['locale' => $locale]) }}" class="text-decoration-none">
+                            <i class="fas fa-home me-1"></i>{{ __('Home') }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('frontend.courses', ['locale' => $locale]) }}" class="text-decoration-none">
+                            {{ __('Courses') }}
+                        </a>
                     </li>
                     <li class="breadcrumb-item">
                         {{-- ИСПРАВЛЕНО: frontend.show -> frontend.courses.show --}}

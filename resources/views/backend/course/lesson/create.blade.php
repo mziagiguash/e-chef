@@ -11,7 +11,7 @@
         <div class="row mb-3">
             <div class="col-lg-12">
                 <h4>Add New Lesson</h4>
-                <a href="{{ localeRoute('lesson.index') }}" class="btn btn-secondary mb-3">Back to List</a>
+                <a href="{{ route('lesson.index') }}" class="btn btn-secondary mb-3">Back to List</a>
             </div>
         </div>
 
@@ -20,7 +20,7 @@
             $appLocale = app()->getLocale();
         @endphp
 
-        <form action="{{ localeRoute('lesson.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('lesson.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             {{-- Language Tabs --}}

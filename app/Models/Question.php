@@ -3,106 +3,67 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Question extends Model
 {
-    use SoftDeletes, HasFactory;
-
-    const TYPE_SINGLE = 'single';
-    const TYPE_MULTIPLE = 'multiple';
-    const TYPE_TEXT = 'text';
-    const TYPE_RATING = 'rating';
+    use SoftDeletes;
 
     protected $fillable = [
         'quiz_id',
-        'content',
         'type',
-        'order',
         'points',
+        'order',
         'is_required',
         'max_choices',
         'min_rating',
         'max_rating'
-
     ];
 
-    protected $dates = ['deleted_at'];
+    protected $casts = [
+        'is_required' => 'boolean',
+    ];
 
     public function quiz(): BelongsTo
     {
         return $this->belongsTo(Quiz::class);
     }
 
+    public function translations(): HasMany
+    {
+        return $this->hasMany(QuestionTranslation::class);
+    }
+public function getTranslation(string $field = 'content', string $locale = null): ?string
+{
+    $locale = $locale ?? app()->getLocale();
+
+    if (!$this->relationLoaded('translations')) {
+        $this->load('translations');
+    }
+
+    $translation = $this->translations->where('locale', $locale)->first();
+
+    if (!$translation && $locale !== 'en') {
+        $translation = $this->translations->where('locale', 'en')->first();
+    }
+
+    if (!$translation) {
+        $translation = $this->translations->first();
+    }
+
+    return $translation ? $translation->{$field} : null;
+}
+
     public function options(): HasMany
     {
         return $this->hasMany(Option::class);
     }
 
-    public function answers(): HasMany
-    {
-        return $this->hasMany(QuestionAnswer::class);
-    }
-
-    public function translations(): HasMany
-    {
-        return $this->hasMany(QuestionTranslation::class);
-    }
-
     public function correctOptions(): HasMany
     {
-        return $this->hasMany(Option::class)->where('is_correct', true);
+        return $this->options()->where('is_correct', true);
     }
 
-    // Accessor для получения перевода контента
-    public function getContentAttribute()
-    {
-        $locale = app()->getLocale();
-
-        if (!$this->relationLoaded('translations')) {
-            $this->load('translations');
-        }
-
-        $translation = $this->translations->where('locale', $locale)->first();
-        return $translation->content ??
-               $this->translations->first()->content ??
-               '';
-    }
-
-    // Accessor для удобства (синоним для content)
-    public function getTextAttribute()
-    {
-        return $this->content;
-    }
-
-    public function isMultipleChoice(): bool
-    {
-        return in_array($this->type, [self::TYPE_SINGLE, self::TYPE_MULTIPLE]);
-    }
-
-    public function isTextType(): bool
-    {
-        return $this->type === self::TYPE_TEXT;
-    }
-
-    public function isRatingType(): bool
-    {
-        return $this->type === self::TYPE_RATING;
-    }
-
-    // Получение перевода для конкретного поля
-    public function getTranslation($field, $locale = null)
-    {
-        $locale = $locale ?? app()->getLocale();
-
-        if (!$this->relationLoaded('translations')) {
-            $this->load('translations');
-        }
-
-        $translation = $this->translations->where('locale', $locale)->first();
-        return $translation ? $translation->$field : $this->$field;
-    }
 }

@@ -20,8 +20,8 @@ class DatabaseSeeder extends Seeder
     CourseCategorySeeder::class,
     InstructorSeeder::class,
     CourseSeeder::class,
-    //LessonSeeder::class,
-   // QuizSeeder::class,      // ← Сначала квизы
+    LessonSeeder::class,
+    //QuizSeeder::class,
     //QuestionSeeder::class,    // ← Потом вопросы
    // OptionSeeder::class,
     //MaterialSeeder::class,

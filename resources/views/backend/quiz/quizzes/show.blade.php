@@ -14,8 +14,8 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item"><a href="{{localeRoute('quiz.index')}}">Quizzes</a></li>
+                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{route('quiz.index')}}">Quizzes</a></li>
                     <li class="breadcrumb-item active">Quiz Details</li>
                 </ol>
             </div>
@@ -26,7 +26,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h4 class="card-title">Quiz Information</h4>
-                        <a href="{{ localeRoute('quiz.edit', ['quiz' => encryptor('encrypt', $quiz->id), 'lang' => app()->getLocale()]) }}"
+                        <a href="{{ route('quiz.edit', ['quiz' => encryptor('encrypt', $quiz->id), 'lang' => app()->getLocale()]) }}"
                            class="btn btn-primary btn-sm">Edit Quiz</a>
                     </div>
                     <div class="card-body">
@@ -247,7 +247,7 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <a href="{{ localeRoute('quiz.index') }}" class="btn btn-secondary">Back to List</a>
+                        <a href="{{ route('quiz.index') }}" class="btn btn-secondary">Back to List</a>
                     </div>
                 </div>
             </div>

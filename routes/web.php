@@ -9,7 +9,7 @@ use App\Http\Controllers\Backend\Setting\PermissionController as permission;
 use App\Http\Controllers\Backend\Students\StudentController as student;
 use App\Http\Controllers\Backend\Instructors\InstructorController;
 use App\Http\Controllers\Backend\Courses\CourseCategoryController as courseCategory;
-use App\Http\Controllers\Backend\Courses\CourseController;
+use App\Http\Controllers\Backend\Courses\CourseController as course;
 use App\Http\Controllers\Backend\Courses\MaterialController as material;
 use App\Http\Controllers\Backend\Quizzes\QuizController as quiz;
 use App\Http\Controllers\Backend\Quizzes\QuestionController as question;
@@ -25,6 +25,8 @@ use App\Http\Controllers\CheckoutController as checkout;
 use App\Http\Controllers\CouponController as coupon;
 
 use App\Http\Controllers\Frontend\WatchCourseController as WatchCourseController;
+use App\Http\Controllers\Frontend\CourseDetailController;
+
 use App\Http\Controllers\Frontend\LessonController as LessonController;
 use App\Http\Controllers\Backend\LessonController as lesson;
 use App\Http\Controllers\EnrollmentController as enrollment;
@@ -40,19 +42,27 @@ use App\Http\Controllers\Students\sslController as sslcz;
 
 use App\Http\Controllers\Frontend\QuizController;
 use App\Http\Controllers\Frontend\FrontendInstructorController;
+
 /*
 |--------------------------------------------------------------------------
 | Debug Route
 |--------------------------------------------------------------------------
 */
-Route::get('/debug', function () {
-    return response()->json([
-        'php_version' => phpversion(),
-        'laravel_version' => app()->version(),
-        'env' => config('app.env'),
-        'debug' => config('app.debug'),
-        'db_connection' => config('database.default'),
-    ]);
+Route::get('/debug-course/{id}', function($id) {
+    try {
+        $course = \App\Models\Course::find($id);
+        if ($course) {
+            return response()->json([
+                'exists' => true,
+                'title' => $course->title,
+                'status' => $course->status
+            ]);
+        } else {
+            return response()->json(['exists' => false]);
+        }
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()]);
+    }
 });
 
 /*
@@ -94,29 +104,28 @@ Route::middleware(['checkrole'])->prefix('admin')->group(function () {
     Route::delete('instructor/{id}', [InstructorController::class, 'destroy'])
         ->name('instructor.destroy');
 
-
     // Остальные маршруты resource без edit/update/destroy
     Route::resource('instructor', InstructorController::class)
         ->except(['edit','update','destroy']);
 
     Route::resource('courseCategory', courseCategory::class);
-    Route::get('courses', [CourseController::class, 'indexForAdmin'])->name('courses.index');
-    Route::resource('courses', CourseController::class); // ✅ Правильно
-    Route::resource('courses', CourseController::class)->except(['index']);
+    Route::get('courses', [course::class, 'indexForAdmin'])->name('courses.index');
+    Route::resource('courses', course::class); // ✅ Правильно
+    Route::resource('courses', course::class)->except(['index']);
     Route::resource('material', material::class);
     Route::resource('lesson', lesson::class);
     Route::resource('event', event::class);
     Route::resource('quiz', quiz::class);
     Route::resource('question', question::class);
     Route::resource('option', option::class);
-     Route::post('option/{option}/toggle-correctness', [option::class, 'toggleCorrectness'])
-        ->name('option.toggle.correctness');
     Route::resource('answer', answer::class);
     Route::resource('review', review::class);
     Route::resource('discussion', discussion::class);
     Route::resource('message', message::class);
     Route::resource('coupon', coupon::class);
     Route::resource('enrollment', enrollment::class);
+    Route::get('/enrollment/statistics', [enrollment::class, 'statistics'])->name('enrollment.statistics');
+    Route::post('/enrollment/{enrollment}/update-payment-status', [enrollment::class, 'updatePaymentStatus'])->name('enrollment.update-payment-status');
     Route::get('permission/{role}', [permission::class, 'index'])->name('permission.list');
     Route::post('permission/{role}', [permission::class, 'save'])->name('permission.save');
 });
@@ -154,84 +163,32 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| SSL Notify Routes (Non-localized)
+| SSL Payment Routes (Non-localized) - ВНЕ локализованной группы
 |--------------------------------------------------------------------------
 */
-// Убедитесь, что этот маршрут находится ВНЕ локализованной группы
 Route::post('/ssl-payment-notify', [sslcz::class, 'notify'])->name('ssl.notify');
+Route::post('/payment/ssl/notify', [sslcz::class, 'notify'])->name('payment.ssl.notify');
+Route::post('/payment/ssl/cancel', [sslcz::class, 'cancel'])->name('payment.ssl.cancel');
 
 /*
-|--------------------------------------------------------------------------
 |--------------------------------------------------------------------------
 | Localized Routes
 |--------------------------------------------------------------------------
 */
-Route::get('{locale}/event-search', [EventSearchController::class, 'index'])
-    ->where('locale', 'en|ru|ka')
-    ->name('event.search');
-
-
 Route::prefix('{locale}')
     ->where(['locale' => 'en|ru|ka'])
     ->middleware('setlocale')
     ->group(function () {
 
- // Маршруты инструкторов
+        // Главная страница
+        Route::get('/', [HomeController::class, 'index'])->name('home');
+        Route::get('/home', [HomeController::class, 'index']);
 
-Route::get('/instructors', [FrontendInstructorController::class, 'index'])->name('frontend.instructors');
-Route::get('/instructor/{id}', [FrontendInstructorController::class, 'show'])->name('frontend.instructor.show');
-
-// Главная страница курса
-Route::get('/courses', [WatchCourseController::class, 'index'])->name('frontend.courses');
-
-// Используйте 'courses' вместо 'course' для consistency
-Route::get('/courses/{course}', [WatchCourseController::class, 'show'])->name('frontend.courses.show');
-// Маршруты для уроков и квизов (остаются без изменений)
-Route::prefix('courses/{course}/lessons/{lesson}')->group(function () {
-    // Просмотр урока
-    Route::get('/', [LessonController::class, 'show'])
-        ->name('lessons.show');
-
-    // Прогресс урока
-    Route::post('progress', [LessonController::class, 'updateProgress'])
-        ->name('lessons.progress.update');
-
-    // Завершение урока
-    Route::post('complete', [LessonController::class, 'completeLesson'])
-        ->name('lessons.complete');
-
-    // Маршруты для квизов
-    Route::prefix('quizzes/{quiz}')->group(function () {
-        // Просмотр квиза
-        Route::get('/', [QuizController::class, 'show'])->name('frontend.quizzes.show');
-        Route::post('/start', [QuizController::class, 'start'])->name('frontend.quizzes.start');
-
-        // Прохождение квиза
-        Route::get('/attempt/{attempt}', [QuizController::class, 'attempt'])
-            ->name('frontend.quizzes.attempt');
-
-        // Отправка ответов
-        Route::post('/attempt/{attempt}/submit', [QuizController::class, 'submitAttempt'])
-            ->name('frontend.quizzes.submit');
-
-        // Результаты
-        Route::get('/results/{attempt?}', [QuizController::class, 'results'])
-            ->name('frontend.quizzes.results');
-    });
-});
-
-// Редирект
-Route::get('courses/{id}/back', function ($locale, $id) {
-    return redirect()->to("/$locale/courses/$id");
-})->name('course.back');
-
-        // 🔐 Student Auth
+        // 🔐 Student Auth Routes - ДОБАВЛЕНЫ ПРОПУЩЕННЫЕ МАРШРУТЫ
         Route::get('/student/register', [sauth::class, 'signUpForm'])->name('studentRegister');
-        Route::post('/student/register', [sauth::class, 'signUpStore'])->name('studentRegister.store');
-
+        Route::post('/student/register/{back_route?}', [sauth::class, 'signUpStore'])->name('studentRegister.store');
         Route::get('/student/login', [sauth::class, 'signInForm'])->name('studentLogin');
-        Route::post('/student/login', [sauth::class, 'signInCheck'])->name('studentLogin.check');
-
+        Route::post('/student/login/{back_route?}', [sauth::class, 'signInCheck'])->name('studentLogin.check');
         Route::get('/student/logout', [sauth::class, 'signOut'])->name('studentlogOut');
 
         // Protected Student Routes
@@ -242,40 +199,67 @@ Route::get('courses/{id}/back', function ($locale, $id) {
             Route::post('/profile/savePass', [stu_profile::class, 'change_password'])->name('change_password');
             Route::post('/change-image', [stu_profile::class, 'changeImage'])->name('change_image');
 
-            // SSL Payment
+            // SSL Payment Routes - ВНУТРИ защищенной группы студентов
             Route::post('/payment/ssl/submit', [sslcz::class, 'store'])->name('payment.ssl.submit');
         });
 
-        // Frontend Routes
-        Route::get('/', [HomeController::class, 'index'])->name('home');
-        Route::get('/home', [HomeController::class, 'index']);
+        // Маршруты инструкторов
+        Route::get('/instructors', [FrontendInstructorController::class, 'index'])->name('frontend.instructors');
+        Route::get('/instructor/{id}', [FrontendInstructorController::class, 'show'])->name('frontend.instructor.show');
+
+
+        // Курсы
+        Route::get('/courses', [WatchCourseController::class, 'index'])->name('frontend.courses');
+        Route::get('/courses/{course}', [WatchCourseController::class, 'show'])->name('frontend.courses.show');
+
+        // 🛒 Cart Routes
+Route::get('/cart', [CartController::class, 'cart'])->name('cart');
+Route::get('/add-to-cart/{id}', [CartController::class, 'addToCart'])->name('add.to.cart');
+Route::patch('/update-cart', [CartController::class, 'update'])->name('update.cart');
+Route::delete('/remove-from-cart', [CartController::class, 'remove'])->name('remove.from.cart');
+Route::post('/coupon-check', [coupon::class, 'coupon_check'])->name('coupon.check'); // Исправлено имя
+Route::post('/coupon-remove', [coupon::class, 'remove_coupon'])->name('coupon.remove'); // Добавьте этот маршрут
+
+// Checkout
+
+Route::get('/checkout', [checkout::class, 'index'])->name('checkout');
+Route::post('/checkout', [checkout::class, 'store'])->name('checkout.store');
+        // Поиск
         Route::get('/searchCourse', [SearchCourseController::class, 'index'])->name('searchCourse');
+        Route::get('/event-search', [EventSearchController::class, 'index'])->name('event.search');
+
+        // Маршруты для уроков и квизов
+        Route::prefix('courses/{course}/lessons/{lesson}')->group(function () {
+            Route::get('/', [LessonController::class, 'show'])->name('lessons.show');
+
+            Route::prefix('quizzes/{quiz}')->group(function () {
+                Route::get('/', [QuizController::class, 'show'])->name('frontend.quizzes.show')->scopeBindings();
+                Route::post('/start', [QuizController::class, 'start'])->name('frontend.quizzes.start');
+                Route::get('/attempt/{attempt}', [QuizController::class, 'attempt'])->name('frontend.quizzes.attempt');
+                Route::post('/attempt/{attempt}/submit', [QuizController::class, 'submit'])->name('frontend.quizzes.submit');
+                Route::get('/results/{attempt}', [QuizController::class, 'results'])->name('frontend.quizzes.results');
+            });
+        });
+
+        // Редирект
+        Route::get('courses/{id}/back', function ($locale, $id) {
+            return redirect()->to("/$locale/courses/$id");
+        })->name('course.back');
+
+        // Детали курса
         Route::get('/courseDetails/{id}', [course::class, 'frontShow'])->name('courseDetails');
         Route::get('/instructorProfile/{id}', [InstructorController::class, 'frontShow'])->name('instructorProfile');
-        Route::get('/checkout', [checkout::class, 'index'])->name('checkout');
-        Route::post('/checkout', [checkout::class, 'store'])->name('checkout.store');
-
-        // 🛒 Cart
-        Route::get('/cart_page', [CartController::class, 'index']);
-        Route::get('/cart', [CartController::class, 'cart'])->name('cart');
-        Route::get('/add-to-cart/{id}', [CartController::class, 'addToCart'])->name('add.to.cart');
-        Route::patch('/update-cart', [CartController::class, 'update'])->name('update.cart');
-        Route::delete('/remove-from-cart', [CartController::class, 'remove'])->name('remove.from.cart');
-        Route::post('/coupon_check', [CartController::class, 'coupon_check'])->name('coupon_check');
 
         // 🧾 Static pages
         Route::get('/about', fn() => view('frontend.about'))->name('about');
         Route::get('/contact', fn() => view('frontend.contact'))->name('contact');
-    }); // ЗАКРЫТИЕ ГРУППЫ ЛОКАЛИЗАЦИИ
+    });
 
 /*
 |--------------------------------------------------------------------------
-| Для временного отключения аутентификации - добавьте этот middleware
+| Debug Route
 |--------------------------------------------------------------------------
 */
-// Временное решение: закомментируйте middleware проверки ролей
-// или создайте временный middleware для отладки
-
 Route::get('/check-courses', function () {
     $courses = \App\Models\Course::withCount('lessons')->get();
 

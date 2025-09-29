@@ -23,28 +23,45 @@ public function index(Request $request)
     $availableLocales = config('app.available_locales');
     $locales = [];
     foreach ($availableLocales as $code => $data) {
-        $locales[$code] = $data[1]; // Берем только название языка
+        $locales[$code] = $data[1];
     }
 
-    // Query для options с переводом
+    // Получаем question_id из запроса
+    $questionId = $request->get('question_id');
+    $question = null;
+
+    // Если question_id не передан, показываем все опции
+    if (!$questionId) {
+        $query = Option::with([
+            'question.quiz.translations',
+            'question.translations',
+            'translations'
+        ]);
+
+        $options = $query->paginate(10);
+
+        return view('backend.quiz.option.index', compact(
+            'options',
+            'locale',
+            'currentLocale',
+            'locales'
+        ));
+    }
+
+    // Если question_id передан, загружаем вопрос и его опции
+    $question = Question::with(['quiz.translations', 'translations'])->findOrFail($questionId);
+
     $query = Option::with([
-        'question.translations' => function($q) use ($locale) {
-            $q->where('locale', $locale);
-        },
         'translations' => function($q) use ($locale) {
             $q->where('locale', $locale);
         }
-    ]);
-
-    // Фильтр по question_id если есть
-    if ($request->has('question_id')) {
-        $query->where('question_id', $request->question_id);
-    }
+    ])->where('question_id', $questionId);
 
     $options = $query->paginate(10);
 
     return view('backend.quiz.option.index', compact(
         'options',
+        'question', // ← Добавляем переменную question
         'locale',
         'currentLocale',
         'locales'
@@ -70,7 +87,7 @@ public function store(Request $request)
         // Создаем опцию
         $option = Option::create([
             'question_id' => $validated['question_id'],
-            'option_text' => $validated['translations']['en']['option_text'], // Основное значение из английского
+            'key' => 'a', // или генерируйте ключ автоматически
             'is_correct' => $validated['is_correct'] ?? false,
             'order' => $validated['order'] ?? 0
         ]);
@@ -81,7 +98,7 @@ public function store(Request $request)
                 !empty(trim($validated['translations'][$locale]['option_text']))) {
                 $option->translations()->create([
                     'locale' => $locale,
-                    'option_text' => $validated['translations'][$locale]['option_text']
+                    'text' => $validated['translations'][$locale]['option_text'] // ← исправьте на 'text' если нужно
                 ]);
             }
         }
@@ -119,15 +136,19 @@ public function create(Request $request)
             ->with('error', 'Please create a question first before adding options');
     }
 
-    // Автоматически выбираем первый вопрос, если question_id не передан
+    // Получаем question_id из запроса или используем первый вопрос
     $questionId = $request->get('question_id', $questions->first()->id);
+
+    // Находим вопрос
+    $question = Question::with(['translations'])->find($questionId);
 
     return view('backend.quiz.option.create', compact(
         'locale',
         'currentLocale',
         'locales',
         'questions',
-        'questionId'
+        'questionId',
+        'question' // ← Добавляем переменную question
     ));
 }
     /**

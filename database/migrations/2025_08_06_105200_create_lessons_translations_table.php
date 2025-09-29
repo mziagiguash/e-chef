@@ -9,27 +9,25 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('lessons_translations', function (Blueprint $table) {
-            $table->id(); // bigint(20) unsigned NOT NULL AUTO_INCREMENT
-            $table->unsignedBigInteger('lesson_id'); // bigint(20) unsigned NOT NULL
-            $table->string('locale', 10); // varchar(10) NOT NULL
-            $table->string('title'); // varchar(255) NOT NULL
-            $table->text('description')->nullable(); // text DEFAULT NULL
-            $table->text('notes')->nullable(); // text DEFAULT NULL
-            $table->timestamps(); // created_at и updated_at
+   public function up(): void
+{
+    Schema::create('lessons_translations', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('lesson_id');
+        $table->string('locale', 10);
+        $table->string('title'); // ТОЛЬКО здесь храним заголовок
+        $table->text('description')->nullable(); // ТОЛЬКО здесь
+        $table->text('notes')->nullable(); // ТОЛЬКО здесь
+        $table->timestamps();
 
-            // Уникальный ключ
-            $table->unique(['lesson_id', 'locale']); // UNIQUE KEY `lessons_translations_lesson_id_locale_unique`
+        $table->unique(['lesson_id', 'locale']);
 
-            // Внешний ключ
-            $table->foreign('lesson_id')
-                  ->references('id')
-                  ->on('lessons')
-                  ->onDelete('cascade'); // CONSTRAINT `lessons_translations_lesson_id_foreign`
-        });
-    }
+        $table->foreign('lesson_id')
+              ->references('id')
+              ->on('lessons')
+              ->onDelete('cascade');
+    });
+}
 
     /**
      * Reverse the migrations.

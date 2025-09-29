@@ -21,6 +21,17 @@ return [
         'scheme' => 'https',
     ],
 
+'sslcommerz' => [
+    'store_id' => env('SSL_STORE_ID', 'geniu5e1b00621f81e'),
+    'store_password' => env('SSL_STORE_PASSWORD', 'geniu5e1b00621f81e@ssl'),
+    'sandbox' => env('SSL_SANDBOX', true),
+],
+'currency' => [
+    'code' => 'GEL',
+    'symbol' => '₾',
+    'rate' => env('CURRENCY_RATE', 2.7), // Курс GEL к BDT
+],
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],

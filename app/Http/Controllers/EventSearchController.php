@@ -7,16 +7,17 @@ use Illuminate\Http\Request;
 
 class EventSearchController extends Controller
 {
-    public function index(Request $request, $locale = null)
+    public function index(Request $request)
     {
-        // Если locale передан в URL, используем его, иначе из запроса или дефолтный
-        $currentLocale = $locale ?? $request->get('lang', app()->getLocale());
+        // Получаем локаль из URL или запроса
+        $currentLocale = $request->route('locale') ?? $request->get('lang', app()->getLocale());
 
         // Устанавливаем локаль приложения
         app()->setLocale($currentLocale);
 
         $search = $request->get('search');
 
+        // Запрос для поиска событий
         $events = Event::with(['translations' => function($q) use ($currentLocale) {
             $q->where('locale', $currentLocale);
         }])
@@ -27,7 +28,8 @@ class EventSearchController extends Controller
                       $subQuery->where('title', 'like', "%$search%")
                                ->orWhere('description', 'like', "%$search%")
                                ->orWhere('location', 'like', "%$search%")
-                               ->orWhere('topic', 'like', "%$search%");
+                               ->orWhere('topic', 'like', "%$search%")
+                               ->orWhere('hosted_by', 'like', "%$search%");
                   });
             });
         })

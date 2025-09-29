@@ -6,7 +6,8 @@ use Illuminate\Database\Seeder;
 use App\Models\Quiz;
 use App\Models\QuizTranslation;
 use App\Models\Lesson;
-use App\Models\LessonTranslation;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 
 class QuizSeeder extends Seeder
 {
@@ -22,18 +23,18 @@ class QuizSeeder extends Seeder
 
         $quizCount = 0;
 
-        // Создаем квизы для некоторых уроков (примерно 30% уроков получат квизы)
         foreach ($lessons as $lesson) {
-            // 30% chance to create a quiz for this lesson
             if (rand(1, 100) <= 30) {
+                // Генерируем уникальный quiz_id
+                $quizId = 'quiz_' . Str::random(10) . '_' . time();
+
                 $quiz = Quiz::create([
                     'lesson_id' => $lesson->id,
+                    'quiz_id' => $quizId, // Обязательное поле
                     'is_active' => true,
                     'time_limit' => rand(15, 45),
                     'passing_score' => rand(60, 80),
                     'max_attempts' => rand(1, 3),
-                    'title' => null,
-                    'description' => null,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -41,8 +42,10 @@ class QuizSeeder extends Seeder
                 // Создаем переводы для квиза
                 $this->createQuizTranslations($quiz, $lesson);
 
-                // Обновляем lesson с quiz_id
-                $lesson->update(['quiz_id' => $quiz->id]);
+                // Обновляем lesson с quiz_id (если такое поле существует)
+                if (Schema::hasColumn('lessons', 'quiz_id')) {
+                    $lesson->update(['quiz_id' => $quiz->id]);
+                }
 
                 $quizCount++;
             }
@@ -54,7 +57,6 @@ class QuizSeeder extends Seeder
 
     private function createQuizTranslations(Quiz $quiz, Lesson $lesson): void
     {
-        // Правильно получаем переводы урока
         $lessonTranslations = [];
         foreach ($lesson->translations as $translation) {
             $lessonTranslations[$translation->locale] = $translation;
@@ -76,7 +78,6 @@ class QuizSeeder extends Seeder
         ];
 
         foreach ($translations as $locale => $data) {
-            // Проверяем, существует ли перевод для этого языка
             if (!isset($lessonTranslations[$locale])) {
                 $this->command->warn("No {$locale} translation found for lesson ID: {$lesson->id}");
                 continue;

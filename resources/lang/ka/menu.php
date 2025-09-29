@@ -26,6 +26,7 @@ return [
     'instructor_name_2' => 'შეიხ რაშედი',
     'instructor_name_3' => 'დევ ტაერი',
     'instructor_role' => 'Adobe-ის ინსტრუქტორი',
-    'cart' => 'კალათა','enter_coupon' => 'შეიყვანეთ კუპონის კოდი',
-
+    'cart' => 'კალათა',
+    'enter_coupon' => 'შეიყვანეთ კუპონის კოდი',
+    'events' => 'ღონისძიებები',
 ];

@@ -123,82 +123,82 @@
                                         $isAvailable = $index === 0 ? true : ($lesson->is_available ?? false);
                                     @endphp
                                     <div class="list-group-item border-0">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
-        <div class="flex-grow-1" style="min-width: 0;">
-            <div class="d-flex align-items-start mb-2">
-                <span class="badge bg-primary me-2 mt-1">{{ $index + 1 }}</span>
-                <div class="flex-grow-1" style="min-width: 0;">
-                    <h6 class="mb-1 text-truncate" title="{{ $lessonTitle }}">{{ $lessonTitle }}</h6>
+                                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+                                            <div class="flex-grow-1" style="min-width: 0;">
+                                                <div class="d-flex align-items-start mb-2">
+                                                    <span class="badge bg-primary me-2 mt-1">{{ $index + 1 }}</span>
+                                                    <div class="flex-grow-1" style="min-width: 0;">
+                                                        <h6 class="mb-1 text-truncate" title="{{ $lessonTitle }}">{{ $lessonTitle }}</h6>
 
-                    @if($lessonDescription)
-                    <div class="lesson-description mb-2">
-                        <p class="text-muted small mb-1 description-preview" style="display: block;">
-                            {{ Str::limit($lessonDescription, 120) }}
-                        </p>
-                        @if(strlen($lessonDescription) > 120)
-                        <button class="btn btn-link p-0 text-primary toggle-description"
-                                data-full="{{ e($lessonDescription) }}"
-                                data-preview="{{ Str::limit($lessonDescription, 120) }}">
-                            <small>{{ __('Show more') }}</small>
-                        </button>
-                        @endif
-                    </div>
-                    @endif
-                </div>
-            </div>
+                                                        @if($lessonDescription)
+                                                        <div class="lesson-description mb-2">
+                                                            <p class="text-muted small mb-1 description-preview" style="display: block;">
+                                                                {{ Str::limit($lessonDescription, 120) }}
+                                                            </p>
+                                                            @if(strlen($lessonDescription) > 120)
+                                                            <button class="btn btn-link p-0 text-primary toggle-description"
+                                                                    data-full="{{ e($lessonDescription) }}"
+                                                                    data-preview="{{ Str::limit($lessonDescription, 120) }}">
+                                                                <small>{{ __('Show more') }}</small>
+                                                            </button>
+                                                            @endif
+                                                        </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
 
-            {{-- Информация о уроке --}}
-            <div class="d-flex flex-wrap gap-2 mb-2">
-                @if($lesson->video_url)
-                    @php
-                        $colors = ['#4681f4', '#5783db', '#55c2da', '#5dbea3', '#33b249'];
-                        $color = $colors[array_rand($colors)];
-                    @endphp
-                    <span class="keyword-badge" style="background-color: {{ $color }}">
-                        <i class="fas fa-video me-1"></i> {{ __('Video') }}
-                    </span>
-                @endif
+                                                {{-- Информация о уроке --}}
+                                                <div class="d-flex flex-wrap gap-2 mb-2">
+                                                    @if($lesson->video_url)
+                                                        @php
+                                                            $colors = ['#4681f4', '#5783db', '#55c2da', '#5dbea3', '#33b249'];
+                                                            $color = $colors[array_rand($colors)];
+                                                        @endphp
+                                                        <span class="keyword-badge" style="background-color: {{ $color }}">
+                                                            <i class="fas fa-video me-1"></i> {{ __('Video') }}
+                                                        </span>
+                                                    @endif
 
-                @if($hasQuiz)
-                    @php
-                        $colors = ['#ffc107', '#ffb300', '#ffa000', '#ff8f00', '#ff6f00'];
-                        $color = $colors[array_rand($colors)];
-                    @endphp
-                    <span class="keyword-badge" style="background-color: {{ $color }}; color: #000;">
-                        <i class="fas fa-graduation-cap me-1"></i> {{ __('Quiz') }}
-                    </span>
-                @endif
+                                                    @if($hasQuiz)
+                                                        @php
+                                                            $colors = ['#ffc107', '#ffb300', '#ffa000', '#ff8f00', '#ff6f00'];
+                                                            $color = $colors[array_rand($colors)];
+                                                        @endphp
+                                                        <span class="keyword-badge" style="background-color: {{ $color }}; color: #000;">
+                                                            <i class="fas fa-graduation-cap me-1"></i> {{ __('Quiz') }}
+                                                        </span>
+                                                    @endif
 
-                @if($materialsCount > 0)
-                    @php
-                        $colors = ['#28a745', '#259b3f', '#218838', '#1e7e34', '#1c7430'];
-                        $color = $colors[array_rand($colors)];
-                    @endphp
-                    <span class="keyword-badge" style="background-color: {{ $color }}">
-                        <i class="fas fa-file-download me-1"></i> {{ __('Materials') }} ({{ $materialsCount }})
-                    </span>
-                @endif
-            </div>
-        </div>
+                                                    @if($materialsCount > 0)
+                                                        @php
+                                                            $colors = ['#28a745', '#259b3f', '#218838', '#1e7e34', '#1c7430'];
+                                                            $color = $colors[array_rand($colors)];
+                                                        @endphp
+                                                        <span class="keyword-badge" style="background-color: {{ $color }}">
+                                                            <i class="fas fa-file-download me-1"></i> {{ __('Materials') }} ({{ $materialsCount }})
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
 
-        <div class="flex-shrink-0">
-            {{-- Проверяем доступность урока --}}
-            @if($isAvailable)
-                <a href="{{ route('lessons.show', [
-                    'locale' => $locale,
-                    'course' => $course->id,
-                    'lesson' => $lesson->id
-                ]) }}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-play me-1"></i> {{ __('Start') }}
-                </a>
-            @else
-                <button class="btn btn-secondary btn-sm" disabled>
-                    <i class="fas fa-lock me-1"></i> {{ __('Locked') }}
-                </button>
-            @endif
-        </div>
-    </div>
-</div>
+                                            <div class="flex-shrink-0">
+                                                {{-- Проверяем доступность урока --}}
+                                                @if($isAvailable)
+                                                    <a href="{{ route('lessons.show', [
+                                                        'locale' => $locale,
+                                                        'course' => $course->id,
+                                                        'lesson' => $lesson->id
+                                                    ]) }}" class="btn btn-primary btn-sm">
+                                                        <i class="fas fa-play me-1"></i> {{ __('Start') }}
+                                                    </a>
+                                                @else
+                                                    <button class="btn btn-secondary btn-sm" disabled>
+                                                        <i class="fas fa-lock me-1"></i> {{ __('Locked') }}
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
                                 @empty
                                     <div class="list-group-item text-center py-5">
                                         <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
@@ -228,9 +228,123 @@
                             @endif
                         </div>
                     </div>
+
+                    {{-- Блок для гостей --}}
+                    @guest
+                    <div class="alert alert-info mt-4">
+                        <h6>{{ __('Want full access to this course?') }}</h6>
+                        <p>{{ __('Enroll now to get unlimited access to all lessons, quizzes, and materials.') }}</p>
+                        <a href="{{ route('add.to.cart', ['locale' => $locale, 'id' => $course->id]) }}" class="btn btn-primary btn-sm">{{ __('Enroll Now') }}</a>
+                    </div>
+                    @endguest
                 </div>
 
                 <div class="col-lg-4">
+                    {{-- Блок с ценой и оформлением --}}
+                    <div class="courseCard--wrapper mb-4">
+                        <div class="cart border-0 shadow-sm">
+                            <div class="cart__price p-3 bg-light rounded-top">
+                                <div class="current-price d-flex justify-content-between align-items-center">
+                                    <h3 class="font-title--sm mb-0">
+                                        @if($course->price > 0)
+                                            {{ $currencySymbol }}{{ number_format($course->price, 2) }}
+                                        @else
+                                            {{ __('Free') }}
+                                        @endif
+                                    </h3>
+                                    @if($course->old_price > 0 && $course->old_price > $course->price)
+                                        <div class="text-end">
+                                            <p class="mb-0"><del class="text-muted">{{ $currencySymbol }}{{ number_format($course->old_price, 2) }}</del></p>
+                                            @php
+                                                $discount = (($course->old_price - $course->price) / $course->old_price) * 100;
+                                            @endphp
+                                            <div class="current-discount">
+                                                <p class="font-para--md mb-0 text-success">{{ round($discount) }}% {{ __('off') }}</p>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="cart__checkout-process p-3">
+                                @if($course->old_price > 0 && $course->old_price > $course->price)
+                                    <p class="time-left text-center text-muted mb-3">
+                                        <i class="fas fa-clock me-1"></i>
+                                        <span>{{ __('5 hours to remaining this price') }}</span>
+                                    </p>
+                                @endif
+
+                                <div class="d-grid gap-2">
+                                    <a href="{{ route('add.to.cart', ['locale' => $locale, 'id' => $course->id]) }}"
+                                       class="text-white button button-lg button--primary w-100 btn btn-primary">
+                                        {{ __('Add to Cart') }}
+                                    </a>
+                                    <a href="{{ route('checkout', ['locale' => $locale]) }}?course_id={{ $course->id }}"
+                                       class="button button-lg button--primary-outline mt-0 w-100 btn btn-outline-primary">
+                                        {{ __('Buy Now') }}
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="cart__includes-info p-3 border-top">
+                                <h6 class="font-title--card mb-3">{{ __('This course includes:') }}</h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li class="d-flex align-items-center mb-2">
+                                        <span class="me-2"><img src="{{ asset('frontend/dist/images/icon/dollar.png') }}" alt="dollar" width="20" /></span>
+                                        <p class="font-para--md mb-0">{{ __('Full Lifetime Access') }}</p>
+                                    </li>
+                                    <li class="d-flex align-items-center mb-2">
+                                        <span class="me-2"><img src="{{ asset('frontend/dist/images/icon/clock-2.png') }}" alt="clock" width="20" /></span>
+                                        <p class="font-para--md mb-0">{{ __('30 Days Money Back Guarantee') }}</p>
+                                    </li>
+                                    <li class="d-flex align-items-center mb-2">
+                                        <span class="me-2"><img src="{{ asset('frontend/dist/images/icon/paper-plus.png') }}" alt="paper-plus" width="20" /></span>
+                                        <p class="font-para--md mb-0">{{ __('Free Exercises File') }}</p>
+                                    </li>
+                                    <li class="d-flex align-items-center mb-2">
+                                        <span class="me-2"><img src="{{ asset('frontend/dist/images/icon/airplay.png') }}" alt="airplay" width="20" /></span>
+                                        <p class="font-para--md mb-0">{{ __('Access on Mobile, Tablet and TV') }}</p>
+                                    </li>
+                                    <li class="d-flex align-items-center">
+                                        <span class="me-2"><img src="{{ asset('frontend/dist/images/icon/clipboard.png') }}" alt="clipboard" width="20" /></span>
+                                        <p class="font-para--md mb-0">{{ __('Certificate of Completion') }}</p>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="cart__share-content p-3 border-top">
+                                <h6 class="font-title--card mb-3">{{ __('Share This Course') }}</h6>
+                                <ul class="social-icons social-icons--outline list-unstyled d-flex gap-2 mb-0">
+                                    <li>
+                                        <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
+                                            <i class="fab fa-instagram"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
+                                            <i class="fab fa-linkedin-in"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
+                                            <i class="fab fa-twitter"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
+                                            <i class="fab fa-youtube"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Боковая панель с информацией --}}
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-header bg-info text-white">
@@ -343,6 +457,7 @@
                     </div>
 
                     {{-- Прогресс --}}
+                    @auth
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-body text-center">
                             <h6 class="mb-3">{{ __('Course Progress') }}</h6>
@@ -357,6 +472,7 @@
                             </small>
                         </div>
                     </div>
+                    @endauth
                 </div>
             </div>
         </div>
@@ -393,6 +509,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @push('styles')
 <style>
+.lesson-locked {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.lesson-locked .badge {
+    font-size: 0.7em;
+}
+
 .breadcrumb {
     background: transparent;
     padding: 0;
@@ -560,6 +685,37 @@ document.addEventListener('DOMContentLoaded', function() {
     border-color: #4681f4;
 }
 
+/* Стили для блока цены */
+.courseCard--wrapper {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.cart__price {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.cart__checkout-process .btn {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+}
+
+.cart__includes-info li {
+    padding: 0.25rem 0;
+}
+
+.social-icons a {
+    transition: all 0.3s ease;
+}
+
+.social-icons a:hover {
+    transform: translateY(-2px);
+    background: #4681f4 !important;
+    color: white !important;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .container {
@@ -630,6 +786,10 @@ document.addEventListener('DOMContentLoaded', function() {
     .keyword-badge {
         padding: 0.25rem 0.5rem;
         font-size: 0.65rem;
+    }
+
+    .social-icons {
+        justify-content: center;
     }
 }
 </style>

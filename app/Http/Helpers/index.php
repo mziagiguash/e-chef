@@ -1,79 +1,122 @@
 <?php
+// app/Http/Helpers/index.php
 
-// Two-way encryption method to encrypt/decrypt all data (e.g., from URL)
+// Two way encryption method to encrypt all data from url
 function encryptor($action, $string)
 {
     $output = false;
 
     $encrypt_method = "AES-256-CBC";
-    // Set your unique hashing key
+    // pls set your unique hashing key
     $secret_key = 'beatnik#technolgoy_sampreeti';
     $secret_iv = 'beatnik$technolgoy@sampreeti';
 
-    // Generate hash key
+    //hash
     $key = hash('sha256', $secret_key);
-    $iv = substr(hash('sha256', $secret_iv), 0, 16); // 16 bytes required
 
+    //iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning
+    $iv = substr(hash('sha256', $secret_iv), 0, 16);
+
+    //do the encryption given text/string/number
     if ($action == 'encrypt') {
         $output = openssl_encrypt($string, $encrypt_method, $key, 0, $iv);
         $output = base64_encode($output);
-    } elseif ($action == 'decrypt') {
+    } else if ($action == 'decrypt') {
+        //decrypt the given text/string/number
         $output = openssl_decrypt(base64_decode($string), $encrypt_method, $key, 0, $iv);
     }
-
     return $output;
 }
 
-// Get decrypted current user ID from session
 function currentUserId()
 {
     return encryptor('decrypt', request()->session()->get('userId'));
 }
 
-// Get decrypted access type from session
 function fullAccess()
 {
     return encryptor('decrypt', request()->session()->get('accessType'));
 }
 
-// Get decrypted role identity from session
 function currentUser()
 {
     return encryptor('decrypt', request()->session()->get('roleIdentity'));
 }
 
-// Get current locale
 function currentLocale()
 {
     return app()->getLocale();
 }
 
-// Check if user is logged in
 function isLoggedIn()
 {
     return session()->has('userId') && !is_null(session('userId'));
 }
 
-// Currency symbol from session (default $)
 function currencySymbol()
 {
     return session('currency_symbol', '$');
 }
 
-// Currency rate from session (default 1.0)
 function currencyRate()
 {
     return session('currency_rate', 1.0);
 }
 
 // Helper to build localized route
-function localeRoute($name, $parameters = [])
+function localeRoute($name, $parameters = [], $absolute = true)
 {
     if (!is_array($parameters)) {
-        // Если параметр передан как строка, превращаем в массив с одним элементом
         $parameters = [$parameters];
     }
-    return route($name, array_merge(['locale' => app()->getLocale()], $parameters));
+
+    // Получаем информацию о маршруте из системы маршрутизации Laravel
+    $route = app('router')->getRoutes()->getByName($name);
+
+    if ($route) {
+        // Получаем список всех параметров, которые ожидает маршрут
+        $parametersNames = $route->parameterNames();
+
+        // Если маршрут требует параметр 'locale', добавляем его автоматически
+        if (in_array('locale', $parametersNames)) {
+            return route($name, array_merge(['locale' => app()->getLocale()], $parameters), $absolute);
+        }
+    }
+
+    // Для маршрутов, которые не требуют locale
+    return route($name, $parameters, $absolute);
 }
 
+// Альтернативная функция для маршрутов с параметрами
+function localizedRoute($name, $parameters = [], $absolute = true)
+{
+    $locale = app()->getLocale();
 
+    // Если параметры не массив, преобразуем в массив
+    if (!is_array($parameters)) {
+        $parameters = ['id' => $parameters];
+    }
+
+    // Добавляем locale в параметры
+    $parameters = array_merge(['locale' => $locale], $parameters);
+
+    return route($name, $parameters, $absolute);
+}
+
+// Функция для получения правильного URL курса
+function courseUrl($courseId)
+{
+    return localizedRoute('courses.show', $courseId);
+}
+
+// Функция для получения правильного URL инструктора
+function instructorUrl($instructorId)
+{
+    return localizedRoute('instructor.show', $instructorId);
+}
+
+// Функция для получения правильного URL категории
+function categoryUrl($categoryId)
+{
+    return route('searchCourse', ['locale' => app()->getLocale(), 'category' => $categoryId]);
+}

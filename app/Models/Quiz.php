@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory; // ← Добавить
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,23 +10,35 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Quiz extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes; // ← Добавить HasFactory
+
     protected $table = 'quizzes';
 
-    protected $fillable = [
-        'lesson_id',
-        'title',
-        'description',
-        'order',
-        'is_active',
-        'time_limit',
-        'passing_score',
-        'max_attempts'
+ protected $fillable = [
+        'lesson_id', 'quiz_id', 'order', 'is_active',
+        'time_limit', 'passing_score', 'max_attempts'
+    ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($quiz) {
+            if (empty($quiz->quiz_id)) {
+                $quiz->quiz_id = 'quiz_' . uniqid() . '_' . time();
+            }
+        });
+    }
+
+    // Добавить casts для boolean полей
+    protected $casts = [
+        'is_active' => 'boolean',
+        'deleted_at' => 'datetime',
     ];
 
     protected $dates = ['deleted_at'];
 
-    public function lesson(): BelongsTo
+ public function lesson(): BelongsTo
     {
         return $this->belongsTo(Lesson::class);
     }
@@ -36,10 +48,10 @@ class Quiz extends Model
         return $this->hasMany(Question::class);
     }
 
-    public function attempts(): HasMany
-    {
-        return $this->hasMany(QuizAttempt::class);
-    }
+public function attempts(): HasMany
+{
+    return $this->hasMany(QuizAttempt::class, 'quiz_id');
+}
 
 public function translations(): HasMany
 {
@@ -66,35 +78,53 @@ public function translations(): HasMany
     }
 
     // Для удобного отображения названия
-    public function getTitleAttribute()
-    {
-        $locale = app()->getLocale();
+public function getTitleAttribute()
+{
+    $locale = app()->getLocale();
 
-        if (!$this->relationLoaded('translations')) {
-            $this->load('translations');
-        }
-
-        $translation = $this->translations->where('locale', $locale)->first();
-        return $translation->title ??
-               $this->translations->first()->title ??
-               'Quiz #' . $this->id;
+    if (!$this->relationLoaded('translations')) {
+        $this->load('translations');
     }
 
-    // Для удобного отображения описания
-    public function getDescriptionAttribute()
-    {
-        $locale = app()->getLocale();
+    $translation = $this->translations->where('locale', $locale)->first();
 
-        if (!$this->relationLoaded('translations')) {
-            $this->load('translations');
-        }
-
-        $translation = $this->translations->where('locale', $locale)->first();
-        return $translation->description ??
-               $this->translations->first()->description ??
-               null;
+    // Безопасная проверка
+    if ($translation && $translation->title) {
+        return $translation->title;
     }
 
+    // Безопасный доступ к первому переводу
+    $firstTranslation = $this->translations->first();
+    if ($firstTranslation && $firstTranslation->title) {
+        return $firstTranslation->title;
+    }
+
+    return 'Quiz #' . ($this->id ?? 'new');
+}
+
+public function getDescriptionAttribute()
+{
+    $locale = app()->getLocale();
+
+    if (!$this->relationLoaded('translations')) {
+        $this->load('translations');
+    }
+
+    $translation = $this->translations->where('locale', $locale)->first();
+
+    // Безопасная проверка - ИСПРАВЛЕНО!
+    if ($translation && $translation->description) {
+        return $translation->description;
+    }
+
+    // Безопасный доступ к первому переводу - ИСПРАВЛЕНО!
+    $firstTranslation = $this->translations->first();
+    if ($firstTranslation && $firstTranslation->description) {
+        return $firstTranslation->description;
+    }
+
+    return null;
+}
 public function getTranslation(string $locale, string $field = 'title'): ?string
 {
     if (!$this->relationLoaded('translations')) {

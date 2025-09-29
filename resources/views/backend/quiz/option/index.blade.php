@@ -1,10 +1,5 @@
 @extends('backend.layouts.app')
-@section('title', __('Option List'))
-
-@push('styles')
-<!-- Datatable -->
-<link href="{{asset('vendor/datatables/css/jquery.dataTables.min.css')}}" rel="stylesheet">
-@endpush
+@section('title', isset($question) ? __('Options for Question') . ': ' . ($question->getTranslation('content', $locale) ?? 'N/A') : __('All Options'))
 
 @section('content')
 <div class="content-body">
@@ -13,208 +8,188 @@
         <div class="row page-titles mx-0">
             <div class="col-sm-6 p-md-0">
                 <div class="welcome-text">
-                    <h4>{{ __('Option List') }}</h4>
+                    <h4>
+                        @if(isset($question) && $question)
+                            {{ __('Options for Question') }}: {{ $question->getTranslation('content', $locale) ?? 'Question #' . $question->id }}
+                        @else
+                            {{ __('All Options') }}
+                        @endif
+                    </h4>
                 </div>
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('Home') }}</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('question.index') }}">{{ __('Questions') }}</a></li>
-                    <li class="breadcrumb-item active">{{ __('Options') }}</li>
+                    <li class="breadcrumb-item"><a href="{{ route('question.index', ['lang' => $locale]) }}">{{ __('Questions') }}</a></li>
+                    <li class="breadcrumb-item active">
+                        @if(isset($question) && $question)
+                            {{ __('Options') }}
+                        @else
+                            {{ __('All Options') }}
+                        @endif
+                    </li>
                 </ol>
             </div>
         </div>
 
-        <!-- Языковые табы -->
+        <!-- Языковые табы Bootstrap -->
         <div class="row mb-3">
             <div class="col-lg-12">
                 <ul class="nav nav-tabs" id="optionLangTabs" role="tablist">
                     @foreach($locales as $localeCode => $localeName)
-                        <li class="nav-item" role="presentation">
-                            <a href="{{ request()->fullUrlWithQuery(['lang' => $localeCode]) }}"
-                               class="nav-link {{ $localeCode === $currentLocale ? 'active' : '' }}"
-                               data-locale="{{ $localeCode }}">
-                                {{ $localeName }}
-                            </a>
-                        </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link {{ $localeCode === $currentLocale ? 'active' : '' }}"
+                           href="{{ route('option.index', array_merge(['lang' => $localeCode], isset($question) ? ['question_id' => $question->id] : [])) }}"
+                           role="tab">
+                            {{ $localeName }}
+                        </a>
+                    </li>
                     @endforeach
                 </ul>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">{{ __('All Options List') }}</h4>
-                        @if(request()->has('question_id') && $question = \App\Models\Question::find(request('question_id')))
-                            <div class="alert alert-info mt-2">
-                                <strong>{{ __('Question') }}:</strong>
-                                {{ $question->text }}
-                                <a href="{{ route('option.index') }}" class="btn btn-sm btn-secondary ml-2">
-                                    {{ __('Show All Options') }}
-                                </a>
-                            </div>
+                        <h5 class="card-title">
+                            @if(isset($question) && $question)
+                                {{ __('Options for Question') }}: {{ $question->getTranslation('content', $currentLocale) ?? 'Question #' . $question->id }}
+                            @else
+                                {{ __('All Options List') }}
+                            @endif
+                        </h5>
+
+                        <!-- Кнопка "Add Option" с проверкой -->
+                        @if(isset($question) && $question)
+                            <a href="{{ route('option.create', ['question_id' => $question->id, 'lang' => $currentLocale]) }}"
+                               class="btn btn-primary btn-sm float-right">
+                                <i class="fa fa-plus"></i> {{ __('Add Option') }}
+                            </a>
+                        @else
+                            <a href="{{ route('option.create', ['lang' => $currentLocale]) }}"
+                               class="btn btn-primary btn-sm float-right">
+                                <i class="fa fa-plus"></i> {{ __('Add Option') }}
+                            </a>
                         @endif
+
+                        <a href="{{ route('question.index', ['lang' => $currentLocale]) }}"
+                           class="btn btn-secondary btn-sm mr-2 float-right">
+                            <i class="fa fa-arrow-left"></i> {{ __('Back to Questions') }}
+                        </a>
                     </div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            @if(request()->has('question_id'))
-                                <a href="{{ route('option.create', ['question_id' => request('question_id')]) }}"
-                                   class="btn btn-primary">+ {{ __('Add Option to this Question') }}</a>
-                            @else
-                                <a href="{{ route('option.create') }}"
-                                   class="btn btn-primary">+ {{ __('Add new Option') }}</a>
-                            @endif
-                        </div>
+                        @if(session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+
+                        @if(session('error'))
+                            <div class="alert alert-danger">
+                                {{ session('error') }}
+                            </div>
+                        @endif
 
                         <div class="table-responsive">
-                            <table id="optionsTable" class="display" style="min-width: 845px">
+                            <table class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('ID') }}</th>
+                                        <th>#</th>
+                                        @if(!isset($question)) <!-- Показываем колонку "Question" только в общем списке -->
                                         <th>{{ __('Question') }}</th>
+                                        @endif
                                         <th>{{ __('Option Text') }}</th>
-                                        <th>{{ __('Is Correct') }}</th>
+                                        <th>{{ __('Key') }}</th>
+                                        <th>{{ __('Correct') }}</th>
                                         <th>{{ __('Order') }}</th>
                                         <th>{{ __('Actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($options as $option)
-                                    <tr>
-                                        <td>{{ $option->id }}</td>
-                                        <td>
-                                            @if($option->question)
-                                                <a href="{{ route('option.index', ['question_id' => $option->question_id]) }}"
-                                                   class="text-primary" title="{{ __('Filter by this question') }}">
-                                                    {{ Str::limit($option->question->text, 50) }}
-                                                </a>
-                                                @if(config('app.debug'))
-                                                <br><small class="text-muted">ID: {{ $option->question_id }}</small>
-                                                @endif
-                                            @else
-                                                <span class="text-danger">{{ __('Question deleted') }}</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <strong>{{ $option->text }}</strong>
+                                    @forelse($options as $option)
+                                        <tr>
+                                            <td>{{ $loop->iteration + (($options->currentPage() - 1) * $options->perPage()) }}</td>
 
-                                            @php
-                                                $currentTranslation = $option->translations->where('locale', $currentLocale)->first();
-                                            @endphp
-
-                                            @if(!$currentTranslation)
-                                                <span class="badge badge-warning ml-1">No {{ $currentLocale }} translation</span>
-                                            @elseif(empty($currentTranslation->option_text))
-                                                <span class="badge badge-warning ml-1">Empty translation</span>
-                                            @endif
-
-                                            @if(config('app.debug'))
-                                            <br><small class="text-muted">Translations: {{ $option->translations->count() }}</small>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <span class="badge {{ $option->is_correct ? 'badge-success' : 'badge-danger' }}">
-                                                {{ $option->is_correct ? __('Correct') : __('Wrong') }}
-                                            </span>
-                                        </td>
-                                        <td>{{ $option->order }}</td>
-                                        <td>
-                                            <div class="d-flex">
-                                                <a href="{{ route('option.edit', $option->id) }}"
-                                                   class="btn btn-sm btn-primary mx-1" title="{{ __('Edit') }}">
-                                                    <i class="la la-pencil"></i>
-                                                </a>
-                                                <form action="{{ route('option.destroy', $option->id) }}"
-                                                      method="POST" class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger mx-1"
-                                                            title="{{ __('Delete') }}"
-                                                            onclick="return confirm('{{ __('Are you sure you want to delete this option?') }}')">
-                                                        <i class="la la-trash-o"></i>
-                                                    </button>
-                                                </form>
+                                            @if(!isset($question)) <!-- Показываем вопрос только в общем списке -->
+                                            <td>
                                                 @if($option->question)
-                                                <form action="{{ route('option.toggle.correctness', $option->id) }}"
-                                                      method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm {{ $option->is_correct ? 'btn-warning' : 'btn-success' }} mx-1"
-                                                            title="{{ $option->is_correct ? __('Mark as Wrong') : __('Mark as Correct') }}">
-                                                        <i class="la {{ $option->is_correct ? 'la-times' : 'la-check' }}"></i>
-                                                    </button>
-                                                </form>
+                                                    <!-- Отображаем перевод вопроса для всех языков -->
+                                                    @foreach($locales as $localeCode => $localeName)
+                                                        <span class="question-content lang-{{ $localeCode }}"
+                                                              style="{{ $localeCode === $currentLocale ? '' : 'display:none' }}">
+                                                            {{ Str::limit($option->question->getTranslation('content', $localeCode) ?? 'Question #' . $option->question->id, 30) }}
+                                                        </span>
+                                                    @endforeach
+                                                @else
+                                                    <span class="text-danger">{{ __('No Question') }}</span>
                                                 @endif
-                                            </div>
-                                        </td>
-                                    </tr>
+                                            </td>
+                                            @endif
+
+                                            <td>
+                                                <!-- Отображаем перевод опции для всех языков -->
+                                                @foreach($locales as $localeCode => $localeName)
+                                                    <span class="option-text lang-{{ $localeCode }}"
+                                                          style="{{ $localeCode === $currentLocale ? '' : 'display:none' }}">
+                                                        {{ $option->getTranslation('text', $localeCode) ?? $option->text ?? __('No translation') }}
+                                                    </span>
+                                                @endforeach
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-info">{{ strtoupper($option->key) }}</span>
+                                            </td>
+                                            <td>
+                                                @if($option->is_correct)
+                                                    <span class="badge badge-success">{{ __('Yes') }}</span>
+                                                @else
+                                                    <span class="badge badge-secondary">{{ __('No') }}</span>
+                                                @endif
+                                            </td>
+                                            <td>{{ $option->order }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <!-- Кнопка toggle correctness -->
+
+
+                                             
+                                                    <!-- Кнопка Delete -->
+                                                    <form action="{{ route('option.destroy', $option->id) }}"
+                                                          method="POST" class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-danger ml-1"
+                                                                onclick="return confirm('{{ __('Are you sure you want to delete this option?') }}')">
+                                                            <i class="fa fa-trash"></i> {{ __('Delete') }}
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center">
-                                            <div class="alert alert-info">
-                                                @if(request()->has('question_id'))
-                                                    {{ __('No options found for this question.') }}
-                                                    <a href="{{ route('option.create', ['question_id' => request('question_id')]) }}" class="btn btn-sm btn-primary ml-2">
-                                                        {{ __('Create First Option') }}
+                                        <tr>
+                                            <td colspan="{{ isset($question) ? 6 : 7 }}" class="text-center">
+                                                {{ __('No options found.') }}
+                                                @if(isset($question) && $question)
+                                                    <a href="{{ route('option.create', ['question_id' => $question->id, 'lang' => $currentLocale]) }}">
+                                                        {{ __('Create first option') }}
                                                     </a>
                                                 @else
-                                                    {{ __('No options found for this language.') }}
-                                                    <a href="{{ route('option.create') }}" class="btn btn-sm btn-primary ml-2">
-                                                        {{ __('Create First Option') }}
+                                                    <a href="{{ route('option.create', ['lang' => $currentLocale]) }}">
+                                                        {{ __('Create first option') }}
                                                     </a>
                                                 @endif
-                                            </div>
-                                        </td>
-                                    </tr>
+                                            </td>
+                                        </tr>
                                     @endforelse
                                 </tbody>
                             </table>
                         </div>
 
-                        <!-- Пагинация -->
-@if($options->hasPages())
-<div class="d-flex justify-content-center mt-3">
-    <nav aria-label="Options pagination">
-        <ul class="pagination pagination-sm">
-            {{-- Previous Page Link --}}
-            @if($options->onFirstPage())
-                <li class="page-item disabled">
-                    <span class="page-link">&laquo;</span>
-                </li>
-            @else
-                <li class="page-item">
-                    <a class="page-link" href="{{ $options->appends(['lang' => $currentLocale, 'question_id' => request('question_id')])->previousPageUrl() }}" rel="prev">&laquo;</a>
-                </li>
-            @endif
-
-            {{-- Pagination Elements --}}
-            @foreach($options->getUrlRange(1, $options->lastPage()) as $page => $url)
-                @if($page == $options->currentPage())
-                    <li class="page-item active">
-                        <span class="page-link">{{ $page }}</span>
-                    </li>
-                @else
-                    <li class="page-item">
-                        <a class="page-link" href="{{ $url }}?lang={{ $currentLocale }}&question_id={{ request('question_id') }}">{{ $page }}</a>
-                    </li>
-                @endif
-            @endforeach
-
-            {{-- Next Page Link --}}
-            @if($options->hasMorePages())
-                <li class="page-item">
-                    <a class="page-link" href="{{ $options->appends(['lang' => $currentLocale, 'question_id' => request('question_id')])->nextPageUrl() }}" rel="next">&raquo;</a>
-                </li>
-            @else
-                <li class="page-item disabled">
-                    <span class="page-link">&raquo;</span>
-                </li>
-            @endif
-        </ul>
-    </nav>
-</div>
-@endif
+                        <div class="d-flex justify-content-center">
+                            {{ $options->appends(array_merge(['lang' => $currentLocale], isset($question) ? ['question_id' => $question->id] : []))->links() }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -223,167 +198,67 @@
 </div>
 @endsection
 
-@push('scripts')
-<!-- Datatable -->
-<script src="{{asset('vendor/datatables/js/jquery.dataTables.min.js')}}"></script>
-<script>
-$(document).ready(function() {
-    // Инициализация DataTable
-    $('#optionsTable').DataTable({
-        responsive: true,
-        ordering: true,
-        searching: true,
-        paging: false,
-        info: false,
-        language: {
-            search: "{{ __('Search') }}",
-            searchPlaceholder: "{{ __('Search options...') }}"
-        }
-    });
-
-    // AJAX подгрузка при переключении языковых табов
-    $('#optionLangTabs .nav-link').on('click', function(e) {
-        e.preventDefault();
-        const locale = $(this).data('locale');
-        const $tab = $(this);
-
-        // Показываем индикатор загрузки
-        $tab.append(' <span class="spinner-border spinner-border-sm" role="status"></span>');
-
-        // Сохраняем текущие параметры
-        const urlParams = new URLSearchParams(window.location.search);
-        const questionId = urlParams.get('question_id');
-
-        // Формируем URL для AJAX запроса
-        let url = '{{ route("option.index") }}?lang=' + locale;
-        if (questionId) {
-            url += '&question_id=' + questionId;
-        }
-
-        // AJAX запрос
-        $.ajax({
-            url: url,
-            type: 'GET',
-            success: function(data) {
-                // Обновляем контент
-                $('#optionLangTabs').html($(data).find('#optionLangTabs').html());
-                $('.card-body').html($(data).find('.card-body').html());
-
-                // Переинициализируем DataTable
-                $('#optionsTable').DataTable({
-                    responsive: true,
-                    ordering: true,
-                    searching: true,
-                    paging: false,
-                    info: false,
-                    language: {
-                        search: "{{ __('Search') }}",
-                        searchPlaceholder: "{{ __('Search options...') }}"
-                    }
-                });
-
-                // Обновляем URL в браузере без перезагрузки
-                window.history.pushState({}, '', url);
-            },
-            error: function() {
-                alert('Error loading data');
-                $tab.find('.spinner-border').remove();
-            }
-        });
-    });
-
-    // Обработка кнопок пагинации через AJAX
-    $(document).on('click', '.pagination a', function(e) {
-        e.preventDefault();
-        const url = $(this).attr('href');
-
-        // Показываем индикатор загрузки
-        $('.card-body').append('<div class="loading-overlay"><div class="spinner-border text-primary"></div></div>');
-
-        $.ajax({
-            url: url,
-            type: 'GET',
-            success: function(data) {
-                $('.card-body').html($(data).find('.card-body').html());
-
-                // Переинициализируем DataTable
-                $('#optionsTable').DataTable({
-                    responsive: true,
-                    ordering: true,
-                    searching: true,
-                    paging: false,
-                    info: false,
-                    language: {
-                        search: "{{ __('Search') }}",
-                        searchPlaceholder: "{{ __('Search options...') }}"
-                    }
-                });
-            },
-            error: function() {
-                alert('Error loading page');
-                $('.loading-overlay').remove();
-            }
-        });
-    });
-});
-</script>
-
+@push('styles')
 <style>
-.badge-success { background-color: #28a745; }
-.badge-danger { background-color: #dc3545; }
-.badge-warning { background-color: #ffc107; }
-.text-danger { color: #dc3545 !important; }
-.text-muted { color: #6c757d !important; }
-
-/* Стили для индикатора загрузки */
-.loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
+.nav-tabs .nav-link {
+    border: 1px solid transparent;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    color: #495057;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
 }
-
-.spinner-border-sm {
-    width: 1rem;
-    height: 1rem;
-}
-
-.pagination {
-    margin: 0;
-}
-
-.page-item .page-link {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    line-height: 1.5;
-    border-radius: 0.2rem;
-    border: 1px solid #dee2e6;
-    color: #007bff;
-    margin: 0 2px;
-}
-
-.page-item.active .page-link {
-    background-color: #007bff;
-    border-color: #007bff;
-    color: white;
-}
-
-.page-item.disabled .page-link {
-    color: #6c757d;
-    pointer-events: none;
+.nav-tabs .nav-link.active {
+    color: #495057;
     background-color: #fff;
-    border-color: #dee2e6;
+    border-color: #dee2e6 #dee2e6 #fff;
+    font-weight: 500;
 }
-
-.page-link:hover {
-    background-color: #e9ecef;
-    border-color: #dee2e6;
+.badge {
+    font-size: 0.75rem;
+}
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+.btn-group .btn {
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+.btn-group {
+    display: flex;
+    flex-wrap: wrap;
 }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Подсветка активной языковой вкладки
+    const currentLang = '{{ $currentLocale }}';
+    const navLinks = document.querySelectorAll('.nav-tabs .nav-link');
+
+    navLinks.forEach(link => {
+        if (link.getAttribute('href').includes('lang=' + currentLang)) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+
+    // Функция для переключения языков (если нужно динамическое переключение)
+    function switchLanguage(locale) {
+        // Скрываем все переводы
+        document.querySelectorAll('.question-content, .option-text').forEach(el => {
+            el.style.display = 'none';
+        });
+
+        // Показываем переводы для выбранного языка
+        document.querySelectorAll('.lang-' + locale).forEach(el => {
+            el.style.display = '';
+        });
+    }
+});
+</script>
 @endpush

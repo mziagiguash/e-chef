@@ -26,5 +26,5 @@ return [
     'instructor_name_2' => 'Dev Taher',
     'instructor_role' => 'Adobe Instructor',
     'cart' => 'Cart',
-
+    'events' => 'Events',
 ];

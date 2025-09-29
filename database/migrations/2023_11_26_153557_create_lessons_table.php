@@ -9,29 +9,26 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('lessons', function (Blueprint $table) {
-    $table->id();
-    $table->text('title')->nullable();
-    $table->unsignedBigInteger('course_id');
-    $table->unsignedBigInteger('quiz_id')->nullable();
-    $table->integer('order')->default(1);
-    $table->boolean('is_active')->default(true); // Добавьте это поле
-    $table->text('description')->nullable();
-    $table->text('notes')->nullable();
-    $table->timestamps();
-    $table->softDeletes();
+   public function up(): void
+{
+    Schema::create('lessons', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('course_id');
+        $table->unsignedBigInteger('quiz_id')->nullable();
+        $table->integer('order')->default(1);
+        $table->boolean('is_active')->default(true);
+        $table->timestamps();
+        $table->softDeletes();
 
-    $table->index('course_id');
-    $table->index('quiz_id');
+        $table->index('course_id');
+        $table->index('quiz_id');
 
-    $table->foreign('course_id')
-          ->references('id')
-          ->on('courses')
-          ->onDelete('cascade');
-});
-    }
+        $table->foreign('course_id')
+              ->references('id')
+              ->on('courses')
+              ->onDelete('cascade');
+    });
+}
 
     /**
      * Reverse the migrations.

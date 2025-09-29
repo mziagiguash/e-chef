@@ -2,7 +2,6 @@
 @section('title', 'Home')
 @section('footer-class') footer--two @endsection
 
-
 @section('content')
 
 <!-- Banner Starts Here -->
@@ -70,7 +69,7 @@
                         </div>
                         <div class="browse-categories-item-text">
                             <h6 class="font-title--card">
-                                <a href="{{ route('courseDetails', ['locale' => app()->getLocale(), 'id' => $cat->id]) }}">
+                                <a href="{{ route('courses.show', $cat->id) }}">
                         {{ $categoryName }}
                     </a>
                             </h6>
@@ -150,142 +149,64 @@
                     </div>
                 </div>
             </div>
-        </div><div class="row">
-    <div class="tab-content" id="pills-tabContent">
-        <div class="tab-pane fade show active" id="pills-all" role="tabpanel" aria-labelledby="pills-all-tab">
-            <div class="row">
-                @forelse ($popularCourses as $pc)
-                @php
-                    // Получаем перевод для текущего языка
-                    $currentLocale = app()->getLocale();
-                    $courseTranslation = $pc->translations->firstWhere('locale', $currentLocale);
-                    $instructorTranslation = $pc->instructor?->translations->firstWhere('locale', $currentLocale);
-
-                    // Получаем изображение инструктора
-                    $instructorImage = null;
-                    if ($pc->instructor && $pc->instructor->image) {
-                        $instructorImagePath = public_path('uploads/users/' . $pc->instructor->image);
-                        if (file_exists($instructorImagePath)) {
-                            $instructorImage = asset('uploads/users/' . $pc->instructor->image);
-                        }
-                    }
-                    if (!$instructorImage) {
-                        $instructorImage = asset('images/default-user.jpg');
-                    }
-                @endphp
-                <div class="col-xl-4 col-md-6">
-                    <div class="contentCard contentCard--course">
-                        <div class="contentCard-top">
-                            <a href="#">
-                                <img src="{{ asset('uploads/courses/'.$pc->image) }}" alt="images"
-                                    class="img-fluid" onerror="this.src='{{ asset('images/default-course.jpg') }}'" />
-                            </a>
-                        </div>
-                        <div class="contentCard-bottom">
-                            <h5>
-                                <a href="{{ localeRoute('courseDetails', ['id' => encryptor('encrypt', $pc->id)]) }}"
-                                   class="font-title--card">
-                                   {{ $courseTranslation->title ?? $pc->title ?? 'No Title' }}
-                                </a>
-                            </h5>
-                            <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                @if($pc->instructor)
-                                <a href="{{ localeRoute('instructorProfile', encryptor('encrypt', $pc->instructor->id)) }}"
-                                    class="contentCard-user d-flex align-items-center">
-                                    <img src="{{ $instructorImage }}"
-                                        alt="client-image" class="rounded-circle" height="34" width="34"
-                                        onerror="this.src='{{ asset('images/default-user.jpg') }}'" />
-                                    <p class="font-para--md">
-                                        {{ $instructorTranslation->name ?? $pc->instructor->name ?? 'No Instructor' }}
-                                    </p>
-                                </a>
-                                @else
-                                <div class="contentCard-user d-flex align-items-center">
-                                    <img src="{{ asset('images/default-user.jpg') }}"
-                                        alt="client-image" class="rounded-circle" height="34" width="34" />
-                                    <p class="font-para--md">No Instructor</p>
-                                </div>
-                                @endif
-                                <div class="price">
-                                    <del>$95</del>
-                                    <span>$12</span>
-                                </div>
-                            </div>
-                            <div class="contentCard-more">
-                                <div class="d-flex align-items-center">
-                                    <div class="icon">
-                                        <img src="{{ asset('frontend/dist/images/icon/star.png') }}"
-                                            alt="star" />
-                                    </div>
-                                    <span>4.5</span>
-                                </div>
-                                <div class="eye d-flex align-items-center">
-                                    <div class="icon">
-                                        <img src="{{ asset('frontend/dist/images/icon/eye.png') }}"
-                                            alt="eye" />
-                                    </div>
-                                    <span>24,517</span>
-                                </div>
-                                <div class="book d-flex align-items-center">
-                                    <div class="icon">
-                                        <img src="{{ asset('frontend/dist/images/icon/book.png') }}"
-                                            alt="location" />
-                                    </div>
-                                    <span>{{ $pc->lesson ? $pc->lesson : 0 }} Lesson</span>
-                                </div>
-                                <div class="clock d-flex align-items-center">
-                                    <div class="icon">
-                                        <img src="{{ asset('frontend/dist/images/icon/Clock.png') }}"
-                                            alt="clock" />
-                                    </div>
-                                    <span>{{ $pc->duration ? $pc->duration : 0 }} Hours</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @empty
-                <div class="col-12">
-                    <div class="alert alert-info text-center">
-                        <h3>No Courses Available</h3>
-                        <p>There are no popular courses at the moment.</p>
-                    </div>
-                </div>
-                @endforelse
-            </div>
         </div>
-    </div>
-</div>
+
+        <div class="row">
+            <div class="tab-content" id="pills-tabContent">
+                <div class="tab-pane fade show active" id="pills-all" role="tabpanel" aria-labelledby="pills-all-tab">
                     <div class="row">
-                        <div class="col-lg-12 text-center">
-                            <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary">Browse all
-                                Courses</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="pills-design" role="tabpanel" aria-labelledby="pills-design-tab">
-                    <div class="row">
-                        @forelse ($designCourses as $dc)
+                        @forelse ($popularCourses as $pc)
+                        @php
+                            // Получаем перевод для текущего языка
+                            $currentLocale = app()->getLocale();
+                            $courseTranslation = $pc->translations->firstWhere('locale', $currentLocale);
+                            $instructorTranslation = $pc->instructor?->translations->firstWhere('locale', $currentLocale);
+
+                            // Получаем изображение инструктора
+                            $instructorImage = null;
+                            if ($pc->instructor && $pc->instructor->image) {
+                                $instructorImagePath = public_path('uploads/users/' . $pc->instructor->image);
+                                if (file_exists($instructorImagePath)) {
+                                    $instructorImage = asset('uploads/users/' . $pc->instructor->image);
+                                }
+                            }
+                            if (!$instructorImage) {
+                                $instructorImage = asset('images/default-user.jpg');
+                            }
+                        @endphp
                         <div class="col-xl-4 col-md-6">
                             <div class="contentCard contentCard--course">
                                 <div class="contentCard-top">
-                                    <a href="#"><img src="{{asset('uploads/courses/'.$dc->image)}}" alt="images" class="img-fluid" /></a>
+                                    <a href="#">
+                                        <img src="{{ asset('uploads/courses/'.$pc->image) }}" alt="images"
+                                            class="img-fluid" onerror="this.src='{{ asset('images/default-course.jpg') }}'" />
+                                    </a>
                                 </div>
                                 <div class="contentCard-bottom">
                                     <h5>
-                                        <a href="{{localeRoute('courseDetails', ['id' => encryptor('encrypt', $dc->id)])}}"
-                                            class="font-title--card">{{$dc->title}}</a>
+                                        <a href="{{ localeRoute('frontend.courses.show', $pc->id) }}"
+                                           class="font-title--card">
+                                           {{ $courseTranslation->title ?? $pc->title ?? 'No Title' }}
+                                        </a>
                                     </h5>
                                     <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                        <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $dc->instructor?->id))}}"
+                                        @if($pc->instructor)
+                                        <a href="{{ localeRoute('instructor.show', $pc->instructor->id) }}"
                                             class="contentCard-user d-flex align-items-center">
-                                            <img src="{{ $instructor->image
-    ? asset('uploads/users/' . $instructor->image)
-    : asset('images/default_instructor.jpg') }}"
-    alt="{{ $instructor->getTranslation('name', app()->getLocale()) }}"
-                                                class="rounded-circle" height="34" width="34" />
-                                            <p class="font-para--md">{{ $instructor->getTranslation('designation', app()->getLocale()) }}</p>
+                                            <img src="{{ $instructorImage }}"
+                                                alt="client-image" class="rounded-circle" height="34" width="34"
+                                                onerror="this.src='{{ asset('images/default-user.jpg') }}'" />
+                                            <p class="font-para--md">
+                                                {{ $instructorTranslation->name ?? $pc->instructor->name ?? 'No Instructor' }}
+                                            </p>
                                         </a>
+                                        @else
+                                        <div class="contentCard-user d-flex align-items-center">
+                                            <img src="{{ asset('images/default-user.jpg') }}"
+                                                alt="client-image" class="rounded-circle" height="34" width="34" />
+                                            <p class="font-para--md">No Instructor</p>
+                                        </div>
+                                        @endif
                                         <div class="price">
                                             <del>$95</del>
                                             <span>$12</span>
@@ -294,254 +215,44 @@
                                     <div class="contentCard-more">
                                         <div class="d-flex align-items-center">
                                             <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/star.png')}}" alt="star" />
+                                                <img src="{{ asset('frontend/dist/images/icon/star.png') }}"
+                                                    alt="star" />
                                             </div>
                                             <span>4.5</span>
                                         </div>
                                         <div class="eye d-flex align-items-center">
                                             <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/eye.png')}}" alt="eye" />
+                                                <img src="{{ asset('frontend/dist/images/icon/eye.png') }}"
+                                                    alt="eye" />
                                             </div>
                                             <span>24,517</span>
                                         </div>
                                         <div class="book d-flex align-items-center">
                                             <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/book.png')}}" alt="location" />
+                                                <img src="{{ asset('frontend/dist/images/icon/book.png') }}"
+                                                    alt="location" />
                                             </div>
-                                            <span>{{$dc->lesson?$dc->lesson:0}} Lesson</span>
+                                            <span>{{ $pc->lesson ? $pc->lesson : 0 }} Lesson</span>
                                         </div>
                                         <div class="clock d-flex align-items-center">
                                             <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/Clock.png')}}" alt="clock" />
+                                                <img src="{{ asset('frontend/dist/images/icon/Clock.png') }}"
+                                                    alt="clock" />
                                             </div>
-                                            <span>{{$dc->duration?$dc->duration:0}} Hours</span>
+                                            <span>{{ $pc->duration ? $pc->duration : 0 }} Hours</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         @empty
-                        <div class="col-xl-4 col-md-6">
-                            <div class="contentCard contentCard--course">
+                        <div class="col-12">
+                            <div class="alert alert-info text-center">
                                 <h3>No Courses Available</h3>
+                                <p>There are no popular courses at the moment.</p>
                             </div>
                         </div>
                         @endforelse
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-12 text-center">
-                            <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary">Browse all
-                                Courses</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="pills-dev" role="tabpanel" aria-labelledby="pills-dev-tab">
-                    <div class="row">
-                        @forelse ($developmentCourses as $dv)
-                        <div class="col-xl-4 col-md-6">
-                            <div class="contentCard contentCard--course">
-                                <div class="contentCard-top">
-                                    <a href="#"><img src="{{asset('uploads/courses/'.$dv->image)}}" alt="images"
-                                            class="img-fluid" /></a>
-                                </div>
-                                <div class="contentCard-bottom">
-                                    <h5>
-                                        <a href="{{localeRoute('courseDetails', ['id' => encryptor('encrypt', $dv->id)])}}"
-                                            class="font-title--card">{{$dv->title}}</a>
-                                    </h5>
-                                    <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                        <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $dv->instructor?->id))}}"
-                                            class="contentCard-user d-flex align-items-center">
-                                            <img src="{{asset('uploads/users/'.$dv?->instructor->image)}}" alt="client-image"
-                                                class="rounded-circle" height="34" width="34" />
-                                            <p class="font-para--md">{{$dv?->instructor->name}}</p>
-                                        </a>
-                                        <div class="price">
-                                            <del>$95</del>
-                                            <span>$12</span>
-                                        </div>
-                                    </div>
-                                    <div class="contentCard-more">
-                                        <div class="d-flex align-items-center">
-                                            <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/star.png')}}" alt="star" />
-                                            </div>
-                                            <span>4.5</span>
-                                        </div>
-                                        <div class="eye d-flex align-items-center">
-                                            <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/eye.png')}}" alt="eye" />
-                                            </div>
-                                            <span>24,517</span>
-                                        </div>
-                                        <div class="book d-flex align-items-center">
-                                            <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/book.png')}}" alt="location" />
-                                            </div>
-                                            <span>{{$dv->lesson?$dv->lesson:0}} Lesson</span>
-                                        </div>
-                                        <div class="clock d-flex align-items-center">
-                                            <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/Clock.png')}}" alt="clock" />
-                                            </div>
-                                            <span>{{$dv->duration?$dv->duration:0}} Hours</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @empty
-                        <div class="col-xl-4 col-md-6">
-                            <div class="contentCard contentCard--course">
-                                <h3>No Courses Available</h3>
-                            </div>
-                        </div>
-                        @endforelse
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-12 text-center">
-                            <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary">Browse all
-                                Courses</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="pills-bus" role="tabpanel" aria-labelledby="pills-bus-tab">
-                    <div class="row">
-                        @forelse ($businessCourses as $bc)
-                        <div class="col-xl-4 col-md-6">
-                            <div class="contentCard contentCard--course">
-                                <div class="contentCard-top">
-                                    <a href="#"><img src="{{asset('uploads/courses/'.$bc->image)}}" alt="images"
-                                            class="img-fluid" /></a>
-                                </div>
-                                <div class="contentCard-bottom">
-                                    <h5>
-                                        <a href="{{localeRoute('courseDetails', ['id' => encryptor('encrypt', $bc->id)])}}"
-                                            class="font-title--card">{{$bc->title}}</a>
-                                    </h5>
-                                    <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                        <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $bc->instructor?->id))}}"
-                                            class="contentCard-user d-flex align-items-center">
-                                            <img src="{{asset('uploads/users/'.$bc?->instructor->image)}}" alt="client-image"
-                                                class="rounded-circle" height="34" width="34" />
-                                            <p class="font-para--md">{{$bc?->instructor->name}}</p>
-                                        </a>
-                                        <div class="price">
-                                            <del>$95</del>
-                                            <span>$12</span>
-                                        </div>
-                                    </div>
-                                    <div class="contentCard-more">
-                                        <div class="d-flex align-items-center">
-                                            <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/star.png')}}" alt="star" />
-                                            </div>
-                                            <span>4.5</span>
-                                        </div>
-                                        <div class="eye d-flex align-items-center">
-                                            <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/eye.png')}}" alt="eye" />
-                                            </div>
-                                            <span>24,517</span>
-                                        </div>
-                                        <div class="book d-flex align-items-center">
-                                            <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/book.png')}}" alt="location" />
-                                            </div>
-                                            <span>{{$bc->lesson?$bc->lesson:0}} Lesson</span>
-                                        </div>
-                                        <div class="clock d-flex align-items-center">
-                                            <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/Clock.png')}}" alt="clock" />
-                                            </div>
-                                            <span>{{$bc->duration?$bc->duration:0}} Hours</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @empty
-                        <div class="col-xl-4 col-md-6">
-                            <div class="contentCard contentCard--course">
-                                <h3>No Courses Available</h3>
-                            </div>
-                        </div>
-                        @endforelse
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-12 text-center">
-                            <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary">Browse all
-                                Courses</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="pills-its" role="tabpanel" aria-labelledby="pills-its-tab">
-                    <div class="row">
-                        @forelse ($itCourses as $ic)
-                        <div class="col-xl-4 col-md-6">
-                            <div class="contentCard contentCard--course">
-                                <div class="contentCard-top">
-                                    <a href="#"><img src="{{asset('uploads/courses/'.$ic->image)}}" alt="images"
-                                            class="img-fluid" /></a>
-                                </div>
-                                <div class="contentCard-bottom">
-                                    <h5>
-                                        <a href="{{localeRoute('courseDetails', ['id' => encryptor('encrypt', $ic->id)])}}"
-                                            class="font-title--card">{{$ic->title}}</a>
-                                    </h5>
-                                    <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                        <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $ic->instructor?->id))}}"
-                                            class="contentCard-user d-flex align-items-center">
-                                            <img src="{{asset('uploads/users/'.$ic?->instructor->image)}}" alt="client-image"
-                                                class="rounded-circle" height="34" width="34" />
-                                            <p class="font-para--md">{{$ic?->instructor->name}}</p>
-                                        </a>
-                                        <div class="price">
-                                            <del>$95</del>
-                                            <span>$12</span></div>
-                                    </div>
-                                    <div class="contentCard-more">
-                                        <div class="d-flex align-items-center">
-                                            <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/star.png')}}" alt="star" />
-                                            </div>
-                                            <span>4.5</span>
-                                        </div>
-                                        <div class="eye d-flex align-items-center">
-                                            <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/eye.png')}}" alt="eye" />
-                                            </div>
-                                            <span>24,517</span>
-                                        </div>
-                                        <div class="book d-flex align-items-center">
-                                            <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/book.png')}}" alt="location" />
-                                            </div>
-                                            <span>{{$ic->lesson?$ic->lesson:0}} Lesson</span>
-                                        </div>
-                                        <div class="clock d-flex align-items-center">
-                                            <div class="icon">
-                                                <img src="{{asset('frontend/dist/images/icon/Clock.png')}}" alt="clock" />
-                                            </div>
-                                            <span>{{$ic->duration?$ic->duration:0}} Hours</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @empty
-                        <div class="col-xl-4 col-md-6">
-                            <div class="contentCard contentCard--course">
-                                <h3>No Courses Available</h3>
-                            </div>
-                        </div>
-                        @endforelse
-                    </div>
-                    <div class="row">
-                        <div class="col-lg-12 text-center">
-                            <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary">Browse all
-                                Courses</a>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1049,61 +760,65 @@
         <img src="{{ asset('frontend/dist/images/shape/triangel2.png') }}" alt="shape" class="img-fluid shape02" />
     </div>
 </section>
-
 <!--  Latest Events Featured Starts Here -->
 <section class="section section--bg-offwhite-three latest-events-featured main-events-featured">
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <h3 class="font-title--md">Latest Events</h3>
+                <h3 class="font-title--md">{{ __('Latest Events') }}</h3>
             </div>
         </div>
         <div class="row">
             <div class="col-12 position-relative px-0 mx-0">
                 <div class="eventsSlider">
-                    @forelse ($course as $c)
+                    @forelse ($events as $event)
                     <div class="contentCard contentCard--event contentCard--space">
                         <div class="contentCard-top">
-                            <a href="#"><img src="{{asset('uploads/courses/'.$c->image)}}" alt="images"
-                                    class="img-fluid" /></a>
+                            <a href="#">
+                                <img src="{{ asset('uploads/events/'.$event->image) }}" alt="{{ $event->title }}"
+                                    class="img-fluid" onerror="this.src='{{ asset('images/default-event.jpg') }}'" />
+                            </a>
                         </div>
                         <div class="contentCard-bottom">
                             <h5>
-                                <a href="{{localeRoute('courseDetails', encryptor('encrypt', $c->id))}}"
-                                    class="font-title--card">{{$c->title}}</a>
+                                <a href="#" class="font-title--card">{{ $event->title }}</a>
                             </h5>
                             <div class="contentCard-more">
                                 <div class="d-flex align-items-center">
                                     <div class="icon">
-                                        <img src="{{asset('frontend/dist/images/icon/location.png')}}"
+                                        <img src="{{ asset('frontend/dist/images/icon/location.png') }}"
                                             alt="location" />
                                     </div>
-                                    <span>Chicago, Illinois</span>
+                                    <span>{{ $event->location ?? 'Location not specified' }}</span>
                                 </div>
                                 <div class="d-flex align-items-center">
                                     <div class="icon">
-                                        <img src="{{asset('frontend/dist/images/icon/calendar.png')}}"
+                                        <img src="{{ asset('frontend/dist/images/icon/calendar.png') }}"
                                             alt="calendar" />
                                     </div>
-                                    <span>29th jan, 2020</span>
+                                    <span>{{ $event->date ? \Carbon\Carbon::parse($event->date)->format('jS M, Y') : 'Date not specified' }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     @empty
+                    <div class="col-12 text-center">
+                        <p>{{ __('No events available') }}</p>
+                    </div>
                     @endforelse
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-lg-12 text-center">
-                <a href="{{localeRoute('searchCourse')}}" class="button button-lg button--primary mt-lg-5 mt-5">Browse all
-                    events</a>
+                <a href="{{ route('event.search', ['locale' => app()->getLocale()]) }}" class="button button-lg button--primary mt-lg-5 mt-5">
+    {{ __('Browse all events') }}
+</a>
             </div>
         </div>
     </div>
     <div class="main-events-featured-shape">
-        <img src="{{asset('frontend/dist/images/shape/triangel3.png')}}" alt="shape" class="img-fluid shape01" />
+        <img src="{{ asset('frontend/dist/images/shape/triangel3.png') }}" alt="shape" class="img-fluid shape01" />
     </div>
 </section>
 
@@ -1181,15 +896,19 @@
 
 @endsection
 
-@push('scripts')
 
+@push('js')
 <script>
-    function drop() {
-                    const dropBox = document.querySelector(".categoryDrop");
-                    const arrow = document.querySelector(".select-button button svg");
-                    arrow.classList.toggle("appear");
-                    dropBox.classList.toggle("appear");
-                }
+    $(document).ready(function () {
+        $('.testimonial--one').slick({
+            infinite: true,
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 2000,
+            dots: true,
+            arrows: false,
+        });
+    });
 </script>
-
 @endpush

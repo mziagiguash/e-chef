@@ -20,8 +20,8 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('quiz.index')}}">Quizzes</a></li>
+                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{route('quiz.index')}}">Quizzes</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0)">All Quiz</a></li>
                 </ol>
             </div>
@@ -82,7 +82,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h4 class="card-title">All Quizzes List</h4>
-                        <a href="{{ localeRoute('quiz.create', ['lang' => $locale]) }}" class="btn btn-primary">+ Add new</a>
+                        <a href="{{ route('quiz.create', ['lang' => $locale]) }}" class="btn btn-primary">+ Add new</a>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -175,8 +175,15 @@
                                                     <small class="text-muted">Please assign a lesson to this quiz</small>
                                                 @endif
                                             </td>
-                                            <td>
+                                             <td>
                                                 <span class="badge badge-info">{{ $quiz->questions_count }}</span>
+                                                @if($quiz->questions_count > 0)
+                                                    <br>
+                                                    <a href="{{ route('question.index', ['quiz_id' => $quiz->id, 'lang' => $locale]) }}"
+                                                       class="btn btn-sm btn-outline-primary mt-1">
+                                                        Manage Questions
+                                                    </a>
+                                                @endif
                                             </td>
                                             <td>
                                                 {{ $quiz->time_limit > 0 ? $quiz->time_limit . ' min' : 'No limit' }}
@@ -194,15 +201,15 @@
                                             </td>
                                             <td>
                                                 <div class="d-flex">
-                                                    <a href="{{ localeRoute('quiz.show', ['quiz' => encryptor('encrypt', $quiz->id), 'lang' => $locale]) }}"
+                                                    <a href="{{ route('quiz.show', ['quiz' => encryptor('encrypt', $quiz->id), 'lang' => $locale]) }}"
                                                        class="btn btn-info btn-sm mr-1" title="View">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    <a href="{{ localeRoute('quiz.edit', ['quiz' => encryptor('encrypt', $quiz->id), 'lang' => $locale]) }}"
+                                                    <a href="{{ route('quiz.edit', ['quiz' => encryptor('encrypt', $quiz->id), 'lang' => $locale]) }}"
                                                        class="btn btn-primary btn-sm mr-1" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <form action="{{ localeRoute('quiz.destroy', ['quiz' => encryptor('encrypt', $quiz->id)]) }}"
+                                                    <form action="{{ route('quiz.destroy', ['quiz' => encryptor('encrypt', $quiz->id)]) }}"
                                                           method="POST" class="d-inline">
                                                         @csrf
                                                         @method('DELETE')
@@ -295,9 +302,9 @@
                                     </span>
                                 </p>
                                 <div class="btn-group">
-                                    <a href="{{ localeRoute('quiz.show', ['quiz' => encryptor('encrypt', $quiz->id), 'lang' => $locale]) }}"
+                                    <a href="{{ route('quiz.show', ['quiz' => encryptor('encrypt', $quiz->id), 'lang' => $locale]) }}"
                                        class="btn btn-info btn-sm">View</a>
-                                    <a href="{{ localeRoute('quiz.edit', ['quiz' => encryptor('encrypt', $quiz->id), 'lang' => $locale]) }}"
+                                    <a href="{{ route('quiz.edit', ['quiz' => encryptor('encrypt', $quiz->id), 'lang' => $locale]) }}"
                                        class="btn btn-primary btn-sm">Edit</a>
                                 </div>
                             </div>

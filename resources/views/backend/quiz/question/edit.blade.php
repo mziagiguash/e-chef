@@ -2,7 +2,6 @@
 @section('title', __('Edit Question'))
 
 @push('styles')
-<!-- Pick date -->
 <link rel="stylesheet" href="{{asset('vendor/pickadate/themes/default.css')}}">
 <link rel="stylesheet" href="{{asset('vendor/pickadate/themes/default.date.css')}}">
 @endpush
@@ -20,7 +19,7 @@
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">{{ __('Home') }}</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('question.index') }}">{{ __('Questions') }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('question.index', ['lang' => $currentLocale]) }}">{{ __('Questions') }}</a></li>
                     <li class="breadcrumb-item active">{{ __('Edit Question') }}</li>
                 </ol>
             </div>
@@ -59,28 +58,39 @@
                             @method('PUT')
                             <input type="hidden" name="current_locale" value="{{ $currentLocale }}">
 
+                            <!-- Основные поля (не зависят от языка) -->
                             <div class="row">
                                 <div class="col-lg-6 col-md-6 col-sm-12">
-    <div class="form-group">
-        <label class="form-label">{{ __('Quiz') }} <span class="text-danger">*</span></label>
-        <select class="form-control @error('quiz_id') is-invalid @enderror" name="quiz_id" required id="quizSelect">
-            <option value="">{{ __('Select Quiz') }}</option>
-            @forelse ($quizzes as $quiz)
-            <option value="{{ $quiz->id }}" {{ old('quiz_id', $question->quiz_id) == $quiz->id ? 'selected' : '' }}
-                    data-title-en="{{ $quiz->getTranslation('en', 'title') }}"
-                    data-title-ru="{{ $quiz->getTranslation('ru', 'title') }}"
-                    data-title-ka="{{ $quiz->getTranslation('ka', 'title') }}">
-                {{ $quiz->getTranslation($currentLocale, 'title') }}
-            </option>
-            @empty
-            <option value="">{{ __('No Quizzes Found') }}</option>
-            @endforelse
-        </select>
-        @error('quiz_id')
-        <span class="invalid-feedback">{{ $message }}</span>
-        @enderror
-    </div>
-</div>
+                                    <div class="form-group">
+                                        <label class="form-label">{{ __('Quiz') }} <span class="text-danger">*</span></label>
+
+                                        @if($quizzes->isEmpty())
+                                        <div class="alert alert-warning">
+                                            <strong>Warning:</strong> No quizzes found in the system.
+                                            <a href="{{ route('quiz.create', ['lang' => $currentLocale]) }}" class="alert-link">
+                                                Create a quiz first
+                                            </a>
+                                        </div>
+                                        @endif
+
+                                        <select class="form-control @error('quiz_id') is-invalid @enderror" name="quiz_id" required id="quizSelect">
+                                            <option value="">{{ __('Select Quiz') }}</option>
+                                            @forelse ($quizzes as $quiz)
+                                            <option value="{{ $quiz->id }}" {{ old('quiz_id', $question->quiz_id) == $quiz->id ? 'selected' : '' }}
+                                                    data-title-en="{{ $quiz->getTranslation('title', 'en') }}"
+                                                    data-title-ru="{{ $quiz->getTranslation('title', 'ru') }}"
+                                                    data-title-ka="{{ $quiz->getTranslation('title', 'ka') }}">
+                                                {{ $quiz->getTranslation('title', $currentLocale) }} (ID: {{ $quiz->id }})
+                                            </option>
+                                            @empty
+                                            <option value="">{{ __('No Quizzes Available') }}</option>
+                                            @endforelse
+                                        </select>
+                                        @error('quiz_id')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
                                 <div class="col-lg-6 col-md-6 col-sm-12">
                                     <div class="form-group">
                                         <label class="form-label">{{ __('Question Type') }} <span class="text-danger">*</span></label>
@@ -138,12 +148,44 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <div class="col-lg-3 col-md-6 col-sm-12" id="maxChoicesContainer" style="display: none;">
+                                <div class="col-lg-3 col-md-6 col-sm-12" id="correctOptionContainer" style="display: none;">
                                     <div class="form-group">
-                                        <label class="form-label">{{ __('Max Choices') }}</label>
-                                        <input type="number" class="form-control @error('max_choices') is-invalid @enderror"
-                                               name="max_choices" value="{{ old('max_choices', $question->max_choices) }}" min="1">
-                                        @error('max_choices')
+                                        <label class="form-label">{{ __('Correct Option') }} <span class="text-danger">*</span></label>
+                                        <div id="singleCorrectOptions" style="display: none;">
+                                            <select class="form-control @error('correct_option') is-invalid @enderror" name="correct_option" id="correctOptionSelect">
+                                                <option value="">{{ __('Select Option') }}</option>
+                                                <option value="a" {{ old('correct_option', $question->correct_option) == 'a' ? 'selected' : '' }}>A</option>
+                                                <option value="b" {{ old('correct_option', $question->correct_option) == 'b' ? 'selected' : '' }}>B</option>
+                                                <option value="c" {{ old('correct_option', $question->correct_option) == 'c' ? 'selected' : '' }}>C</option>
+                                                <option value="d" {{ old('correct_option', $question->correct_option) == 'd' ? 'selected' : '' }}>D</option>
+                                            </select>
+                                        </div>
+                                        <div id="multipleCorrectOptions" style="display: none;">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="correct_options[]" value="a" id="correctA"
+                                                    {{ is_array(old('correct_options', $question->correct_options)) && in_array('a', old('correct_options', $question->correct_options)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="correctA">A</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="correct_options[]" value="b" id="correctB"
+                                                    {{ is_array(old('correct_options', $question->correct_options)) && in_array('b', old('correct_options', $question->correct_options)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="correctB">B</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="correct_options[]" value="c" id="correctC"
+                                                    {{ is_array(old('correct_options', $question->correct_options)) && in_array('c', old('correct_options', $question->correct_options)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="correctC">C</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="correct_options[]" value="d" id="correctD"
+                                                    {{ is_array(old('correct_options', $question->correct_options)) && in_array('d', old('correct_options', $question->correct_options)) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="correctD">D</label>
+                                            </div>
+                                        </div>
+                                        @error('correct_option')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                        @error('correct_options')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
                                     </div>
@@ -159,44 +201,81 @@
 
                                     <h6 class="text-primary mt-4">{{ $localeName }} {{ __('Translation') }}</h6>
 
-                                    @php
-                                        $translation = $question->translations->firstWhere('locale', $localeCode);
-                                    @endphp
-
                                     <div class="row">
                                         <div class="col-lg-12 col-md-12 col-sm-12">
                                             <div class="form-group">
                                                 <label class="form-label">{{ __('Question Content') }} <span class="text-danger">*</span></label>
-                                                <textarea class="form-control @error('translations.'.$localeCode.'.content') is-invalid @enderror"
-                                                          name="translations[{{ $localeCode }}][content]"
+                                                <textarea class="form-control @error('content.'.$localeCode) is-invalid @enderror"
+                                                          name="content[{{ $localeCode }}]"
                                                           rows="3"
                                                           placeholder="{{ __('Enter question content') }}"
-                                                          {{ $localeCode === 'en' ? 'required' : '' }}>{{ old('translations.'.$localeCode.'.content', $translation->content ?? '') }}</textarea>
-                                                @error('translations.'.$localeCode.'.content')
+                                                          {{ $localeCode === 'en' ? 'required' : '' }}>{{ old('content.'.$localeCode, $question->getTranslation('content', $localeCode)) }}</textarea>
+                                                @error('content.'.$localeCode)
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                                 @enderror
                                             </div>
                                         </div>
                                     </div>
 
-                                    <input type="hidden" name="translations[{{ $localeCode }}][locale]" value="{{ $localeCode }}">
-                                    @if($translation)
-                                    <input type="hidden" name="translations[{{ $localeCode }}][id]" value="{{ $translation->id }}">
-                                    @endif
+                                    <!-- Options for single and multiple choice questions -->
+                                    @php
+                                        $options = $question->getTranslation('options', $localeCode) ?? [];
+                                    @endphp
+                                    <div class="row mt-4 options-container" id="options-container-{{ $localeCode }}" style="display: none;">
+                                        <div class="col-12">
+                                            <h6 class="mb-3">{{ __('Options') }} ({{ $localeName }})</h6>
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label class="form-label">{{ __('Option A') }} <span class="text-danger">*</span></label>
+                                                        <input type="text" class="form-control @error('options.'.$localeCode.'.a') is-invalid @enderror"
+                                                               name="options[{{ $localeCode }}][a]" value="{{ old('options.'.$localeCode.'.a', $options['a'] ?? '') }}" required>
+                                                        @error('options.'.$localeCode.'.a')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label class="form-label">{{ __('Option B') }} <span class="text-danger">*</span></label>
+                                                        <input type="text" class="form-control @error('options.'.$localeCode.'.b') is-invalid @enderror"
+                                                               name="options[{{ $localeCode }}][b]" value="{{ old('options.'.$localeCode.'.b', $options['b'] ?? '') }}" required>
+                                                        @error('options.'.$localeCode.'.b')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label class="form-label">{{ __('Option C') }}</label>
+                                                        <input type="text" class="form-control @error('options.'.$localeCode.'.c') is-invalid @enderror"
+                                                               name="options[{{ $localeCode }}][c]" value="{{ old('options.'.$localeCode.'.c', $options['c'] ?? '') }}">
+                                                        @error('options.'.$localeCode.'.c')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label class="form-label">{{ __('Option D') }}</label>
+                                                        <input type="text" class="form-control @error('options.'.$localeCode.'.d') is-invalid @enderror"
+                                                               name="options[{{ $localeCode }}][d]" value="{{ old('options.'.$localeCode.'.d', $options['d'] ?? '') }}">
+                                                        @error('options.'.$localeCode.'.d')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" name="locale[{{ $localeCode }}]" value="{{ $localeCode }}">
                                 </div>
                                 @endforeach
-                            </div>
-
-                            <!-- Динамические опции (только для single и multiple choice) -->
-                            <div class="row mt-4" id="optionsContainer" style="display: none;">
-                                <div class="col-12">
-                                    <h5 class="mb-3">{{ __('Options') }}</h5>
-                                    <p class="text-muted">{{ __('Edit options in the options management section') }}</p>
-                                    <a href="{{ route('option.index', ['question_id' => $question->id, 'lang' => $currentLocale]) }}"
-                                       class="btn btn-info btn-sm">
-                                        <i class="la la-list"></i> {{ __('Manage Options') }}
-                                    </a>
-                                </div>
                             </div>
 
                             <div class="col-lg-12 col-md-12 col-sm-12 mt-3">
@@ -213,11 +292,12 @@
 @endsection
 
 @push('scripts')
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Document loaded, initializing question form...');
+
     // Обновляем hidden поле при переключении табов
     const questionTabs = document.querySelectorAll('#questionLangTabs .nav-link');
     questionTabs.forEach(tab => {
@@ -225,93 +305,181 @@ document.addEventListener('DOMContentLoaded', function() {
             const target = event.target;
             const locale = target.id.replace('tab-', '');
             document.querySelector('input[name="current_locale"]').value = locale;
+            updateQuizTitles(locale);
         });
     });
 
     // Показ/скрытие полей в зависимости от типа вопроса
     const questionType = document.getElementById('questionType');
-    const maxChoicesContainer = document.getElementById('maxChoicesContainer');
-    const optionsContainer = document.getElementById('optionsContainer');
+    const correctOptionContainer = document.getElementById('correctOptionContainer');
+    const singleCorrectOptions = document.getElementById('singleCorrectOptions');
+    const multipleCorrectOptions = document.getElementById('multipleCorrectOptions');
 
     function toggleFields() {
         const type = questionType.value;
+        const optionContainers = document.querySelectorAll('.options-container');
+        const correctOptionSelect = document.getElementById('correctOptionSelect');
 
-        if (type === 'multiple') {
-            maxChoicesContainer.style.display = 'block';
-            optionsContainer.style.display = 'block';
-        } else if (type === 'single') {
-            maxChoicesContainer.style.display = 'none';
-            optionsContainer.style.display = 'block';
+        console.log('Question type changed to:', type);
+
+        if (type === 'single' || type === 'multiple') {
+            correctOptionContainer.style.display = 'block';
+            optionContainers.forEach(container => {
+                container.style.display = 'block';
+                // Делаем опции A и B обязательными
+                const inputs = container.querySelectorAll('input[type="text"]');
+                inputs[0].setAttribute('required', 'required'); // Option A
+                inputs[1].setAttribute('required', 'required'); // Option B
+            });
+
+            // Показываем соответствующий тип выбора правильного ответа
+            if (type === 'single') {
+                singleCorrectOptions.style.display = 'block';
+                multipleCorrectOptions.style.display = 'none';
+                if (correctOptionSelect) {
+                    correctOptionSelect.setAttribute('required', 'required');
+                }
+            } else {
+                singleCorrectOptions.style.display = 'none';
+                multipleCorrectOptions.style.display = 'block';
+                if (correctOptionSelect) {
+                    correctOptionSelect.removeAttribute('required');
+                }
+            }
         } else {
-            maxChoicesContainer.style.display = 'none';
-            optionsContainer.style.display = 'none';
+            correctOptionContainer.style.display = 'none';
+            singleCorrectOptions.style.display = 'none';
+            multipleCorrectOptions.style.display = 'none';
+            if (correctOptionSelect) {
+                correctOptionSelect.removeAttribute('required');
+            }
+            optionContainers.forEach(container => {
+                container.style.display = 'none';
+                // Убираем обязательность опций
+                const inputs = container.querySelectorAll('input[type="text"]');
+                inputs.forEach(input => input.removeAttribute('required'));
+            });
         }
     }
 
-    questionType.addEventListener('change', toggleFields);
-    toggleFields(); // Инициализация при загрузке
+    if (questionType) {
+        questionType.addEventListener('change', toggleFields);
+        // Инициализация при загрузке с учетом текущего типа вопроса
+        toggleFields();
+    }
 
     // Валидация формы
     const form = document.querySelector('form');
-    form.addEventListener('submit', function(e) {
-        let isValid = true;
-        const quizSelect = document.querySelector('select[name="quiz_id"]');
-        const questionTypeSelect = document.querySelector('select[name="type"]');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            const quizSelect = document.querySelector('select[name="quiz_id"]');
+            const questionTypeSelect = document.querySelector('select[name="type"]');
 
-        if (!quizSelect.value) {
-            quizSelect.classList.add('is-invalid');
-            isValid = false;
-        } else {
-            quizSelect.classList.remove('is-invalid');
-        }
+            // Проверка выбора квиза
+            if (!quizSelect || !quizSelect.value) {
+                if (quizSelect) quizSelect.classList.add('is-invalid');
+                isValid = false;
+                console.error('Quiz selection is required');
+            } else {
+                quizSelect.classList.remove('is-invalid');
+            }
 
-        if (!questionTypeSelect.value) {
-            questionTypeSelect.classList.add('is-invalid');
-            isValid = false;
-        } else {
-            questionTypeSelect.classList.remove('is-invalid');
-        }
+            // Проверка типа вопроса
+            if (!questionTypeSelect || !questionTypeSelect.value) {
+                if (questionTypeSelect) questionTypeSelect.classList.add('is-invalid');
+                isValid = false;
+                console.error('Question type is required');
+            } else {
+                questionTypeSelect.classList.remove('is-invalid');
+            }
 
-        // Проверка, что английский перевод заполнен (обязательное поле)
-        const enTranslation = document.querySelector('textarea[name="translations[en][content]"]');
-        if (!enTranslation.value.trim()) {
-            enTranslation.classList.add('is-invalid');
-            isValid = false;
-        } else {
-            enTranslation.classList.remove('is-invalid');
-        }
+            // Проверка, что английский перевод заполнен
+            const enTranslation = document.querySelector('textarea[name="content[en]"]');
+            if (enTranslation && !enTranslation.value.trim()) {
+                enTranslation.classList.add('is-invalid');
+                isValid = false;
+                console.error('English translation is required');
+            } else if (enTranslation) {
+                enTranslation.classList.remove('is-invalid');
+            }
 
-        if (!isValid) {
-            e.preventDefault();
-            alert('{{ __("Please fill required fields") }}');
-        }
-    });
-});
-// Обновление названий квизов при переключении языковых табов
-document.addEventListener('DOMContentLoaded', function() {
-    const questionTabs = document.querySelectorAll('#questionLangTabs .nav-link');
-    const quizSelect = document.getElementById('quizSelect');
+            // Проверка правильного ответа для single и multiple choice
+            const type = questionTypeSelect ? questionTypeSelect.value : '';
 
+            if (type === 'single') {
+                const correctOptionSelect = document.getElementById('correctOptionSelect');
+                if (correctOptionSelect && !correctOptionSelect.value) {
+                    correctOptionSelect.classList.add('is-invalid');
+                    isValid = false;
+                    console.error('Correct option is required for single choice questions');
+                } else if (correctOptionSelect) {
+                    correctOptionSelect.classList.remove('is-invalid');
+                }
+            } else if (type === 'multiple') {
+                const correctOptions = document.querySelectorAll('input[name="correct_options[]"]:checked');
+                if (correctOptions.length === 0) {
+                    document.getElementById('multipleCorrectOptions').classList.add('is-invalid');
+                    isValid = false;
+                    console.error('At least one correct option is required for multiple choice questions');
+                } else {
+                    document.getElementById('multipleCorrectOptions').classList.remove('is-invalid');
+                }
+            }
+
+            // Проверка опций для single и multiple choice
+            if (type === 'single' || type === 'multiple') {
+                const activeTab = document.querySelector('.tab-pane.show.active');
+                if (activeTab) {
+                    const optionA = activeTab.querySelector('input[name*="[a]"]');
+                    const optionB = activeTab.querySelector('input[name*="[b]"]');
+
+                    if (optionA && !optionA.value.trim()) {
+                        optionA.classList.add('is-invalid');
+                        isValid = false;
+                        console.error('Option A is required');
+                    }
+                    if (optionB && !optionB.value.trim()) {
+                        optionB.classList.add('is-invalid');
+                        isValid = false;
+                        console.error('Option B is required');
+                    }
+                }
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                alert('{{ __("Please fill all required fields") }}');
+
+                // Показываем первую вкладку с ошибкой
+                const firstErrorTab = document.querySelector('.is-invalid');
+                if (firstErrorTab) {
+                    firstErrorTab.closest('.tab-pane').classList.add('show', 'active');
+                    const tabId = firstErrorTab.closest('.tab-pane').id.replace('content-', 'tab-');
+                    document.getElementById(tabId).classList.add('active');
+                }
+            }
+        });
+    }
+
+    // Обновление названий квизов при переключении языковых табов
     function updateQuizTitles(locale) {
-        if (!quizSelect) return;
+        const quizSelect = document.getElementById('quizSelect');
+        if (!quizSelect) {
+            console.error('Quiz select element not found');
+            return;
+        }
 
         const options = quizSelect.querySelectorAll('option');
         options.forEach(option => {
             if (option.value !== '') {
                 const title = option.getAttribute('data-title-' + locale) ||
-                             option.getAttribute('data-title-en');
+                             option.getAttribute('data-title-en') ||
+                             option.textContent;
                 option.textContent = title;
             }
         });
     }
-
-    questionTabs.forEach(tab => {
-        tab.addEventListener('shown.bs.tab', function (event) {
-            const target = event.target;
-            const locale = target.id.replace('tab-', '');
-            updateQuizTitles(locale);
-        });
-    });
 
     // Инициализация при загрузке
     const activeTab = document.querySelector('#questionLangTabs .nav-link.active');
@@ -343,8 +511,13 @@ document.addEventListener('DOMContentLoaded', function() {
 .text-danger {
     color: #dc3545 !important;
 }
-.text-muted {
-    color: #6c757d !important;
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+}
+.form-check {
+    margin-bottom: 0.5rem;
 }
 </style>
 @endpush

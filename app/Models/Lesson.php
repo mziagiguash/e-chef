@@ -15,10 +15,24 @@ class Lesson extends Model
 
     protected $fillable = [
         'course_id',
-        'quiz_id',
+        'quiz_id', // ← добавить
+        'order',
+        'is_active',
     ];
 
-    protected $dates = ['deleted_at'];
+    protected $casts = [
+        'is_active' => 'boolean',
+        'deleted_at' => 'datetime',
+    ];
+
+    protected $appends = [
+        'title',
+        'description',
+        'notes',
+        'has_quiz',
+        'materials_count',
+        'material_types'
+    ];
 
     public function course(): BelongsTo
     {

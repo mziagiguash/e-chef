@@ -388,38 +388,37 @@
                     </div>
                 </div>
 
-                {{-- Courses --}}
-                <div class="row event-search-content">
-                    @forelse ($course as $c)
-                    <div class="col-md-6 mb-4">
-                        <div class="contentCard contentCard--course">
-                            <div class="contentCard-top">
-                                <a href="{{localeRoute('courseDetails', encryptor('encrypt', $c->id))}}"><img
-                                        src="{{asset('uploads/courses/'.$c->image)}}" alt="images"
-                                        class="img-fluid" /></a>
-                            </div>
-                            <div class="contentCard-bottom">
-                                <h5>
-                                    <a href="{{localeRoute('courseDetails', ['id' => encryptor('encrypt', $c->id)])}}"
-                                        class="font-title--card">{{$c->title}}</a>
-                                </h5>
-                                <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                    <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $c->instructor?->id))}}"
-                                        class="contentCard-user d-flex align-items-center">
-                                        <img src="{{asset('uploads/users/'.$c->instructor?->image)}}"
-                                            alt="Instructor Image" class="rounded-circle" height="34" width="34" />
-                                        <p class="font-para--md">{{ $c->instructor ? $c->instructor->getTranslation('name') : 'No Instructor' }}</p>
-                                    </a>
-                                    <div class="price">
-    <span>
-        {{ $c->price === null ? 'Free' : $currencySymbol . number_format($c->price * $currencyRate, 2) }}
-    </span>
-    <del>
-        {{ $c->old_price ? $currencySymbol . number_format($c->old_price * $currencyRate, 2) : '' }}
-    </del>
-</div>
-                                </div>
-                                <div class="contentCard-more">
+{{-- Courses --}}
+<div class="row event-search-content">
+    @forelse ($course as $c)
+    <div class="col-md-6 mb-4">
+        <div class="contentCard contentCard--course">
+            <div class="contentCard-top">
+                <a href="{{ localeRoute('frontend.courses.show', $c->id) }}">
+    <img src="{{ asset('uploads/courses/'.$c->image) }}" alt="images" class="img-fluid" />
+</a>
+            </div>
+            <div class="contentCard-bottom">
+                <h5>
+    <a href="{{ localeRoute('frontend.courses.show', $c->id) }}" class="font-title--card">
+        {{ $c->title }}
+    </a>
+</h5>
+                <div class="contentCard-info d-flex align-items-center justify-content-between">
+                    <a href="{{ localeRoute('instructorProfile', $c->instructor?->id) }}" class="contentCard-user d-flex align-items-center">
+                        <img src="{{ asset('uploads/users/'.$c->instructor?->image) }}" alt="Instructor Image" class="rounded-circle" height="34" width="34" />
+                        <p class="font-para--md">{{ $c->instructor ? $c->instructor->getTranslation('name') : 'No Instructor' }}</p>
+                    </a>
+                    <div class="price">
+                        <span>
+                            {{ $c->price === null ? 'Free' : $currencySymbol . number_format($c->price * $currencyRate, 2) }}
+                        </span>
+                        <del>
+                            {{ $c->old_price ? $currencySymbol . number_format($c->old_price * $currencyRate, 2) : '' }}
+                        </del>
+                    </div>
+                </div>
+                <div class="contentCard-more">
                                     <div class="d-flex align-items-center">
                                         <div class="icon">
                                             <img src="{{asset('frontend/dist/images/icon/star.png')}}"

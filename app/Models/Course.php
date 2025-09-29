@@ -72,6 +72,20 @@ class Course extends Model
         return $this->translations->where('locale', $locale)->first();
     }
 
+// В модели Course
+public function getTranslation($locale, $field = 'title')
+{
+    $translation = $this->translations->where('locale', $locale)->first();
+
+    if ($translation && isset($translation->{$field})) {
+        return $translation->{$field};
+    }
+
+    // Fallback to English or return empty string
+    $fallback = $this->translations->where('locale', 'en')->first();
+    return $fallback->{$field} ?? '';
+}
+
     public function getNextLesson($currentLessonOrder)
     {
         return $this->lessons()

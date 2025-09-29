@@ -11,7 +11,7 @@
         <div class="row mb-3">
             <div class="col-lg-12">
                 <h4>Edit Lesson</h4>
-                <a href="{{ localeRoute('lesson.index') }}" class="btn btn-secondary mb-3">Back to List</a>
+                <a href="{{ route('lesson.index') }}" class="btn btn-secondary mb-3">Back to List</a>
             </div>
         </div>
 
@@ -34,7 +34,7 @@
             }
         @endphp
 
-        <form action="{{ localeRoute('lesson.update', encryptor('encrypt', $lesson->id)) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('lesson.update', encryptor('encrypt', $lesson->id)) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 

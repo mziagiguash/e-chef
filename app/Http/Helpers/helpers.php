@@ -1,4 +1,6 @@
 <?php
+// app/Http/Helpers/helpers.php
+
 if (!function_exists('extractYouTubeId')) {
     function extractYouTubeId($url)
     {
@@ -12,10 +14,9 @@ if (!function_exists('decryptor')) {
     function decryptor($type, $string)
     {
         if ($type == 'encrypt') {
-            return base64_encode($string); // или encrypt($string);
+            return base64_encode($string);
         } elseif ($type == 'decrypt') {
-            return base64_decode($string); // или decrypt($string);
+            return base64_decode($string);
         }
     }
-
 }

@@ -68,7 +68,7 @@ class CourseSeeder extends Seeder
             ]);
         }
 
-        // ИСПРАВЛЕНИЕ: Используем существующие категории вместо создания новых
+        // Используем существующие категории вместо создания новых
         $programmingCategory = CourseCategory::whereHas('translations', function($query) {
             $query->where('category_name', 'Development');
         })->first();
@@ -79,14 +79,12 @@ class CourseSeeder extends Seeder
 
         // Если категории не найдены (на случай если сидер категорий не был запущен)
         if (!$programmingCategory) {
-            $programmingCategory = CourseCategory::firstOrCreate(
-                ['category_status' => 1],
-                [
-                    'category_image' => 'category-development.jpg',
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]
-            );
+            $programmingCategory = CourseCategory::create([
+                'category_status' => 1,
+                'category_image' => 'category-development.jpg',
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
 
             // Создаем переводы для категории Programming
             $this->createCategoryTranslations($programmingCategory->id, [
@@ -97,14 +95,12 @@ class CourseSeeder extends Seeder
         }
 
         if (!$designCategory) {
-            $designCategory = CourseCategory::firstOrCreate(
-                ['category_status' => 1],
-                [
-                    'category_image' => 'category-design.jpg',
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]
-            );
+            $designCategory = CourseCategory::create([
+                'category_status' => 1,
+                'category_image' => 'category-design.jpg',
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
 
             // Создаем переводы для категории Design
             $this->createCategoryTranslations($designCategory->id, [
@@ -117,26 +113,6 @@ class CourseSeeder extends Seeder
         // Первый курс - Веб-разработка
         $course1 = Course::create([
             'status' => 1, // active
-            'title' => json_encode([
-                'en' => 'Complete Web Development Bootcamp',
-                'ru' => 'Полный курс веб-разработки',
-                'ka' => 'სრული ვებ-განვითარების კურსი'
-            ]),
-            'description' => json_encode([
-                'en' => 'Learn modern web development technologies including HTML, CSS, JavaScript, React, Node.js and more.',
-                'ru' => 'Изучите современные технологии веб-разработки, включая HTML, CSS, JavaScript, React, Node.js и многое другое.',
-                'ka' => 'ისწავლეთ თანამედროვე ვებ-განვითარების ტექნოლოგიები, მათ შორის HTML, CSS, JavaScript, React, Node.js და სხვა.'
-            ]),
-            'prerequisites' => json_encode([
-                'en' => 'Basic computer knowledge. No programming experience required.',
-                'ru' => 'Базовые знания компьютера. Опыт программирования не требуется.',
-                'ka' => 'კომპიუტერის საბაზისო ცოდნა. პროგრამირების გამოცდილება არ არის საჭირო.'
-            ]),
-            'keywords' => json_encode([
-                'en' => 'web development, programming, javascript, react',
-                'ru' => 'веб-разработка, программирование, javascript, react',
-                'ka' => 'ვებ-განვითარება, პროგრამირება, javascript, react'
-            ]),
             'course_category_id' => $programmingCategory->id,
             'instructor_id' => $johnDoe->id,
             'courseType' => 'paid',
@@ -182,26 +158,6 @@ class CourseSeeder extends Seeder
         // Второй курс - UX/UI Дизайн
         $course2 = Course::create([
             'status' => 1, // active
-            'title' => json_encode([
-                'en' => 'UX/UI Design Masterclass',
-                'ru' => 'Мастер-класс по UX/UI дизайну',
-                'ka' => 'UX/UI დიზაინის მასტერკლასი'
-            ]),
-            'description' => json_encode([
-                'en' => 'Master the art of user experience and interface design. Learn design principles, prototyping, and user research techniques.',
-                'ru' => 'Освойте искусство проектирования пользовательского опыта и интерфейсов. Изучите принципы дизайна, прототипирование и методы исследования пользователей.',
-                'ka' => 'დაეუფლეთ მომხმარებლის გამოცდილების და ინტერფეისის დიზაინის ხელოვნებას. ისწავლეთ დიზაინის პრინციპები, პროტოტიპირება და მომხმარებლის კვლევის მეთოდები.'
-            ]),
-            'prerequisites' => json_encode([
-                'en' => 'Basic design understanding. Creative thinking skills.',
-                'ru' => 'Базовое понимание дизайна. Навыки творческого мышления.',
-                'ka' => 'დიზაინის საბაზისო გაგება. შემოქმედებითი აზროვნების უნარები.'
-            ]),
-            'keywords' => json_encode([
-                'en' => 'ux design, ui design, prototyping, user research',
-                'ru' => 'ux дизайн, ui дизайн, прототипирование, исследование пользователей',
-                'ka' => 'ux დიზაინი, ui დიზაინი, პროტოტიპირება, მომხმარებლის კვლევა'
-            ]),
             'course_category_id' => $designCategory->id,
             'instructor_id' => $annaSmith->id,
             'courseType' => 'subscription',

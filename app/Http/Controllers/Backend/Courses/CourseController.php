@@ -65,6 +65,11 @@ class CourseController extends Controller
         return $this->saveCourse(new Course(), $request);
     }
 
+public function frontShow($id)
+{
+    //
+}
+
 public function show($id)
 {
     $course = Course::with([

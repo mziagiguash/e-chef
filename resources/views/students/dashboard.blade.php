@@ -175,11 +175,11 @@
                                 </div>
                                 <div class="contentCard-bottom">
                                     <h5>
-                                        <a href="{{localeRoute('courseDetails', encryptor('encrypt', $a->course?->id))}}"
+                                        <a href="{{localeRoute('frontend.courses.show', $a->course?->id)}}"
                                             class="font-title--card">{{$a->course?->title}}</a>
                                     </h5>
                                     <div class="contentCard-info d-flex align-items-center justify-content-between">
-                                        <a href="{{localeRoute('instructorProfile', encryptor('encrypt', $a->course?->instructor->id))}}"
+                                        <a href="{{localeRoute('instructor.show', $a->course?->instructor->id)}}"
                                             class="contentCard-user d-flex align-items-center">
                                             <img src="{{asset('uploads/users/'.$a->course?->instructor?->image)}}"
                                                 alt="client-image" class="rounded-circle" height="34" width="34" />
@@ -191,8 +191,7 @@
                                         </div>
                                     </div>
                                     <a class="button button-md button--primary-outline w-100 my-3"
-                                        href="{{localeRoute('watchCourse', encryptor('encrypt', $a->course?->id))}}">Watch
-                                        Course</a>
+   href="{{localeRoute('frontend.courses.show', $a->course?->id)}}">Watch Course</a>
                                     <div class="contentCard-watch--progress">
                                         <span class="percentage" style="width: 43%;"></span>
                                     </div>
@@ -493,76 +492,89 @@
                     </div>
                 </div>
 
-                {{-- Purchase History --}}
-                <div class="tab-pane fade" id="nav-purchase" role="tabpanel" aria-labelledby="nav-purchase-tab">
-                    @foreach ($checkout as $e)
-                    @if ($e->cart_data)
-                    <div class="row mb-3">
-                        <div class="col-lg-12">
-                            <div class="purchase-area">
-                                <div class="purchase-area-close">
-                                    <a href="#">
-                                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M11 1L1 11" stroke="#F15C4C" stroke-width="1.5"
-                                                stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M1 1L11 11" stroke="#F15C4C" stroke-width="1.5"
-                                                stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                    </a>
-                                </div>
-                                <div class="d-flex align-items-lg-center align-items-start flex-column flex-lg-row">
-
-
-                                    <div class="purchase-area-items">
-                                        @php $i=0; @endphp
-                                        @foreach (json_decode(base64_decode($e->cart_data))->cart as $data)
-                                        @php ++$i; @endphp
-                                        <div
-                                            class="purchase-area-items-start d-flex align-items-lg-center flex-column flex-lg-row">
-                                            <div class="image">
-                                                <a href="#">
-                                                    <img src="{{asset('uploads/courses/'.$data->image)}}"
-                                                        alt="Image" />
-                                                </a>
-                                            </div>
-                                            <div class="text d-flex flex-column flex-lg-row">
-                                                <div class="text-main">
-                                                    <h6>
-                                                        <a href="#">{{$data->title}}</a>
-                                                    </h6>
-                                                    <p> By
-                                                        <a href="#">
-                                                         {{$data->instructor}}</a>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        @endforeach
-                                    </div>
-                                    <div class="purchase-area-items-end">
-                                        <p>{{$e->created_at}}</p>
-                                        <dl class="row">
-                                            <dt class="col-sm-4">Total</dt>
-                                            <dd class="col-sm-8">
-                                                {{json_decode(base64_decode($e->cart_data))->cart_details->total_amount}}
-                                            </dd>
-                                            <dt class="col-sm-4">Total Courses</dt>
-                                            <dd class="col-sm-8">
-                                                {{$i}}
-                                            </dd>
-                                            <dt class="col-sm-4">Payment Type</dt>
-                                            <dd class="col-sm-8">
-                                                {{$e->txnid}}
-                                            </dd>
-                                        </dl>
-                                    </div>
+{{-- Purchase History --}}
+<div class="tab-pane fade" id="nav-purchase" role="tabpanel" aria-labelledby="nav-purchase-tab">
+    @forelse ($enrollment as $e)
+    <div class="row mb-3">
+        <div class="col-lg-12">
+            <div class="purchase-area">
+                <div class="d-flex align-items-lg-center align-items-start flex-column flex-lg-row">
+                    <div class="purchase-area-items">
+                        <div class="purchase-area-items-start d-flex align-items-lg-center flex-column flex-lg-row">
+                            <div class="image">
+                                <a href="{{ localeRoute('frontend.courses.show', $e->course?->id) }}">
+                                    <img src="{{ asset('uploads/courses/'.($e->course?->image ?? 'default.jpg')) }}"
+                                         alt="{{ $e->course?->title }}"
+                                         style="width: 80px; height: 60px; object-fit: cover;"
+                                         onerror="this.src='{{ asset('uploads/courses/default.jpg') }}'" />
+                                </a>
+                            </div>
+                            <div class="text d-flex flex-column flex-lg-row">
+                                <div class="text-main">
+                                    <h6>
+                                        <a href="{{ localeRoute('frontend.courses.show', $e->course?->id) }}">
+                                            {{ $e->course?->title ?? 'Unknown Course' }}
+                                        </a>
+                                    </h6>
+                                    <p>By
+                                        <a href="{{ localeRoute('instructor.show', $e->course?->instructor->id) }}">
+                                            {{ $e->course?->instructor->name ?? 'Unknown Instructor' }}
+                                        </a>
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    @endif
-                    @endforeach
+                    <div class="purchase-area-items-end">
+                        <p>{{ $e->enrollment_date->format('M d, Y') }}</p>
+                        <dl class="row">
+                            <dt class="col-sm-4">Amount Paid</dt>
+                            <dd class="col-sm-8">
+                                @if($e->amount_paid && $e->amount_paid > 0)
+                                    <strong class="text-success">${{ number_format($e->amount_paid, 2) }}</strong>
+                                @else
+                                    <span class="text-muted">Free</span>
+                                @endif
+                            </dd>
+                            <dt class="col-sm-4">Payment Status</dt>
+                            <dd class="col-sm-8">
+                                {!! $e->payment_status_badge !!}
+                            </dd>
+                            <dt class="col-sm-4">Payment Method</dt>
+                            <dd class="col-sm-8">
+                                @if($e->payment_method)
+                                    <span class="badge badge-light">{{ ucfirst(str_replace('_', ' ', $e->payment_method)) }}</span>
+                                @else
+                                    <span class="text-muted">N/A</span>
+                                @endif
+                            </dd>
+                            @if($e->transaction_id)
+                            <dt class="col-sm-4">Transaction ID</dt>
+                            <dd class="col-sm-8">
+                                <small class="text-muted">{{ $e->transaction_id }}</small>
+                            </dd>
+                            @endif
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @empty
+    <div class="row">
+        <div class="col-12 text-center py-5">
+            <div class="empty-state">
+                <i class="las la-shopping-bag fa-3x text-muted mb-3"></i>
+                <h5>No Purchase History Found</h5>
+                <p class="text-muted">You haven't purchased any courses yet.</p>
+                <a href="{{ localeRoute('frontend.courses') }}" class="btn btn-primary mt-2">
+                    <i class="las la-shopping-cart me-2"></i>Browse Courses
+                </a>
+            </div>
+        </div>
+    </div>
+    @endforelse
+</div>
                     <div class="row mt-lg-5 mt-4">
                         <div class="col-lg-12 text-center">
                             <p style="color: #42414b !important; font-size: 18px !important;">
@@ -657,3 +669,143 @@
 </section>
 
 @endsection
+
+@push('styles')
+<!-- Datatable -->
+<link href="{{asset('public/vendor/datatables/css/jquery.dataTables.min.css')}}" rel="stylesheet">
+
+<style>
+.students-info-intro-end {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-width: 100%;
+}
+
+.enrolled-courses-text p,
+.completed-courses-text p {
+    word-break: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    font-size: 14px;
+    text-align: left;
+}
+
+.enrolled-courses,
+.completed-courses {
+    max-width: 220px;
+    font-size: 14px;
+}
+
+.students-info-intro-end,
+.students-info-intro-end * {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+/* Стили для Purchase History */
+.purchase-area-items-end dl {
+    margin-bottom: 0;
+}
+
+.purchase-area-items-end dt {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.85rem;
+}
+
+.purchase-area-items-end dd {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Стили для статусов платежей */
+.badge-warning {
+    color: #212529;
+}
+
+.badge-success {
+    color: #28a745;
+}
+
+.badge-danger {
+    color: #dc3545;
+}
+
+.badge-info {
+    color: #17a2b8;
+}
+
+.badge-light {
+    color: #17a2b8;
+}
+
+/* Улучшаем внешний вид purchase area */
+.purchase-area {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.purchase-area-items-start .image img {
+    border-radius: 6px;
+}
+
+.text-main h6 {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.text-main p {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .purchase-area {
+        padding: 1rem;
+    }
+
+    .purchase-area-items-end {
+        margin-top: 1rem;
+    }
+
+    .purchase-area-items-end dl .row {
+        display: block;
+    }
+
+    .purchase-area-items-end dt,
+    .purchase-area-items-end dd {
+        display: inline-block;
+        width: auto;
+    }
+
+    .purchase-area-items-end dt {
+        min-width: 120px;
+    }
+}
+
+/* Улучшаем отображение текста */
+.purchase-area-items-end p {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+/* Выделяем важную информацию */
+.text-success {
+    font-weight: 600;
+}
+
+.text-muted {
+    font-style: italic;
+}
+</style>
+@endpush

@@ -16,7 +16,6 @@ return [
     'lessons' => 'Уроки',
     'materials' => 'Материалы',
     'enrollments' => 'Записи',
-    'events' => 'События',
     'coupons' => 'Купоны',
     'quizzes' => 'Тесты',
     'all_quizzes' => 'Все Тесты',

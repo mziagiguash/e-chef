@@ -34,54 +34,100 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">All Enrollments List </h4>
-                                <a href="{{localeRoute('enrollment.create')}}" class="btn btn-primary">+ Add new</a>
+                                <a href="{{localeRoute('enrollment.statistics')}}" class="btn btn-info">Statistics</a>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table id="example3" class="display" style="min-width: 845px">
                                         <thead>
                                             <tr>
-                                                <th>{{__('#')}}</th>
-                                                <th>{{__('Student Name')}}</th>
-                                                <th>{{__('Course Name')}}</th>
-                                                <th>{{__('Course Image')}}</th>
-                                                <th>{{__('Course Value')}}</th>
-                                                <th>{{__('Enrollment Date')}}</th>
-                                                <th>{{__('Action')}}</th>
+                                                <th>#</th>
+                                                <th>Student Name</th>
+                                                <th>Course Name</th>
+                                                <th>Course Image</th>
+                                                <th>Amount Paid</th>
+                                                <th>Payment Status</th>
+                                                <th>Payment Method</th>
+                                                <th>Enrollment Date</th>
+                                                <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @forelse ($enrollment as $e)
+                                            @forelse ($enrollments as $enrollment)
                                             <tr>
-                                                <td><img class="rounded-circle" width="35" height="35"
-                                                        src="{{asset('uploads/students/'.$e->student?->image)}}"
-                                                        alt="">
-                                                </td>
-                                                <td><strong>{{$e->student?->name}}</strong></td>
-                                                <td><strong>{{$e->course?->title}}</strong></td>
-                                                <td><img class="img fluid" width="100"
-                                                        src="{{asset('uploads/courses/'.$e->course?->image)}}"
-                                                        alt="">
-                                                </td>
-                                                <td><strong>{{$e->enrollment_date}}</strong></td>
+                                                <td>{{ $loop->iteration }}</td>
                                                 <td>
-                                                    <a href="{{localeRoute('enrollment.edit', encryptor('encrypt',$e->id))}}"
-                                                        class="btn btn-sm btn-primary" title="Edit"><i
-                                                            class="la la-pencil"></i></a>
-                                                    <a href="javascript:void(0);" class="btn btn-sm btn-danger"
-                                                        title="Delete" onclick="$('#form{{$e->id}}').submit()"><i
-                                                            class="la la-trash-o"></i></a>
-                                                    <form id="form{{$e->id}}"
-                                                        action="{{localeRoute('enrollment.destroy', encryptor('encrypt',$e->id))}}"
-                                                        method="post">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                    </form>
+                                                    <div class="d-flex align-items-center">
+                                                        <img class="rounded-circle" width="35" height="35"
+                                                            src="{{ asset('uploads/students/'.($enrollment->student->image ?? 'default.jpg')) }}"
+                                                            alt="{{ $enrollment->student->name ?? 'N/A' }}">
+                                                        <div class="ms-3">
+                                                            <strong>{{ $enrollment->student->name ?? 'N/A' }}</strong>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <strong>{{ $enrollment->course->title ?? 'N/A' }}</strong>
+                                                    @if($enrollment->course)
+                                                    <br><small class="text-muted">By: {{ $enrollment->course->instructor->name ?? 'Unknown' }}</small>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <img class="img-fluid rounded" width="80" height="60" style="object-fit: cover;"
+                                                        src="{{ asset('uploads/courses/'.($enrollment->course->image ?? 'default.jpg')) }}"
+                                                        alt="{{ $enrollment->course->title ?? 'Course' }}">
+                                                </td>
+                                                <td>
+                                                    @if($enrollment->amount_paid)
+                                                        <strong class="text-success">${{ number_format($enrollment->amount_paid, 2) }}</strong>
+                                                    @else
+                                                        <span class="text-muted">Free</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    {!! $enrollment->payment_status_badge !!}
+                                                </td>
+                                                <td>
+                                                    @if($enrollment->payment_method)
+                                                        <span class="badge badge-light">{{ ucfirst(str_replace('_', ' ', $enrollment->payment_method)) }}</span>
+                                                    @else
+                                                        <span class="text-muted">N/A</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    {{ $enrollment->enrollment_date->format('M d, Y') }}
+                                                    <br>
+                                                    <small class="text-muted">{{ $enrollment->enrollment_date->format('h:i A') }}</small>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex">
+                                                        <a href="{{ localeRoute('enrollment.show', $enrollment->id) }}"
+                                                            class="btn btn-sm btn-info me-1" title="View">
+                                                            <i class="la la-eye"></i>
+                                                        </a>
+                                                        <form action="{{ localeRoute('enrollment.destroy', $enrollment->id) }}"
+                                                            method="post" class="d-inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                                    title="Delete"
+                                                                    onclick="return confirm('Are you sure you want to delete this enrollment?')">
+                                                                <i class="la la-trash-o"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                 </td>
                                             </tr>
                                             @empty
                                             <tr>
-                                                <th colspan="6" class="text-center">No Enrollment Found</th>
+                                                <td colspan="9" class="text-center py-4">
+                                                    <div class="empty-state">
+                                                        <i class="las la-user-graduate fa-3x text-muted mb-3"></i>
+                                                        <h5>No Enrollments Found</h5>
+                                                        <p class="text-muted">There are no enrollments in the system yet.</p>
+                                                        <p class="text-muted small">Enrollments will appear here after successful course purchases.</p>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             @endforelse
                                         </tbody>
@@ -101,7 +147,6 @@
 
 @push('scripts')
 <!-- Datatable -->
-<script src="{{asset('vendor/datatables/js/jquery.dataTables.min.js')}}"></script>
-<script src="{{asset('js/plugins-init/datatables.init.js')}}"></script>
-
+<script src="{{ asset('vendor/datatables/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('js/plugins-init/datatables.init.js') }}"></script>
 @endpush

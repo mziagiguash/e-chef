@@ -172,6 +172,11 @@
                             <a class="nav-link" href="{{ route('contact', ['locale' => $currentLocale]) }}">{{ __('menu.contacts') }}</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="{{ route('event.search', ['locale' => app()->getLocale()]) }}">
+                               {{ __('menu.events') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="{{ route('dashboard', ['locale' => $currentLocale]) }}">{{ __('menu.admin') }}</a>
                         </li>
                     </ul>

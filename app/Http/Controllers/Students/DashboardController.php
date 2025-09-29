@@ -13,11 +13,21 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $student_info = Student::find(currentUserId());
-        $enrollment = Enrollment::where('student_id', currentUserId())->get();
+        $student_id = currentUserId();
+        $student_info = Student::find($student_id);
+        $enrollment = Enrollment::where('student_id', $student_id)->get();
         $course = Course::get();
-        $checkout = Checkout::where('student_id', currentUserId())->get();
-        // $purchaseHistory = Enrollment::with(['course', 'checkout'])->orderBy('enrollment_date', 'desc')->get();
-        return view('students.dashboard', compact('student_info','enrollment', 'course','checkout'));
+
+        // 🔴 ИСПРАВЛЕНО: используем student_id вместо user_id
+        $checkout = Checkout::where('student_id', $student_id)
+                          ->latest()
+                          ->get();
+
+        return view('students.dashboard', compact(
+            'student_info',
+            'enrollment',
+            'course',
+            'checkout'
+        ));
     }
 }

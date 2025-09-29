@@ -27,34 +27,41 @@ public function index(Request $request)
         'ka' => 'ქართული'
     ];
 
+    // Получаем quiz_id из запроса
+    $quizId = $request->get('quiz_id');
+    $quiz = null;
+
     $questions = Question::with([
-        'quiz',
-        'options',
-        'correctOptions',
-        'translations' => function($query) use ($locale) {
-            $query->where('locale', $locale);
-        }
+        'quiz.translations', // Загружаем квиз и его переводы
+        'options.translations', // Загружаем опции и их переводы
+        'translations'
     ])
     ->withCount(['options', 'correctOptions'])
+    ->when($quizId, function($query) use ($quizId) {
+        return $query->where('quiz_id', $quizId);
+    })
     ->paginate(10);
 
+    // Если передан quiz_id, загружаем квиз
+    if ($quizId) {
+        $quiz = Quiz::with('translations')->find($quizId);
+    }
 
     return view('backend.quiz.question.index', compact(
         'questions',
+        'quiz', // ← Добавляем переменную quiz
+        'quizId', // ← Добавляем quizId
         'locale',
         'currentLocale',
         'locales'
     ));
 }
-
     /**
      * Show the form for creating a new resource.
      */
 public function create()
 {
-    $quizzes = Quiz::with(['translations' => function($q) {
-        $q->where('locale', app()->getLocale());
-    }])->get();
+    $quizzes = Quiz::with(['translations'])->get(); // ← Загружаем все переводы
 
     $locales = ['en' => 'English', 'ru' => 'Русский', 'ka' => 'ქართული'];
     $currentLocale = request('lang', app()->getLocale());
@@ -69,45 +76,76 @@ public function create()
 {
     try {
         $request->validate([
-            'quizId' => 'required|exists:quizzes,id',
-            'questionType' => 'required|in:multiple_choice,true_false,short_answer',
-            'correctAnswer' => 'nullable|in:a,b,c,d',
+            'quiz_id' => 'required|exists:quizzes,id',
+            'type' => 'required|in:single,multiple,text,rating',
+            'points' => 'nullable|integer|min:1',
+            'order' => 'nullable|integer|min:0',
+            'is_required' => 'nullable|boolean',
+            'content.en' => 'required|string',
+            'content.ru' => 'nullable|string',
+            'content.ka' => 'nullable|string',
+            'options.*.a' => 'nullable|string',
+            'options.*.b' => 'nullable|string',
+            'options.*.c' => 'nullable|string',
+            'options.*.d' => 'nullable|string',
         ]);
 
-        $question = new Question;
-        $question->quiz_id = $request->quizId;
-        $question->type = $request->questionType;
-        $question->content = null; // Основное содержание будет в переводах
-        $question->correct_answer = $request->correctAnswer;
+        // Создаем вопрос
+        $question = Question::create([
+            'quiz_id' => $request->quiz_id,
+            'type' => $request->type,
+            'points' => $request->points ?? 1,
+            'order' => $request->order ?? 0,
+            'is_required' => $request->is_required ?? true,
+        ]);
 
-        if ($question->save()) {
-            // Сохраняем переводы для всех языков
-            $locales = ['en', 'ru', 'ka'];
-
-            foreach ($locales as $locale) {
-                $translation = new QuestionTranslation([
+        // Сохраняем переводы вопроса
+        foreach (['en', 'ru', 'ka'] as $locale) {
+            if (!empty($request->input("content.$locale"))) {
+                $question->translations()->create([
                     'locale' => $locale,
-                    'content' => $request->input("questionContent_$locale", ''),
-                    'option_a' => $request->input("optionA_$locale", ''),
-                    'option_b' => $request->input("optionB_$locale", ''),
-                    'option_c' => $request->input("optionC_$locale", ''),
-                    'option_d' => $request->input("optionD_$locale", ''),
+                    'content' => $request->input("content.$locale"),
                 ]);
-
-                $question->translations()->save($translation);
             }
-
-            $this->notice::success('Question Saved');
-            return redirect()->route('question.index', ['lang' => $request->input('current_locale', app()->getLocale())]);
         }
 
-        $this->notice::error('Please try again');
-        return redirect()->back()->withInput();
+        // Для вопросов с опциями создаем опции
+        if (in_array($request->type, ['single', 'multiple'])) {
+            $optionKeys = ['a', 'b', 'c', 'd'];
+            $correctOptions = $request->type === 'single'
+                ? [$request->correct_option]
+                : ($request->correct_options ?? []);
+
+            foreach ($optionKeys as $key) {
+                $optionText = $request->input("options.{$request->current_locale}.{$key}");
+
+                if (!empty($optionText)) {
+                    $option = $question->options()->create([
+                        'key' => $key,
+                        'is_correct' => in_array($key, $correctOptions),
+                        'order' => array_search($key, $optionKeys),
+                    ]);
+
+                    // Сохраняем переводы опций для всех языков
+                    foreach (['en', 'ru', 'ka'] as $locale) {
+                        $optionText = $request->input("options.{$locale}.{$key}");
+                        if (!empty($optionText)) {
+                            $option->translations()->create([
+                                'locale' => $locale,
+                                'text' => $optionText,
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
+
+        return redirect()->route('question.index', ['lang' => $request->input('current_locale', app()->getLocale())])
+            ->with('success', 'Question Saved');
 
     } catch (Exception $e) {
         \Log::error('Question store error: ' . $e->getMessage());
-        $this->notice::error('Error: ' . $e->getMessage());
-        return redirect()->back()->withInput();
+        return redirect()->back()->withInput()->with('error', 'Error: ' . $e->getMessage());
     }
 }
     /**

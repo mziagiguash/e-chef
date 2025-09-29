@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Course;
 use App\Models\Instructor;
 use App\Models\CourseCategory;
+use App\Models\Event; // Добавляем модель Event
 
 class HomeController extends Controller
 {
@@ -15,6 +16,18 @@ class HomeController extends Controller
         $instructors = Instructor::get();
         $category = CourseCategory::get();
         $popularCourses = Course::where('tag', 'popular')->get();
+
+        // Добавляем загрузку событий для секции Latest Events
+        $events = Event::with(['translations' => function($q) {
+            $q->where('locale', app()->getLocale());
+        }])
+        ->where('date', '>=', now()) // только будущие события
+        ->orWhere(function($query) {
+            $query->where('date', '>=', now()->subDays(30)); // или события за последние 30 дней
+        })
+        ->orderBy('date', 'desc')
+        ->limit(6) // ограничиваем количество для слайдера
+        ->get();
 
         $designCategories = CourseCategory::whereIn('category_name', ['Graphics Desgin', 'Web Design', 'Video Editing'])->pluck('id')->toArray();
         $designCourses = Course::whereIn('course_category_id', $designCategories)->where('tag', 'popular')->get();
@@ -30,7 +43,7 @@ class HomeController extends Controller
 
         return view(
             'frontend.home',
-            compact('course', 'instructors', 'category', 'popularCourses', 'designCourses', 'developmentCourses', 'businessCourses', 'itCourses')
+            compact('course', 'instructors', 'category', 'popularCourses', 'designCourses', 'developmentCourses', 'businessCourses', 'itCourses', 'events')
         );
     }
 }

@@ -23,9 +23,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('coupon.index')}}">Coupons</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('coupon.index')}}">All Coupon</a></li>
+                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{route('coupon.index')}}">Coupons</a></li>
+                    <li class="breadcrumb-item active"><a href="{{route('coupon.index')}}">All Coupon</a></li>
                 </ol>
             </div>
         </div>
@@ -37,7 +37,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title">All Coupons List </h4>
-                                <a href="{{localeRoute('coupon.create')}}" class="btn btn-primary">+ Add new</a>
+                                <a href="{{route('coupon.create')}}" class="btn btn-primary">+ Add new</a>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -61,14 +61,14 @@
                                                 <td>{{$c->valid_from}}</td>
                                                 <td>{{$c->valid_until}}</td>
                                                 <td>
-                                                    <a href="{{localeRoute('coupon.edit', $c->id)}}"
+                                                    <a href="{{route('coupon.edit', $c->id)}}"
                                                         class="btn btn-sm btn-primary" title="Edit"><i
                                                             class="la la-pencil"></i></a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
                                                         title="Delete" onclick="$('#form{{$c->id}}').submit()"><i
                                                             class="la la-trash-o"></i></a>
                                                     <form id="form{{$c->id}}"
-                                                        action="{{localeRoute('coupon.destroy', $c->id)}}"
+                                                        action="{{route('coupon.destroy', $c->id)}}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')

@@ -103,8 +103,12 @@ public function show($locale, Course $course) // Используем привя
 
         // Используем хелпер для получения символа валюты
         $currencySymbol = CurrencyHelper::getSymbol();
+        // Проверяем, купил ли пользователь курс
+        //$hasAccess = auth()->check() && auth()->user()->purchasedCourses()->where('course_id', $course->id)->exists();
+
 
         return view('frontend.courses.watch-course', compact(
+       //    'hasAccess', // Добавляем эту переменную
             'course',
             'progress',
             'completedLessons',

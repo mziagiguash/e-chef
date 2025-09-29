@@ -6,24 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
-        if (!Schema::hasTable('options_translations')) {
-            Schema::create('options_translations', function (Blueprint $table) {
-                $table->id();
-                $table->unsignedBigInteger('option_id');
-                $table->string('locale', 10);
-                $table->text('option_text'); 
-                $table->timestamps();
+        Schema::create('option_translations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('option_id')->constrained()->onDelete('cascade');
+            $table->string('locale', 10)->index();
+            $table->text('text');
 
-                $table->unique(['option_id', 'locale']);
-                $table->foreign('option_id')->references('id')->on('options')->onDelete('cascade');
-            });
-        }
+            $table->unique(['option_id', 'locale']);
+            $table->timestamps();
+        });
     }
 
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('options_translations');
+        Schema::dropIfExists('option_translations');
     }
 };

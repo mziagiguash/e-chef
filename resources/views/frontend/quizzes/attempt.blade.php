@@ -12,8 +12,7 @@
                 <a href="{{ route('frontend.quizzes.show', [
                     'locale' => $locale,
                     'course' => $course->id,
-                    'lesson' => $lesson->id,
-                    'quiz' => $quiz->id
+                    'lesson' => $lesson->id
                 ]) }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i> {{ __('Back') }}
                 </a>
@@ -24,22 +23,19 @@
                 <div class="card-header bg-primary text-white">
                     <h1 class="h3 mb-0">
                         <i class="fas fa-graduation-cap me-2"></i>
-                        {{ $quiz->translations->firstWhere('locale', $locale)->title ?? $quiz->translations->first()->title ?? $quiz->title }}
+                        {{ $quiz->getTranslation($locale, 'title') ?? $quiz->title ?? __('Quiz') }}
                     </h1>
                 </div>
                 <div class="card-body">
                     @php
-                        $quizTranslation = $quiz->translations->firstWhere('locale', $locale);
                         $timeLimit = $quiz->time_limit ? $quiz->time_limit . ' ' . __('minutes') : __('No limit');
                         $passingScore = $quiz->passing_score . '%';
-                        $currentAttempt = $quiz->attempts()->where('user_id', auth()->id())->count() + 1;
+                        $currentAttempt = $quiz->attempts()->where('user_id', auth()->id())->count();
                         $maxAttempts = $quiz->max_attempts > 0 ? $quiz->max_attempts : '∞';
                     @endphp
 
-                    @if($quizTranslation && $quizTranslation->description)
-                        <p class="lead">{{ $quizTranslation->description }}</p>
-                    @elseif($quiz->translations->first() && $quiz->translations->first()->description)
-                        <p class="lead">{{ $quiz->translations->first()->description }}</p>
+                    @if($quizDescription = $quiz->getTranslation($locale, 'description'))
+                        <p class="lead">{{ $quizDescription }}</p>
                     @endif
 
                     <div class="row">
@@ -53,7 +49,7 @@
                         </div>
                         <div class="col-md-4">
                             <strong><i class="fas fa-redo me-2"></i> {{ __('Attempt') }}:</strong>
-                            {{ $currentAttempt }}/{{ $maxAttempts }}
+                            {{ $currentAttempt + 1 }}/{{ $maxAttempts }}
                         </div>
                     </div>
                 </div>
@@ -64,26 +60,27 @@
                 'locale' => $locale,
                 'course' => $course->id,
                 'lesson' => $lesson->id,
-                'quiz' => $quiz->id,
-                'attempt' => $attemptId // Изменено с attempt->id на attemptId
+                'attempt' => $attempt->id
             ]) }}" method="POST" id="quiz-form">
                 @csrf
 
                 {{-- Questions --}}
-                @foreach($quiz->questions as $index => $question)
+                @foreach($questions as $index => $question)
                     <div class="card mb-4 question-card">
                         <div class="card-header">
                             <h5 class="mb-0">
-                                {{ __('Question') }} {{ $index + 1 }} {{ __('of') }} {{ $quiz->questions->count() }}
+                                {{ __('Question') }} {{ $index + 1 }} {{ __('of') }} {{ $questions->count() }}
+                                @if($question->points > 1)
+                                    <span class="badge bg-primary ms-2">{{ $question->points }} {{ __('points') }}</span>
+                                @endif
                             </h5>
                         </div>
                         <div class="card-body">
                             @php
-                                $questionTranslation = $question->translations->firstWhere('locale', $locale);
-                                $questionText = $questionTranslation ? $questionTranslation->question_text : ($question->translations->first() ? $question->translations->first()->question_text : __('No question content'));
+                                $questionContent = $question->getTranslation($locale, 'content') ?? $question->content ?? __('No question content');
                             @endphp
 
-                            <h6 class="card-title mb-3">{{ $questionText }}</h6>
+                            <h6 class="card-title mb-3">{!! nl2br(e($questionContent)) !!}</h6>
 
                             {{-- Options --}}
                             <div class="options-list">
@@ -92,23 +89,22 @@
                                         @if($question->options->count() > 0)
                                             @foreach($question->options as $option)
                                                 @php
-                                                    $optionTranslation = $option->translations->firstWhere('locale', $locale);
-                                                    $optionText = $optionTranslation ? $optionTranslation->option_text : ($option->translations->first() ? $option->translations->first()->option_text : __('No option text'));
+                                                    $optionText = $option->getTranslation($locale, 'text') ?? $option->text ?? __('No option text');
                                                 @endphp
 
                                                 <div class="form-check mb-3 p-3 option-item">
                                                     <input class="form-check-input" type="radio"
                                                            name="answers[{{ $question->id }}]"
-                                                           value="{{ $option->id }}"
+                                                           value="{{ $option->key }}"
                                                            id="option_{{ $option->id }}_{{ $question->id }}"
                                                            required>
                                                     <label class="form-check-label w-100" for="option_{{ $option->id }}_{{ $question->id }}">
-                                                        {{ $optionText }}
+                                                        <strong>{{ strtoupper($option->key) }}.</strong> {{ $optionText }}
                                                     </label>
                                                 </div>
                                             @endforeach
                                         @else
-                                            <div class="alert alert-danger">
+                                            <div class="alert alert-warning">
                                                 {{ __('No options available for this question!') }}
                                             </div>
                                         @endif
@@ -118,48 +114,24 @@
                                         @if($question->options->count() > 0)
                                             @foreach($question->options as $option)
                                                 @php
-                                                    $optionTranslation = $option->translations->firstWhere('locale', $locale);
-                                                    $optionText = $optionTranslation ? $optionTranslation->option_text : ($option->translations->first() ? $option->translations->first()->option_text : __('No option text'));
+                                                    $optionText = $option->getTranslation($locale, 'text') ?? $option->text ?? __('No option text');
                                                 @endphp
 
                                                 <div class="form-check mb-3 p-3 option-item">
                                                     <input class="form-check-input" type="checkbox"
                                                            name="answers[{{ $question->id }}][]"
-                                                           value="{{ $option->id }}"
+                                                           value="{{ $option->key }}"
                                                            id="option_{{ $option->id }}_{{ $question->id }}">
                                                     <label class="form-check-label w-100" for="option_{{ $option->id }}_{{ $question->id }}">
-                                                        {{ $optionText }}
+                                                        <strong>{{ strtoupper($option->key) }}.</strong> {{ $optionText }}
                                                     </label>
                                                 </div>
                                             @endforeach
                                         @else
-                                            <div class="alert alert-danger">
+                                            <div class="alert alert-warning">
                                                 {{ __('No options available for this question!') }}
                                             </div>
                                         @endif
-                                        @break
-
-                                    @case('true_false')
-                                        <div class="form-check mb-3 p-3 option-item">
-                                            <input class="form-check-input" type="radio"
-                                                   name="answers[{{ $question->id }}]"
-                                                   value="true"
-                                                   id="true_{{ $question->id }}"
-                                                   required>
-                                            <label class="form-check-label w-100" for="true_{{ $question->id }}">
-                                                {{ __('True') }}
-                                            </label>
-                                        </div>
-                                        <div class="form-check mb-3 p-3 option-item">
-                                            <input class="form-check-input" type="radio"
-                                                   name="answers[{{ $question->id }}]"
-                                                   value="false"
-                                                   id="false_{{ $question->id }}"
-                                                   required>
-                                            <label class="form-check-label w-100" for="false_{{ $question->id }}">
-                                                {{ __('False') }}
-                                            </label>
-                                        </div>
                                         @break
 
                                     @case('text')
@@ -171,6 +143,20 @@
                                                    required
                                                    rows="3"
                                                    placeholder="{{ __('Type your answer here') }}"></textarea>
+                                        </div>
+                                        @break
+
+                                    @case('rating')
+                                        <div class="form-group">
+                                            <label for="rating_{{ $question->id }}" class="form-label">
+                                                {{ __('Select rating from :min to :max', ['min' => $question->min_rating ?? 1, 'max' => $question->max_rating ?? 5]) }}:
+                                            </label>
+                                            <select class="form-control form-control-lg" name="answers[{{ $question->id }}]" required>
+                                                <option value="">{{ __('Select rating') }}</option>
+                                                @for($i = ($question->min_rating ?? 1); $i <= ($question->max_rating ?? 5); $i++)
+                                                    <option value="{{ $i }}">{{ $i }}</option>
+                                                @endfor
+                                            </select>
                                         </div>
                                         @break
                                 @endswitch

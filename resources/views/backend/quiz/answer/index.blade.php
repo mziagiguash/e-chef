@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('answer.index')}}">Answers</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('answer.index')}}">All Answer</a>
+                    <li class="breadcrumb-item"><a href="{{route('dashboard')}}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{route('answer.index')}}">Answers</a></li>
+                    <li class="breadcrumb-item active"><a href="{{route('answer.index')}}">All Answer</a>
                     </li>
                 </ol>
             </div>
@@ -127,7 +127,7 @@
                                         </td>
                                         <td>
                                             <!-- Delete Button -->
-                                            <form action="{{ localeRoute('answer.destroy', encryptor('encrypt', $a->id)) }}"
+                                            <form action="{{ route('answer.destroy', encryptor('encrypt', $a->id)) }}"
                                                   method="POST" id="delete-form-{{ $a->id }}">
                                                 @csrf
                                                 @method('DELETE')

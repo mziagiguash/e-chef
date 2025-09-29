@@ -2,23 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OptionTranslation extends Model
 {
-    use HasFactory;
-
-    protected $table = 'options_translations';
-
     protected $fillable = [
         'option_id',
         'locale',
-        'option_text' // Исправлено
+        'text'
     ];
-    public $timestamps = true;
-    public function option()
+
+    public function option(): BelongsTo
     {
-        return $this->belongsTo(Option::class, 'option_id');
+        return $this->belongsTo(Option::class);
     }
 }
