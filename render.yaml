@@ -8,7 +8,6 @@ services:
     region: frankfurt
     buildCommand: |
       composer install --no-dev --optimize-autoloader
-      php artisan migrate --force
       php artisan config:cache
       php artisan route:cache
       php artisan view:cache
@@ -24,7 +23,7 @@ services:
         value: https://e-chef.onrender.com
       - key: LOG_CHANNEL
         value: stderr
-      # Настройки для существующей PostgreSQL базы на Render
+      # PostgreSQL база
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
@@ -38,7 +37,6 @@ services:
       - key: DB_PASSWORD
         value: 5ugqSBC984RZ1nYp248umaES2t2j1881
 
-  # Cron для планировщика Laravel
   - type: cron
     name: e-chef-scheduler
     runtime: php
@@ -69,5 +67,3 @@ services:
         value: e_chef_db_user
       - key: DB_PASSWORD
         value: 5ugqSBC984RZ1nYp248umaES2t2j1881
-
-
