@@ -8,24 +8,24 @@ services:
     container_name: elearning_api
     volumes:
       - .:/var/www/html
-      - ./entrypoint.sh:/entrypoint.sh
-    entrypoint: ["/entrypoint.sh"]
+      - ./storage:/var/www/html/storage
     depends_on:
       - db
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
-      - APP_URL=http://localhost:8082
+      - APP_URL=http://localhost:8080
       - DB_CONNECTION=mysql
       - DB_HOST=db
       - DB_PORT=3306
       - DB_DATABASE=elearning_db
       - DB_USERNAME=user
       - DB_PASSWORD=password
-    command: sh /entrypoint.sh
+    networks:
+      - elearning-network
 
   db:
-    image: mysql:5.7
+    image: mysql:8.0  # Лучше использовать более новую версию
     container_name: elearning_db
     environment:
       MYSQL_ROOT_PASSWORD: root_password
@@ -36,6 +36,8 @@ services:
       - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - elearning-network
 
   nginx:
     image: nginx:latest
@@ -47,6 +49,8 @@ services:
       - .:/var/www/html
     depends_on:
       - app
+    networks:
+      - elearning-network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -56,8 +60,15 @@ services:
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root_password
     depends_on:
       - db
+    networks:
+      - elearning-network
 
 volumes:
   db_data:
+
+networks:
+  elearning-network:
+    driver: bridge
