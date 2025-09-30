@@ -1,8 +1,10 @@
 docker-compose.yml
+docker-compose.local.yml
 Dockerfile
 Dockerfile.local
 docker/
 entrypoint.sh
+entrypoint.local.sh
 .git/
 .github/
 node_modules/
@@ -11,3 +13,4 @@ storage/framework/cache/
 storage/framework/sessions/
 storage/framework/views/
 tests/
+.idea/
