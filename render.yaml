@@ -1,4 +1,4 @@
-# render.yaml
+# render.yaml (минимальная версия)
 
 services:
   - type: web
@@ -6,11 +6,7 @@ services:
     runtime: php
     plan: free
     region: frankfurt
-    buildCommand: |
-      composer install --no-dev --optimize-autoloader
-      php artisan config:cache
-      php artisan route:cache
-      php artisan view:cache
+    buildCommand: composer install --no-dev --optimize-autoloader
     startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
     envVars:
       - key: APP_ENV
@@ -19,51 +15,3 @@ services:
         value: false
       - key: APP_KEY
         generateValue: true
-      - key: APP_URL
-        value: https://e-chef.onrender.com
-      - key: LOG_CHANNEL
-        value: stderr
-      # PostgreSQL база
-      - key: DB_CONNECTION
-        value: pgsql
-      - key: DB_HOST
-        value: dpg-d3d6e5qdbo4c73ep12eg-a
-      - key: DB_PORT
-        value: 5432
-      - key: DB_DATABASE
-        value: e_chef_db
-      - key: DB_USERNAME
-        value: e_chef_db_user
-      - key: DB_PASSWORD
-        value: 5ugqSBC984RZ1nYp248umaES2t2j1881
-
-  - type: cron
-    name: e-chef-scheduler
-    runtime: php
-    plan: free
-    region: frankfurt
-    schedule: "*/5 * * * *"
-    buildCommand: composer install --no-dev --optimize-autoloader
-    startCommand: php artisan schedule:run
-    envVars:
-      - key: APP_ENV
-        value: production
-      - key: APP_DEBUG
-        value: false
-      - key: APP_KEY
-        fromService:
-          type: web
-          name: e-chef-web
-          property: envVars.APP_KEY
-      - key: DB_CONNECTION
-        value: pgsql
-      - key: DB_HOST
-        value: dpg-d3d6e5qdbo4c73ep12eg-a
-      - key: DB_PORT
-        value: 5432
-      - key: DB_DATABASE
-        value: e_chef_db
-      - key: DB_USERNAME
-        value: e_chef_db_user
-      - key: DB_PASSWORD
-        value: 5ugqSBC984RZ1nYp248umaES2t2j1881
