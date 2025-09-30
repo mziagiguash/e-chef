@@ -1,30 +1,38 @@
-FROM php:8.4-cli
+# Stage 1: Composer
+FROM composer:2 AS composer
 
-WORKDIR /app
+# Stage 2: PHP + Laravel
+FROM php:8.4-fpm
 
-# Установка системных зависимостей
+# Установка системных зависимостей и PHP расширений
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
-    curl \
+    zip \
     libzip-dev \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    libpq-dev
+    netcat-openbsd \
+    && docker-php-ext-install pdo_mysql zip mbstring exif pcntl bcmath gd
 
-# Установка PHP расширений
-RUN docker-php-ext-install pdo_mysql pdo_pgsql mbstring zip exif pcntl bcmath gd
+# Копируем composer из первого stage
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-# Установка Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+WORKDIR /var/www/html
 
-# Копирование файлов проекта
+# Копируем все файлы проекта
 COPY . .
 
-# Установка зависимостей
-RUN composer install --no-dev --optimize-autoloader
+# Правильные права на storage и кеш
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
-EXPOSE 8000
+# Открываем порт 9000
+EXPOSE 9000
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# Делаем entrypoint исполняемым
+RUN chmod +x /entrypoint.sh
+
+# Используем entrypoint для установки зависимостей
+ENTRYPOINT ["/entrypoint.sh"]
