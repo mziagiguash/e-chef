@@ -23,9 +23,13 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SearchCourseController;
 use App\Http\Controllers\CheckoutController as checkout;
 use App\Http\Controllers\CouponController as coupon;
+use App\Http\Controllers\Frontend\FreeCheckoutController;
+
+use App\Http\Controllers\CertificateController as CertificateController;
+
+use App\Http\Controllers\Frontend\StudentCourseController;
 
 use App\Http\Controllers\Frontend\WatchCourseController as WatchCourseController;
-use App\Http\Controllers\Frontend\CourseDetailController;
 
 use App\Http\Controllers\Frontend\LessonController as LessonController;
 use App\Http\Controllers\Backend\LessonController as lesson;
@@ -123,9 +127,13 @@ Route::middleware(['checkrole'])->prefix('admin')->group(function () {
     Route::resource('discussion', discussion::class);
     Route::resource('message', message::class);
     Route::resource('coupon', coupon::class);
+
+   // Маршруты для Enrollment
+    Route::get('/enrollment/statistics', [enrollment::class, 'statistics'])
+        ->name('enrollment.statistics');
+
+    // Остальные маршруты enrollment
     Route::resource('enrollment', enrollment::class);
-    Route::get('/enrollment/statistics', [enrollment::class, 'statistics'])->name('enrollment.statistics');
-    Route::post('/enrollment/{enrollment}/update-payment-status', [enrollment::class, 'updatePaymentStatus'])->name('enrollment.update-payment-status');
     Route::get('permission/{role}', [permission::class, 'index'])->name('permission.list');
     Route::post('permission/{role}', [permission::class, 'save'])->name('permission.save');
 });
@@ -170,6 +178,7 @@ Route::post('/ssl-payment-notify', [sslcz::class, 'notify'])->name('ssl.notify')
 Route::post('/payment/ssl/notify', [sslcz::class, 'notify'])->name('payment.ssl.notify');
 Route::post('/payment/ssl/cancel', [sslcz::class, 'cancel'])->name('payment.ssl.cancel');
 
+
 /*
 |--------------------------------------------------------------------------
 | Localized Routes
@@ -211,19 +220,28 @@ Route::prefix('{locale}')
         // Курсы
         Route::get('/courses', [WatchCourseController::class, 'index'])->name('frontend.courses');
         Route::get('/courses/{course}', [WatchCourseController::class, 'show'])->name('frontend.courses.show');
+        // Мои курсы
 
         // 🛒 Cart Routes
-Route::get('/cart', [CartController::class, 'cart'])->name('cart');
-Route::get('/add-to-cart/{id}', [CartController::class, 'addToCart'])->name('add.to.cart');
-Route::patch('/update-cart', [CartController::class, 'update'])->name('update.cart');
-Route::delete('/remove-from-cart', [CartController::class, 'remove'])->name('remove.from.cart');
-Route::post('/coupon-check', [coupon::class, 'coupon_check'])->name('coupon.check'); // Исправлено имя
-Route::post('/coupon-remove', [coupon::class, 'remove_coupon'])->name('coupon.remove'); // Добавьте этот маршрут
+        Route::get('/cart', [CartController::class, 'cart'])->name('cart');
+        Route::get('/add-to-cart/{id}', [CartController::class, 'addToCart'])->name('add.to.cart');
+        Route::patch('/update-cart', [CartController::class, 'update'])->name('update.cart');
+        Route::delete('/remove-from-cart', [CartController::class, 'remove'])->name('remove.from.cart');
+        Route::post('/coupon-check', [coupon::class, 'coupon_check'])->name('coupon.check');
+        Route::post('/coupon-remove', [coupon::class, 'remove_coupon'])->name('coupon.remove');
 
-// Checkout
+        // 🔄 Маршруты для бесплатных курсов - ПЕРЕМЕЩЕНЫ ВНУТРЬ локализованной группы
+        Route::post('/courses/enroll-free', [CartController::class, 'enrollFreeCourse'])
+            ->name('courses.enroll.free');
 
-Route::get('/checkout', [checkout::class, 'index'])->name('checkout');
-Route::post('/checkout', [checkout::class, 'store'])->name('checkout.store');
+        Route::post('/courses/enroll-free-all', [CartController::class, 'enrollAllFreeCourses'])
+            ->name('courses.enroll.free.all');
+        Route::post('/courses/{course}/certificate/generate', [CertificateController::class, 'generate'])
+    ->name('certificate.generate');
+        // Checkout
+        Route::get('/checkout', [checkout::class, 'index'])->name('checkout');
+        Route::post('/checkout', [checkout::class, 'store'])->name('checkout.store');
+
         // Поиск
         Route::get('/searchCourse', [SearchCourseController::class, 'index'])->name('searchCourse');
         Route::get('/event-search', [EventSearchController::class, 'index'])->name('event.search');
@@ -247,8 +265,7 @@ Route::post('/checkout', [checkout::class, 'store'])->name('checkout.store');
         })->name('course.back');
 
         // Детали курса
-        Route::get('/courseDetails/{id}', [course::class, 'frontShow'])->name('courseDetails');
-        Route::get('/instructorProfile/{id}', [InstructorController::class, 'frontShow'])->name('instructorProfile');
+       Route::get('/instructorProfile/{id}', [InstructorController::class, 'frontShow'])->name('instructorProfile');
 
         // 🧾 Static pages
         Route::get('/about', fn() => view('frontend.about'))->name('about');
@@ -260,6 +277,8 @@ Route::post('/checkout', [checkout::class, 'store'])->name('checkout.store');
 | Debug Route
 |--------------------------------------------------------------------------
 */
+
+
 Route::get('/check-courses', function () {
     $courses = \App\Models\Course::withCount('lessons')->get();
 

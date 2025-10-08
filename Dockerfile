@@ -1,38 +1,28 @@
-# Stage 1: Composer
-FROM composer:2 AS composer
+FROM php:8.2-fpm
 
-# Stage 2: PHP + Laravel
-FROM php:8.4-fpm
-
-# Установка системных зависимостей и PHP расширений
+# Установка системных утилит для отладки
 RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    zip \
-    libzip-dev \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    netcat-openbsd \
-    && docker-php-ext-install pdo_mysql zip mbstring exif pcntl bcmath gd
+    procps \
+    net-tools \
+    iputils-ping \
+    && rm -rf /var/lib/apt/lists/*
 
-# Копируем composer из первого stage
-COPY --from=composer /usr/bin/composer /usr/bin/composer
+# Установка расширений PHP
+RUN docker-php-ext-install pdo pdo_mysql
+
+# Копирование конфигурации PHP-FPM
+COPY docker/php/php-fpm.conf /usr/local/etc/php-fpm.d/zz-docker.conf
+
+# Создание директории для логов
+RUN mkdir -p /var/log && touch /var/log/fpm-php.www.log
 
 WORKDIR /var/www/html
 
-# Копируем все файлы проекта
+# Копирование файлов приложения
 COPY . .
 
-# Правильные права на storage и кеш
-RUN chown -R www-data:www-data storage bootstrap/cache \
+# Установка прав доступа
+RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 storage bootstrap/cache
 
-# Открываем порт 9000
-EXPOSE 9000
-
-# Делаем entrypoint исполняемым
-RUN chmod +x /entrypoint.sh
-
-# Используем entrypoint для установки зависимостей
-ENTRYPOINT ["/entrypoint.sh"]
+CMD ["php-fpm", "-F", "-R"]

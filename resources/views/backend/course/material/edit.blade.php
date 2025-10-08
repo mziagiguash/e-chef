@@ -66,9 +66,9 @@
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label">Content Text ({{ $name }})</label>
-                                            <textarea class="form-control" name="materialContentText[{{ $code }}]">{{ old('materialContentText.'.$code, $translation?->content_text) }}</textarea>
-                                            @if($errors->has('materialContentText.'.$code))
-                                                <span class="text-danger">{{ $errors->first('materialContentText.'.$code) }}</span>
+                                            <textarea class="form-control" name="content_text[{{ $code }}]">{{ old('content_text.'.$code, $translation?->content_text) }}</textarea>
+                                            @if($errors->has('content_text.'.$code))
+                                                <span class="text-danger">{{ $errors->first('content_text.'.$code) }}</span>
                                             @endif
                                         </div>
                                     </div>
@@ -83,7 +83,7 @@
                                         <select class="form-control" name="lessonId">
                                             @forelse ($lessons as $l)
                                                 <option value="{{ $l->id }}" {{ old('lessonId', $material->lesson_id ?? '') == $l->id ? 'selected' : '' }}>
-                                                    {{ $l->displayTitle() }}
+                                                    {{ $l->display_title }}
                                                 </option>
                                             @empty
                                                 <option value="">No Lesson Found</option>

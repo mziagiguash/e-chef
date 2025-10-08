@@ -3,7 +3,7 @@
 
 @push('styles')
 <!-- Datatable -->
-<link href="{{asset('public/vendor/datatables/css/jquery.dataTables.min.css')}}" rel="stylesheet">
+<link href="{{ asset('public/vendor/datatables/css/jquery.dataTables.min.css') }}" rel="stylesheet">
 @endpush
 
 @section('content')
@@ -20,9 +20,9 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{localeRoute('dashboard')}}">Home</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('discussion.index')}}">Discussions</a></li>
-                    <li class="breadcrumb-item active"><a href="{{localeRoute('discussion.index')}}">All Discussion</a>
+                    <li class="breadcrumb-item"><a href="{{ localeRoute('dashboard') }}">Home</a></li>
+                    <li class="breadcrumb-item active"><a href="{{ localeRoute('discussion.index') }}">Discussions</a></li>
+                    <li class="breadcrumb-item active"><a href="{{ localeRoute('discussion.index') }}">All Discussion</a>
                     </li>
                 </ol>
             </div>
@@ -50,31 +50,33 @@
                                     <table id="example3" class="display" style="min-width: 845px">
                                         <thead>
                                             <tr>
-                                                <th>{{__('User')}}</th>
-                                                <th>{{__('Role')}}</th>
-                                                <th>{{__('Course')}}</th>
-                                                <th>{{__('Title')}}</th>
-                                                <th>{{__('Comment')}}</th>
-                                                <th>{{__('Action')}}</th> 
+                                                <th>{{ __('User') }}</th>
+                                                <th>{{ __('Role') }}</th>
+                                                <th>Course</th>
+                                                <th>{{ __('Title') }}</th>
+                                                <th>{{ __('Comment') }}</th>
+                                                <th>{{ __('Action') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @forelse ($discussion as $d)
                                             <tr>
-                                                <td>{{$d->user?->name}}</td>
-                                                <td>{{$d->user?->role?->name}}</td>
-                                                <td>{{$d->course?->title}}</td>
-                                                <td>{{$d->title}}</td>
-                                                <td>{{$d->content}}</td>
+                                                <td>{{ $d->user->name ?? 'N/A' }}</td>
+                                                <td>{{ $d->user->role->name ?? 'N/A' }}</td>
+                                                <td>{{ $d->course->title ?? 'N/A' }}</td>
+                                                <td>{{ $d->title }}</td>
+                                                <td>{{ Str::limit($d->content, 50) }}</td>
                                                 <td>
-                                                    <a href="{{localeRoute('discussion.edit', encryptor('encrypt',$d->id))}}"
-                                                        class="btn btn-sm btn-primary" title="Edit"><i
-                                                            class="la la-pencil"></i></a>
+                                                    <a href="{{ localeRoute('discussion.edit', encryptor('encrypt', $d->id)) }}"
+                                                        class="btn btn-sm btn-primary" title="Edit">
+                                                        <i class="la la-pencil"></i>
+                                                    </a>
                                                     <a href="javascript:void(0);" class="btn btn-sm btn-danger"
-                                                        title="Delete" onclick="$('#form{{$d->id}}').submit()"><i
-                                                            class="la la-trash-o"></i></a>
-                                                    <form id="form{{$d->id}}"
-                                                        action="{{localeRoute('discussion.destroy', encryptor('encrypt',$d->id))}}"
+                                                        title="Delete" onclick="$('#form{{ $d->id }}').submit()">
+                                                        <i class="la la-trash-o"></i>
+                                                    </a>
+                                                    <form id="form{{ $d->id }}"
+                                                        action="{{ localeRoute('discussion.destroy', encryptor('encrypt', $d->id)) }}"
                                                         method="post">
                                                         @csrf
                                                         @method('DELETE')
@@ -103,7 +105,6 @@
 
 @push('scripts')
 <!-- Datatable -->
-<script src="{{asset('public/vendor/datatables/js/jquery.dataTables.min.js')}}"></script>
-<script src="{{asset('public/js/plugins-init/datatables.init.js')}}"></script>
-
+<script src="{{ asset('public/vendor/datatables/js/jquery.dataTables.min.js') }}"></script>
+<script src="{{ asset('public/js/plugins-init/datatables.init.js') }}"></script>
 @endpush

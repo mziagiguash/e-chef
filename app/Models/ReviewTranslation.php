@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class ReviewTranslation extends Model
 {
-    protected $fillable = ['review_id', 'locale', 'comment'];
+    protected $fillable = [
+        'review_id',
+        'locale',
+        'comment'
+    ];
 
     public function review()
     {

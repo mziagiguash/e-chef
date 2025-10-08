@@ -72,21 +72,21 @@
                             <!-- Other Fields -->
                             <div class="row">
                                 <div class="col-lg-6 col-md-6 col-sm-12">
-                                    <div class="form-group">
-                                        <label>Lesson</label>
-                                        <select name="lessonId" class="form-control">
-                                            @forelse($lessons as $lesson)
-                                                <option value="{{ $lesson->id }}" {{ old('lessonId') == $lesson->id ? 'selected' : '' }}>
-                                                    {{ $lesson->displayTitle() }}
-                                                </option>
-                                            @empty
-                                                <option value="">No Lesson Found</option>
-                                            @endforelse
-                                        </select>
-                                        @error('lessonId')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+<div class="form-group">
+    <label>Lesson</label>
+    <select name="lessonId" class="form-control">
+        @forelse($lessons as $lesson)
+            <option value="{{ $lesson->id }}" {{ old('lessonId') == $lesson->id ? 'selected' : '' }}>
+                {{ $lesson->display_title }}
+            </option>
+        @empty
+            <option value="">No Lesson Found</option>
+        @endforelse
+    </select>
+    @error('lessonId')
+        <span class="text-danger">{{ $message }}</span>
+    @enderror
+</div>
                                 </div>
 
                                 <div class="col-lg-6 col-md-6 col-sm-12">

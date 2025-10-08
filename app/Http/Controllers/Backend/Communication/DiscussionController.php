@@ -11,11 +11,11 @@ class DiscussionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $discussion = Discussion::paginate(10);
-        return view('backend.communication.discussion.index', compact('discussion')); 
-    }
+public function index()
+{
+    $discussion = Discussion::with(['user', 'user.role', 'course'])->paginate(10);
+    return view('backend.communication.discussion.index', compact('discussion'));
+}
 
     /**
      * Show the form for creating a new resource.

@@ -25,18 +25,50 @@
                     </li>
                 </ol>
             </nav>
+{{-- Заголовок курса --}}
+<div class="text-center mb-4">
+    <h1 class="h2 fw-bold mb-2">{{ $currentTitle }}</h1>
+    @if($course->course_code)
+    <p class="text-muted mb-0">{{ $course->course_code }}</p>
+    @endif
+    {{-- Бейдж доступа в виде флажка --}}
+{{-- Альтернативный современный стиль --}}
+@if($hasAccess)
+<div class="access-flag-modern access-flag-modern--success mt-3">
+    <i class="fa-solid fa-universal-access"></i>
+    {{ __('You have full access to this course') }}
+</div>
+@else
+<div class="access-flag-modern access-flag-modern--warning mt-3">
+    <i class="fa-solid fa-user-slash"></i>
+    {{ __('Enroll to get full access') }}
+</div>
+@endif
+</div>
 
-            {{-- Заголовок курса --}}
-            <div class="text-center mb-4">
-                <h1 class="h2 fw-bold mb-2">{{ $currentTitle }}</h1>
-                @if($course->course_code)
-                <p class="text-muted mb-0">{{ $course->course_code }}</p>
-                @endif
-            </div>
-
-            {{-- Основная информация о курсе --}}
             <div class="row g-4">
                 <div class="col-lg-8">
+                     {{-- Описание курса --}}
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>{{ __('Course Description') }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">{{ $currentDescription }}</p>
+                        </div>
+                    </div>
+
+                    {{-- Что вы узнаете --}}
+                    @if($currentPrerequisites && $currentPrerequisites != 'No Prerequisites')
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-secondary text-black">
+                            <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>{{ __('What You Will Learn') }}</h5>
+                        </div>
+                        <div class="card-body">
+                            {!! nl2br(e($currentPrerequisites)) !!}
+                        </div>
+                    </div>
+                    @endif
                     {{-- Видео превью --}}
                     @if($course->thumbnail_video_url || $course->thumbnail_image)
                     <div class="card mb-4 border-0 shadow-sm">
@@ -77,29 +109,8 @@
                     </div>
                     @endif
 
-                    {{-- Описание курса --}}
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>{{ __('Course Description') }}</h5>
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-0">{{ $currentDescription }}</p>
-                        </div>
-                    </div>
-
-                    {{-- Что вы узнаете --}}
-                    @if($currentPrerequisites && $currentPrerequisites != 'No Prerequisites')
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-header bg-secondary text-black">
-                            <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>{{ __('What You Will Learn') }}</h5>
-                        </div>
-                        <div class="card-body">
-                            {!! nl2br(e($currentPrerequisites)) !!}
-                        </div>
-                    </div>
-                    @endif
-
-                    {{-- Список уроков --}}
+                    {{-- РАЗДЕЛ УРОКОВ - ТОЛЬКО ДЛЯ ПОЛЬЗОВАТЕЛЕЙ С ДОСТУПОМ --}}
+                    @if($student)
                     <div class="card border-0 shadow-sm">
                         <div class="card-header bg-dark text-white">
                             <h5 class="mb-0">
@@ -115,11 +126,8 @@
                                         $lessonTitle = $lessonTranslation->title ?? $lesson->translations->first()->title ?? $lesson->title ?? __('No Title');
                                         $lessonDescription = $lessonTranslation->description ?? $lesson->translations->first()->description ?? $lesson->description ?? '';
 
-                                        // Получаем переводы для материалов и квизов
                                         $materialsCount = $lesson->materials ? $lesson->materials->count() : 0;
                                         $hasQuiz = $lesson->quiz ? true : false;
-
-                                        // Определяем доступность урока (первый урок всегда доступен)
                                         $isAvailable = $index === 0 ? true : ($lesson->is_available ?? false);
                                     @endphp
                                     <div class="list-group-item border-0">
@@ -150,31 +158,19 @@
                                                 {{-- Информация о уроке --}}
                                                 <div class="d-flex flex-wrap gap-2 mb-2">
                                                     @if($lesson->video_url)
-                                                        @php
-                                                            $colors = ['#4681f4', '#5783db', '#55c2da', '#5dbea3', '#33b249'];
-                                                            $color = $colors[array_rand($colors)];
-                                                        @endphp
-                                                        <span class="keyword-badge" style="background-color: {{ $color }}">
+                                                        <span class="keyword-badge" style="background-color: #4681f4">
                                                             <i class="fas fa-video me-1"></i> {{ __('Video') }}
                                                         </span>
                                                     @endif
 
                                                     @if($hasQuiz)
-                                                        @php
-                                                            $colors = ['#ffc107', '#ffb300', '#ffa000', '#ff8f00', '#ff6f00'];
-                                                            $color = $colors[array_rand($colors)];
-                                                        @endphp
-                                                        <span class="keyword-badge" style="background-color: {{ $color }}; color: #000;">
+                                                        <span class="keyword-badge" style="background-color: #ffc107; color: #000;">
                                                             <i class="fas fa-graduation-cap me-1"></i> {{ __('Quiz') }}
                                                         </span>
                                                     @endif
 
                                                     @if($materialsCount > 0)
-                                                        @php
-                                                            $colors = ['#28a745', '#259b3f', '#218838', '#1e7e34', '#1c7430'];
-                                                            $color = $colors[array_rand($colors)];
-                                                        @endphp
-                                                        <span class="keyword-badge" style="background-color: {{ $color }}">
+                                                        <span class="keyword-badge" style="background-color: #28a745">
                                                             <i class="fas fa-file-download me-1"></i> {{ __('Materials') }} ({{ $materialsCount }})
                                                         </span>
                                                     @endif
@@ -182,7 +178,6 @@
                                             </div>
 
                                             <div class="flex-shrink-0">
-                                                {{-- Проверяем доступность урока --}}
                                                 @if($isAvailable)
                                                     <a href="{{ route('lessons.show', [
                                                         'locale' => $locale,
@@ -207,54 +202,134 @@
                                     </div>
                                 @endforelse
                             </div>
+                        </div>
+                    </div>
+                    @else
+                    {{-- РАЗДЕЛ ДЛЯ ПОЛЬЗОВАТЕЛЕЙ БЕЗ ДОСТУПА --}}
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2"></i>
+                                {{ __('Course Overview') }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4 mb-3">
+                                    <div class="border rounded p-3">
+                                        <i class="fas fa-book fa-2x text-primary mb-2"></i>
+                                        <h5 class="mb-1">{{ $totalLessons }}</h5>
+                                        <small class="text-muted">{{ __('Lessons') }}</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="border rounded p-3">
+                                        <i class="fas fa-clock fa-2x text-primary mb-2"></i>
+                                        <h5 class="mb-1">{{ $course->duration ?? 0 }}</h5>
+                                        <small class="text-muted">{{ __('Hours') }}</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="border rounded p-3">
+                                        <i class="fas fa-layer-group fa-2x text-primary mb-2"></i>
+                                        <h5 class="mb-1">{{ $course->level ?? 'All' }}</h5>
+                                        <small class="text-muted">{{ __('Level') }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                            {{-- Пагинация --}}
-                            @if($course->lessons->count() > 10)
-                            <div class="card-footer bg-light">
-                                <nav aria-label="Lesson navigation">
-                                    <ul class="pagination pagination-sm justify-content-center mb-0">
-                                        <li class="page-item disabled">
-                                            <a class="page-link" href="#" tabindex="-1">{{ __('Previous') }}</a>
-                                        </li>
-                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                        <li class="page-item">
-                                            <a class="page-link" href="#">{{ __('Next') }}</a>
-                                        </li>
-                                    </ul>
-                                </nav>
+                    {{-- Призыв к действию --}}
+                    <div class="card border-0 shadow-sm bg-light">
+                        <div class="card-body text-center py-5">
+                            <h4 class="mb-3">{{ __('Ready to Start Learning?') }}</h4>
+                            <p class="mb-4">{{ __('Enroll now to get full access to all lessons, quizzes, and course materials.') }}</p>
+                            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                                <a href="{{ route('add.to.cart', ['locale' => $locale, 'id' => $course->id]) }}"
+                                   class="btn btn-primary btn-lg">
+                                    <i class="fas fa-shopping-cart me-2"></i>
+                                    {{ __('Add to Cart') }}
+                                </a>
+                                <a href="{{ route('checkout', ['locale' => $locale]) }}?course_id={{ $course->id }}"
+                                   class="btn btn-outline-primary btn-lg">
+                                    <i class="fas fa-bolt me-2"></i>
+                                    {{ __('Buy Now') }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+                <div class="col-lg-4">
+                    {{-- ПРОГРЕСС И СЕРТИФИКАТ - ТОЛЬКО ДЛЯ ПОЛЬЗОВАТЕЛЕЙ С ДОСТУПОМ --}}
+                    @if($student)
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <h6 class="mb-3">{{ __('Course Progress') }}</h6>
+
+                            {{-- Круговой прогресс-бар --}}
+                            <div class="position-relative d-inline-block mb-3">
+                                <div class="progress-circle" data-progress="{{ $progress }}">
+                                    <svg width="120" height="120" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="54" fill="none" stroke="#e9ecef" stroke-width="8"/>
+                                        <circle cx="60" cy="60" r="54" fill="none" stroke="#28a745" stroke-width="8"
+                                                stroke-dasharray="339.292" stroke-dashoffset="{{ 339.292 * (1 - $progress / 100) }}"
+                                                stroke-linecap="round" transform="rotate(-90 60 60)"/>
+                                    </svg>
+                                    <div class="progress-text">
+                                        <span class="h4 mb-0 fw-bold">{{ $progress }}%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="progress mb-2" style="height: 12px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                     style="width: {{ $progress }}%">
+                                </div>
+                            </div>
+                            <small class="text-muted d-block mb-3">
+                                {{ $completedLessons }}/{{ $totalLessons }} {{ __('lessons completed') }}
+                            </small>
+
+                            {{-- Кнопка сертификата --}}
+                            @if($canGenerateCertificate)
+                            <div class="certificate-section mt-4 p-3 bg-light rounded">
+                                <i class="fas fa-award fa-2x text-warning mb-2"></i>
+                                <h6 class="mb-2">{{ __('Course Completed!') }}</h6>
+                                <p class="small text-muted mb-3">{{ __('Congratulations! You have successfully completed this course.') }}</p>
+                                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#certificateModal">
+                                    <i class="fas fa-download me-1"></i> {{ __('Download Certificate') }}
+                                </button>
+                            </div>
+                            @else
+                            <div class="certificate-info mt-3 p-3 bg-light rounded">
+                                <i class="fas fa-trophy text-muted mb-2"></i>
+                                <p class="small text-muted mb-0">
+                                    {{ __('Complete all lessons to get your certificate of completion') }}
+                                </p>
                             </div>
                             @endif
                         </div>
                     </div>
+                    @endif
 
-                    {{-- Блок для гостей --}}
-                    @guest
-                    <div class="alert alert-info mt-4">
-                        <h6>{{ __('Want full access to this course?') }}</h6>
-                        <p>{{ __('Enroll now to get unlimited access to all lessons, quizzes, and materials.') }}</p>
-                        <a href="{{ route('add.to.cart', ['locale' => $locale, 'id' => $course->id]) }}" class="btn btn-primary btn-sm">{{ __('Enroll Now') }}</a>
-                    </div>
-                    @endguest
-                </div>
-
-                <div class="col-lg-4">
-                    {{-- Блок с ценой и оформлением --}}
+                    {{-- БЛОК С ЦЕНОЙ И ОФОРМЛЕНИЕМ --}}
                     <div class="courseCard--wrapper mb-4">
                         <div class="cart border-0 shadow-sm">
                             <div class="cart__price p-3 bg-light rounded-top">
                                 <div class="current-price d-flex justify-content-between align-items-center">
                                     <h3 class="font-title--sm mb-0">
                                         @if($course->price > 0)
-                                            {{ $currencySymbol }}{{ number_format($course->price, 2) }}
+                                            {{ $currencySymbol }}{{ number_format($course->price * $currencyRate, 2) }}
                                         @else
                                             {{ __('Free') }}
                                         @endif
                                     </h3>
                                     @if($course->old_price > 0 && $course->old_price > $course->price)
                                         <div class="text-end">
-                                            <p class="mb-0"><del class="text-muted">{{ $currencySymbol }}{{ number_format($course->old_price, 2) }}</del></p>
+                                            <p class="mb-0"><del class="text-muted">{{ $currencySymbol }}{{ number_format($course->old_price * $currencyRate, 2) }}</del></p>
                                             @php
                                                 $discount = (($course->old_price - $course->price) / $course->old_price) * 100;
                                             @endphp
@@ -267,46 +342,63 @@
                             </div>
 
                             <div class="cart__checkout-process p-3">
-                                @if($course->old_price > 0 && $course->old_price > $course->price)
-                                    <p class="time-left text-center text-muted mb-3">
-                                        <i class="fas fa-clock me-1"></i>
-                                        <span>{{ __('5 hours to remaining this price') }}</span>
-                                    </p>
-                                @endif
+                                @if(!$hasAccess)
+                                    {{-- Кнопки покупки для пользователей без доступа --}}
+                                    @if($course->old_price > 0 && $course->old_price > $course->price)
+                                        <p class="time-left text-center text-muted mb-3">
+                                            <i class="fas fa-clock me-1"></i>
+                                            <span>{{ __('5 hours to remaining this price') }}</span>
+                                        </p>
+                                    @endif
 
-                                <div class="d-grid gap-2">
-                                    <a href="{{ route('add.to.cart', ['locale' => $locale, 'id' => $course->id]) }}"
-                                       class="text-white button button-lg button--primary w-100 btn btn-primary">
-                                        {{ __('Add to Cart') }}
-                                    </a>
-                                    <a href="{{ route('checkout', ['locale' => $locale]) }}?course_id={{ $course->id }}"
-                                       class="button button-lg button--primary-outline mt-0 w-100 btn btn-outline-primary">
-                                        {{ __('Buy Now') }}
-                                    </a>
-                                </div>
+                                    <div class="d-grid gap-2">
+                                        <a href="{{ route('add.to.cart', ['locale' => $locale, 'id' => $course->id]) }}"
+                                           class="text-white button button-lg button--primary w-100 btn btn-primary">
+                                            {{ __('Add to Cart') }}
+                                        </a>
+                                        <a href="{{ route('checkout', ['locale' => $locale]) }}?course_id={{ $course->id }}"
+                                           class="button button-lg button--primary-outline mt-0 w-100 btn btn-outline-primary">
+                                            {{ __('Buy Now') }}
+                                        </a>
+                                    </div>
+                                @else
+                                    {{-- Информация о доступе для пользователей с доступом --}}
+                                    <div class="alert alert-success mb-0 text-center">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        {{ __('You have full access to this course') }}
+                                        <br>
+                                        <small class="mt-1 d-block">
+                                            <a href="{{ route('lessons.show', ['locale' => $locale, 'course' => $course->id, 'lesson' => $course->lessons->first()->id ?? 0]) }}"
+                                               class="btn btn-primary btn-sm mt-2">
+                                                <i class="fas fa-play me-1"></i> {{ __('Start Learning') }}
+                                            </a>
+                                        </small>
+                                    </div>
+                                @endif
                             </div>
 
+                            {{-- Остальные блоки (включения, шеринг) --}}
                             <div class="cart__includes-info p-3 border-top">
                                 <h6 class="font-title--card mb-3">{{ __('This course includes:') }}</h6>
                                 <ul class="list-unstyled mb-0">
                                     <li class="d-flex align-items-center mb-2">
-                                        <span class="me-2"><img src="{{ asset('frontend/dist/images/icon/dollar.png') }}" alt="dollar" width="20" /></span>
+                                        <span class="me-2"><i class="fas fa-infinity text-primary"></i></span>
                                         <p class="font-para--md mb-0">{{ __('Full Lifetime Access') }}</p>
                                     </li>
                                     <li class="d-flex align-items-center mb-2">
-                                        <span class="me-2"><img src="{{ asset('frontend/dist/images/icon/clock-2.png') }}" alt="clock" width="20" /></span>
+                                        <span class="me-2"><i class="fas fa-undo text-primary"></i></span>
                                         <p class="font-para--md mb-0">{{ __('30 Days Money Back Guarantee') }}</p>
                                     </li>
                                     <li class="d-flex align-items-center mb-2">
-                                        <span class="me-2"><img src="{{ asset('frontend/dist/images/icon/paper-plus.png') }}" alt="paper-plus" width="20" /></span>
+                                        <span class="me-2"><i class="fas fa-file-download text-primary"></i></span>
                                         <p class="font-para--md mb-0">{{ __('Free Exercises File') }}</p>
                                     </li>
                                     <li class="d-flex align-items-center mb-2">
-                                        <span class="me-2"><img src="{{ asset('frontend/dist/images/icon/airplay.png') }}" alt="airplay" width="20" /></span>
+                                        <span class="me-2"><i class="fas fa-mobile-alt text-primary"></i></span>
                                         <p class="font-para--md mb-0">{{ __('Access on Mobile, Tablet and TV') }}</p>
                                     </li>
                                     <li class="d-flex align-items-center">
-                                        <span class="me-2"><img src="{{ asset('frontend/dist/images/icon/clipboard.png') }}" alt="clipboard" width="20" /></span>
+                                        <span class="me-2"><i class="fas fa-certificate text-primary"></i></span>
                                         <p class="font-para--md mb-0">{{ __('Certificate of Completion') }}</p>
                                     </li>
                                 </ul>
@@ -345,7 +437,7 @@
                         </div>
                     </div>
 
-                    {{-- Боковая панель с информацией --}}
+                    {{-- ИНФОРМАЦИЯ О КУРСЕ --}}
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-header bg-info text-white">
                             <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>{{ __('Course Information') }}</h5>
@@ -362,6 +454,7 @@
                                 <br>
                                 <span class="ms-4">{{ $categoryName }}</span>
                             </div>
+
                             <div class="mb-3">
                                 <strong><i class="fas fa-play-circle me-2 text-primary"></i>{{ __('Course Type') }}:</strong>
                                 <br>
@@ -403,8 +496,7 @@
                                     @endif
                                 </span>
                             </div>
-
-                            <div class="mb-3">
+<div class="mb-3">
                                 <strong><i class="fas fa-calendar me-2 text-primary"></i>{{ __('Start Date') }}:</strong>
                                 <br>
                                 <span class="ms-4">{{ $course->start_from ? \Carbon\Carbon::parse($course->start_from)->format('d.m.Y') : __('Not specified') }}</span>
@@ -421,7 +513,6 @@
                                 <br>
                                 <span class="ms-4">{{ $totalLessons }} {{ __('lessons') }}</span>
                             </div>
-
                             @if($course->tag)
                             <div class="mb-3">
                                 <strong><i class="fas fa-tag me-2 text-primary"></i>{{ __('Status') }}:</strong>
@@ -455,29 +546,16 @@
                             @endif
                         </div>
                     </div>
-
-                    {{-- Прогресс --}}
-                    @auth
-                    <div class="card mb-4 border-0 shadow-sm">
-                        <div class="card-body text-center">
-                            <h6 class="mb-3">{{ __('Course Progress') }}</h6>
-                            <div class="progress mb-2" style="height: 20px;">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated"
-                                     style="width: {{ $progress }}%">
-                                    {{ $progress }}%
-                                </div>
-                            </div>
-                            <small class="text-muted">
-                                {{ $completedLessons }}/{{ $totalLessons }} {{ __('lessons completed') }}
-                            </small>
-                        </div>
-                    </div>
-                    @endauth
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+{{-- Модальное окно сертификата --}}
+@if($hasAccess && $canGenerateCertificate)
+@include('frontend.courses.partials.certificate-modal')
+@endif
 
 @endsection
 
@@ -486,7 +564,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Функция для переключения описания уроков
     const toggleButtons = document.querySelectorAll('.toggle-description');
-
     toggleButtons.forEach(button => {
         button.addEventListener('click', function() {
             const descriptionDiv = this.closest('.lesson-description');
@@ -503,9 +580,125 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Анимация кругового прогресса
+    const progressCircle = document.querySelector('.progress-circle');
+    if (progressCircle) {
+        const progress = progressCircle.getAttribute('data-progress');
+        const circle = progressCircle.querySelector('circle:last-child');
+        const radius = circle.r.baseVal.value;
+        const circumference = radius * 2 * Math.PI;
+
+        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+        circle.style.strokeDashoffset = circumference - (progress / 100) * circumference;
+    }
+
+    // Загрузка сертификата - ОДИН обработчик
+    const downloadButtons = document.querySelectorAll('.download-certificate');
+    downloadButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const format = this.getAttribute('data-format');
+            generateCertificate(format, e);
+        });
+    });
+
+    function generateCertificate(format, event) {
+    const courseId = {{ $course->id }};
+    const studentId = {{ $studentId ?? 'null' }};
+
+    if (!studentId) {
+        alert('{{ __("Student not found") }}');
+        return;
+    }
+
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> {{ __("Generating") }}';
+    button.disabled = true;
+
+    const formData = new FormData();
+    formData.append('student_id', studentId);
+    formData.append('format', format);
+    formData.append('_token', '{{ csrf_token() }}');
+
+    fetch(`/{{ $locale }}/courses/${courseId}/certificate/generate`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.download_url && data.download_url.startsWith('data:')) {
+                const link = document.createElement('a');
+                link.href = data.download_url;
+                link.download = data.filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Закрываем модальное окно
+                const modal = bootstrap.Modal.getInstance(document.getElementById('certificateModal'));
+                if (modal) modal.hide();
+
+                showAlert('{{ __("Certificate downloaded successfully!") }}', 'success');
+            } else {
+                alert('{{ __("Download URL not available") }}');
+            }
+        } else {
+            // Информативное сообщение об ошибке
+            if (data.message.includes('not available')) {
+                showAlert('{{ __("PNG/JPG certificates are not available. Please use PDF format.") }}', 'warning');
+            } else {
+                alert(data.message || '{{ __("Error generating certificate") }}');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('{{ __("Network error. Please try again.") }}');
+    })
+    .finally(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
+    // Функция для показа уведомлений
+    function showAlert(message, type = 'info') {
+        // Создаем контейнер для алертов если его нет
+        let alertContainer = document.querySelector('.alert-container');
+        if (!alertContainer) {
+            alertContainer = document.createElement('div');
+            alertContainer.className = 'alert-container position-fixed top-0 start-50 translate-middle-x mt-3';
+            alertContainer.style.zIndex = '1060';
+            document.body.appendChild(alertContainer);
+        }
+
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        alertContainer.appendChild(alertDiv);
+
+        // Автоматически скрываем через 5 секунд
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
 });
 </script>
 @endpush
+
+{{-- Добавьте стили из watch-course.blade.php --}}
 
 @push('styles')
 <style>
@@ -575,27 +768,55 @@ document.addEventListener('DOMContentLoaded', function() {
     border-bottom-right-radius: 12px;
 }
 
-/* Стили для баджей */
-.badge {
-    font-size: 0.75em;
-    font-weight: 500;
+/* Альтернативный современный стиль для флажков */
+.access-flag-modern {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
-.badge.bg-primary {
-    background-color: #4681f4 !important;
+.access-flag-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s ease;
 }
 
-.badge.bg-warning {
-    background-color: #ffc107 !important;
-    color: #000 !important;
+.access-flag-modern:hover::before {
+    left: 100%;
 }
 
-.badge.bg-success {
-    background-color: #28a745 !important;
+.access-flag-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-.badge.bg-dark {
-    background-color: #343a40 !important;
+.access-flag-modern--success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: 2px solid #28a745;
+}
+
+.access-flag-modern--warning {
+    background: linear-gradient(135deg, #b58a07, #ffb300);
+    color: #000;
+    border: 2px solid #e0a800;
+}
+
+.access-flag-modern i {
+    font-size: 1.1em;
+    margin-right: 8px;
 }
 
 .btn-sm {
@@ -716,6 +937,48 @@ document.addEventListener('DOMContentLoaded', function() {
     color: white !important;
 }
 
+/* Стили для прогресса и сертификата */
+.progress-circle {
+    position: relative;
+    display: inline-block;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.certificate-section {
+    border-left: 4px solid #28a745;
+}
+
+.certificate-info {
+    border-left: 4px solid #6c757d;
+}
+
+.certificate-design {
+    background: linear-gradient(135deg, #fffaf0 0%, #fff 100%);
+    font-family: 'Georgia', serif;
+}
+
+.certificate-border {
+    border-style: double !important;
+    border-width: 15px !important;
+}
+
+/* Анимация прогресса */
+.progress-bar-animated {
+    animation: progress-animation 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-animation {
+    0% { background-position: 0 0; }
+    100% { background-position: 40px 0; }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .container {
@@ -759,6 +1022,23 @@ document.addEventListener('DOMContentLoaded', function() {
     .keyword-badge {
         padding: 0.3rem 0.6rem;
         font-size: 0.7rem;
+    }
+
+    .progress-circle svg {
+        width: 100px;
+        height: 100px;
+    }
+
+    .progress-text .h4 {
+        font-size: 1.25rem;
+    }
+
+    .certificate-preview {
+        padding: 1rem !important;
+    }
+
+    .certificate-border {
+        border-width: 8px !important;
     }
 }
 

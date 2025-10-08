@@ -90,8 +90,9 @@
                                 ? asset('uploads/users/' . $course->instructor->image)
                                 : asset('images/default-user.jpg');
 
-                            // Кодируем ID курса
-                            $encodedCourseId = base64_encode($course->id);
+                            // Рейтинг курса
+                            $averageRating = $course->average_rating ?? 0;
+                            $reviewsCount = $course->reviews_count ?? 0;
                         @endphp
 
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4">
@@ -102,12 +103,23 @@
                                          alt="{{ $courseTitle }}"
                                          style="height: 200px; object-fit: cover;"
                                          onerror="this.src='{{ asset('images/default-course.jpg') }}'">
+
+                                    {{-- Бейдж рейтинга --}}
+                                    @if($averageRating > 0)
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <div class="bg-warning text-dark px-2 py-1 rounded-pill d-flex align-items-center">
+                                            <i class="fas fa-star me-1 small"></i>
+                                            <small class="fw-bold">{{ number_format($averageRating, 1) }}</small>
+                                        </div>
+                                    </div>
+                                    @endif
+
                                     <div class="course-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75 opacity-0 transition-opacity">
                                         <a href="{{ route('frontend.courses.show', ['locale' => $locale, 'course' => $course->id]) }}"
-   class="btn btn-primary btn-sm rounded-pill px-3">
-    <i class="fas fa-eye me-1"></i>
-    {{ __('View Course') }}
-</a>
+                                           class="btn btn-primary btn-sm rounded-pill px-3">
+                                            <i class="fas fa-eye me-1"></i>
+                                            {{ __('View Course') }}
+                                        </a>
                                     </div>
                                 </div>
 
@@ -144,6 +156,24 @@
                                         </div>
                                     </div>
 
+                                    {{-- Рейтинг и отзывы --}}
+                                    <div class="course-rating mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rating me-2">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <i class="fas fa-star{{ $i <= round($averageRating) ? ' text-warning' : ' text-muted' }} small"></i>
+                                                @endfor
+                                            </div>
+                                            <small class="text-muted">
+                                                @if($reviewsCount > 0)
+                                                    {{ number_format($averageRating, 1) }} ({{ $reviewsCount }})
+                                                @else
+                                                    {{ __('No ratings') }}
+                                                @endif
+                                            </small>
+                                        </div>
+                                    </div>
+
                                     <div class="d-flex justify-content-between align-items-center mt-auto">
                                         <div class="course-price">
                                             @if($course->price > 0)
@@ -159,9 +189,11 @@
                                                 <span class="text-success fw-bold">{{ __('Free') }}</span>
                                             @endif
                                         </div>
-                                        <div class="course-rating d-flex align-items-center">
-                                            <i class="fas fa-star text-warning small me-1"></i>
-                                            <small>4.5</small>
+                                        <div class="course-enrollments">
+                                            <small class="text-muted">
+                                                <i class="fas fa-users me-1"></i>
+                                                {{ $course->enrollments_count ?? 0 }}
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
@@ -301,6 +333,19 @@
 .section-subtitle {
     color: #6c757d;
     font-size: 1.1rem;
+}
+
+.rating {
+    display: inline-flex;
+    align-items: center;
+}
+
+.rating .fas.fa-star.text-warning {
+    color: #ffc107 !important;
+}
+
+.rating .fas.fa-star.text-muted {
+    color: #dee2e6 !important;
 }
 
 /* Responsive adjustments */

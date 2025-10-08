@@ -78,36 +78,36 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($materials as $material)
-                                        <tr class="material-row"
-                                            data-titles='@json($material->translations->pluck("title","locale"))'
-                                            data-content='@json($material->translations->pluck("content_text","locale"))'>
-                                            <td>{{ $material->id }}</td>
-                                            <td class="material-title"></td>
-                                            <td>{{ $material->lesson?->displayTitle() }}</td>
-                                            <td>{{ ucfirst($material->type) }}</td>
-                                            <td>
-                                                @if($material->type === 'video' || $material->type === 'document')
-                                                    <embed src="{{ asset('uploads/courses/contents/'.$material->content) }}" width="200px" height="100px" />
-                                                @endif
-                                            </td>
-                                            <td class="material-text"></td>
-                                            <td>{{ $material->content_url }}</td>
-                                            <td>
-                                                <a href="{{ localeRoute('material.edit', encryptor('encrypt', $material->id)) }}" class="btn btn-sm btn-primary"><i class="la la-pencil"></i></a>
-                                                <a href="javascript:void(0);" class="btn btn-sm btn-danger" onclick="$('#form{{$material->id}}').submit()"><i class="la la-trash-o"></i></a>
-                                                <form id="form{{$material->id}}" action="{{ localeRoute('material.destroy', encryptor('encrypt', $material->id)) }}" method="post">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="8" class="text-center">No Course Material Found</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
+    @forelse($materials as $material)
+        <tr class="material-row"
+            data-titles='@json($material->translations->pluck("title","locale"))'
+            data-content='@json($material->translations->pluck("content_text","locale"))'>
+            <td>{{ $material->id }}</td>
+            <td class="material-title"></td>
+            <td>{{ $material->lesson?->display_title }}</td> {{-- Исправлено здесь --}}
+            <td>{{ ucfirst($material->type) }}</td>
+            <td>
+                @if($material->type === 'video' || $material->type === 'document')
+                    <embed src="{{ asset('uploads/courses/contents/'.$material->content) }}" width="200px" height="100px" />
+                @endif
+            </td>
+            <td class="material-text"></td>
+            <td>{{ $material->content_url }}</td>
+            <td>
+                <a href="{{ localeRoute('material.edit', encryptor('encrypt', $material->id)) }}" class="btn btn-sm btn-primary"><i class="la la-pencil"></i></a>
+                <a href="javascript:void(0);" class="btn btn-sm btn-danger" onclick="$('#form{{$material->id}}').submit()"><i class="la la-trash-o"></i></a>
+                <form id="form{{$material->id}}" action="{{ localeRoute('material.destroy', encryptor('encrypt', $material->id)) }}" method="post">
+                    @csrf
+                    @method('DELETE')
+                </form>
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="8" class="text-center">No Course Material Found</td>
+        </tr>
+    @endforelse
+</tbody>
                             </table>
                             {{ $materials->links() }}
                         </div>
@@ -115,39 +115,39 @@
                 </div>
             </div>
 
-            {{-- Grid View --}}
-            <div id="grid-view" class="tab-pane fade col-lg-12">
-                <div class="row">
-                    @forelse($materials as $material)
-                        <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
-                            <div class="card h-100 material-card"
-                                 data-titles='@json($material->translations->pluck("title","locale"))'
-                                 data-content='@json($material->translations->pluck("content_text","locale"))'>
-                                <div class="card-body">
-                                    <h5 class="material-title"></h5>
-                                    <p><strong>Lesson:</strong> {{ $material->lesson?->displayTitle() }}</p>
-                                    <p><strong>Type:</strong> {{ ucfirst($material->type) }}</p>
-                                    @if($material->type === 'video' || $material->type === 'document')
-                                        <embed src="{{ asset('uploads/courses/contents/'.$material->content) }}" width="200px" height="100px" />
-                                    @endif
-                                    <p class="material-text mt-2"></p>
-                                    <p><strong>URL:</strong> {{ $material->content_url }}</p>
-                                    <div class="mt-2">
-                                        <a href="{{ localeRoute('material.edit', encryptor('encrypt', $material->id)) }}" class="btn btn-sm btn-primary"><i class="la la-pencil"></i></a>
-                                        <a href="javascript:void(0);" class="btn btn-sm btn-danger" onclick="$('#form{{$material->id}}').submit()"><i class="la la-trash-o"></i></a>
-                                        <form id="form{{$material->id}}" action="{{ localeRoute('material.destroy', encryptor('encrypt', $material->id)) }}" method="post">
-                                            @csrf
-                                            @method('DELETE')
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
+{{-- Grid View --}}
+<div id="grid-view" class="tab-pane fade col-lg-12">
+    <div class="row">
+        @forelse($materials as $material)
+            <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+                <div class="card h-100 material-card"
+                     data-titles='@json($material->translations->pluck("title","locale"))'
+                     data-content='@json($material->translations->pluck("content_text","locale"))'>
+                    <div class="card-body">
+                        <h5 class="material-title"></h5>
+                        <p><strong>Lesson:</strong> {{ $material->lesson?->display_title }}</p> {{-- Исправлено здесь --}}
+                        <p><strong>Type:</strong> {{ ucfirst($material->type) }}</p>
+                        @if($material->type === 'video' || $material->type === 'document')
+                            <embed src="{{ asset('uploads/courses/contents/'.$material->content) }}" width="200px" height="100px" />
+                        @endif
+                        <p class="material-text mt-2"></p>
+                        <p><strong>URL:</strong> {{ $material->content_url }}</p>
+                        <div class="mt-2">
+                            <a href="{{ localeRoute('material.edit', encryptor('encrypt', $material->id)) }}" class="btn btn-sm btn-primary"><i class="la la-pencil"></i></a>
+                            <a href="javascript:void(0);" class="btn btn-sm btn-danger" onclick="$('#form{{$material->id}}').submit()"><i class="la la-trash-o"></i></a>
+                            <form id="form{{$material->id}}" action="{{ localeRoute('material.destroy', encryptor('encrypt', $material->id)) }}" method="post">
+                                @csrf
+                                @method('DELETE')
+                            </form>
                         </div>
-                    @empty
-                        <div class="col-12 text-center">No Course Material Found</div>
-                    @endforelse
+                    </div>
                 </div>
             </div>
+        @empty
+            <div class="col-12 text-center">No Course Material Found</div>
+        @endforelse
+    </div>
+</div>
 
         </div>
 

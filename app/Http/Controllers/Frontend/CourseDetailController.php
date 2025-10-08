@@ -7,53 +7,77 @@ use App\Http\Helpers\CurrencyHelper;
 
 class CourseDetailController extends Controller
 {
-    public function show($locale, $id)
+    public function showSimpleCourse($locale, Course $course)
     {
         try {
-            app()->setLocale($locale);
+            // Установка языка
+            $this->setLocale($locale);
 
-            $course = Course::with([
+            // Проверяем статус курса
+            if ($course->status != 2) {
+                abort(404, 'Course is not active');
+            }
+
+            // Загружаем отношения
+            $course->load([
                 'instructor.translations',
                 'courseCategory.translations',
-                'lessons' => function($query) {
-                    $query->where('status', 1)->orderBy('order');
-                },
+                'lessons',
                 'translations'
-            ])->where('status', 2)->findOrFail($id);
+            ]);
 
             // Получаем переводы
             $courseTranslation = $course->translations->where('locale', $locale)->first();
-            $currentTitle = $courseTranslation->title ?? $course->title;
-            $currentDescription = $courseTranslation->description ?? $course->description;
-            $currentPrerequisites = $courseTranslation->prerequisites ?? $course->prerequisites;
+            $instructorTranslation = $course->instructor ? $course->instructor->translations->where('locale', $locale)->first() : null;
+            $categoryTranslation = $course->courseCategory ? $course->courseCategory->translations->where('locale', $locale)->first() : null;
 
-            // Исправлено: добавлены значения по умолчанию
-            $instructorName = 'Unknown Instructor';
-            $instructorBio = 'No biography available';
+            $currentTitle = $courseTranslation->title ?? $course->translations->first()->title ?? $course->title ?? __('No Title');
+            $currentDescription = $courseTranslation->description ?? $course->translations->first()->description ?? $course->description ?? __('No Description');
+            $currentPrerequisites = $courseTranslation->prerequisites ?? $course->translations->first()->prerequisites ?? $course->prerequisites ?? __('No Prerequisites');
+            $currentKeywords = $courseTranslation->keywords ?? $course->translations->first()->keywords ?? $course->keywords ?? '';
 
-            if ($course->instructor) {
-                $instructorTranslation = $course->instructor->translations->where('locale', $locale)->first();
-                $instructorName = $instructorTranslation->name ?? $course->instructor->name ?? 'Unknown Instructor';
-                $instructorBio = $instructorTranslation->bio ?? $course->instructor->bio ?? 'No biography available';
-            }
+            // Инструктор
+            $instructorName = $instructorTranslation->name ?? $course->instructor->translations->first()->name ?? $course->instructor->name ?? __('No Instructor');
+            $instructorBio = $instructorTranslation->bio ?? $course->instructor->translations->first()->bio ?? $course->instructor->bio ?? __('No biography available.');
+            $instructorDesignation = $instructorTranslation->designation ?? $course->instructor->translations->first()->designation ?? $course->instructor->designation ?? '';
 
+            // Категория
+            $categoryName = $categoryTranslation->category_name ?? $course->courseCategory->translations->first()->name ?? $course->courseCategory->category_name ?? __('No Category');
+
+            $totalLessons = $course->lessons->count();
+
+            // Используем хелпер для получения символа валюты
             $currencySymbol = CurrencyHelper::getSymbol();
-            $currencyRate = CurrencyHelper::getRate(); // ← ЭТОЙ ПЕРЕМЕННОЙ НЕ БЫЛО!
+            $currencyRate = config('payment.currency_rate', 1);
 
-            return view('frontend.courses.courseDetails', compact( // ← ИСПРАВЬТЕ ПУТЬ!
+            return view('frontend.courses.show-simple', compact(
                 'course',
+                'locale',
                 'currentTitle',
                 'currentDescription',
                 'currentPrerequisites',
+                'currentKeywords',
                 'instructorName',
                 'instructorBio',
+                'instructorDesignation',
+                'categoryName',
                 'currencySymbol',
                 'currencyRate',
-                'locale'
+                'totalLessons'
             ));
 
         } catch (\Exception $e) {
-            abort(404, 'Course not found: ' . $e->getMessage());
+            \Log::error('Course show simple error: ' . $e->getMessage());
+            abort(404, 'Course not found');
+        }
+    }
+
+    private function setLocale($locale)
+    {
+        $lang = $locale ?? request()->get('lang', session('locale', 'en'));
+        if (in_array($lang, ['en', 'ru', 'ka'])) {
+            app()->setLocale($lang);
+            session()->put('locale', $lang);
         }
     }
 }

@@ -95,6 +95,22 @@ class Lesson extends Model
         return $translation ? $translation->{$field} : null;
     }
 
+   public function getDisplayTitleAttribute()
+    {
+        $currentLocale = app()->getLocale();
+
+        // Если есть переводы и отношение translations
+        if ($this->relationLoaded('translations') && $this->translations) {
+            $translation = $this->translations->where('locale', $currentLocale)->first();
+            if ($translation && !empty($translation->title)) {
+                return $translation->title;
+            }
+        }
+
+        // Fallback на основное название или ID
+        return $this->title ?? "Lesson #{$this->id}";
+    }
+
     // Accessors
     public function getTitleAttribute()
     {

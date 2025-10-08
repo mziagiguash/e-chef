@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Course;
+use App\Models\Enrollment;
 
 class CartController extends Controller
 {
@@ -61,6 +62,120 @@ class CartController extends Controller
         ]);
     }
 
+    // Методы для бесплатных курсов
+      public function enrollFreeCourse(Request $request)
+    {
+        try {
+            $student_id = currentUserId();
+            $course_id = $request->course_id;
+
+            // Проверяем, существует ли курс
+            $course = Course::find($course_id);
+            if (!$course) {
+                return back()->with('error', 'Course not found.');
+            }
+
+            // 🔴 ИСПРАВЛЕНО: Используем правильное название колонки
+            if ($course->coursePrice > 0) {
+                return back()->with('error', 'This course is not free.');
+            }
+
+            // Проверяем, не записан ли студент уже на курс
+            $existingEnrollment = Enrollment::where('student_id', $student_id)
+                ->where('course_id', $course_id)
+                ->first();
+
+            if ($existingEnrollment) {
+                return back()->with('info', 'You are already enrolled in this course.');
+            }
+
+            // Создаем запись о зачислении
+            $enrollment = Enrollment::create([
+                'student_id' => $student_id,
+                'course_id' => $course_id,
+                'amount_paid' => 0,
+                'payment_status' => Enrollment::PAYMENT_COMPLETED,
+                'payment_method' => 'free',
+                'enrollment_date' => now(),
+                'payment_date' => now(),
+            ]);
+
+            // Удаляем курс из корзины
+            $cart = session('cart', []);
+            if (isset($cart[$course_id])) {
+                unset($cart[$course_id]);
+                session(['cart' => $cart]);
+            }
+
+            return back()->with('success', 'Successfully enrolled in the free course!');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error enrolling in course: ' . $e->getMessage());
+        }
+    }
+public function enrollAllFreeCourses(Request $request)
+    {
+        try {
+            $student_id = currentUserId();
+            $course_ids = $request->course_ids ?? [];
+
+            if (empty($course_ids)) {
+                return back()->with('error', 'No free courses selected.');
+            }
+
+            $enrolledCount = 0;
+            $cart = session('cart', []);
+
+            foreach ($course_ids as $course_id) {
+                // Проверяем, существует ли курс
+                $course = Course::find($course_id);
+                // 🔴 ИСПРАВЛЕНО: Используем правильное название колонки
+                if (!$course || $course->coursePrice > 0) {
+                    continue; // Пропускаем если курс не найден или не бесплатный
+                }
+
+                // Проверяем, не записан ли студент уже на курс
+                $existingEnrollment = Enrollment::where('student_id', $student_id)
+                    ->where('course_id', $course_id)
+                    ->first();
+
+                if ($existingEnrollment) {
+                    continue; // Уже записан
+                }
+
+                // Создаем запись о зачислении
+                Enrollment::create([
+                    'student_id' => $student_id,
+                    'course_id' => $course_id,
+                    'amount_paid' => 0,
+                    'payment_status' => Enrollment::PAYMENT_COMPLETED,
+                    'payment_method' => 'free',
+                    'enrollment_date' => now(),
+                    'payment_date' => now(),
+                ]);
+
+                // Удаляем курс из корзины
+                if (isset($cart[$course_id])) {
+                    unset($cart[$course_id]);
+                }
+
+                $enrolledCount++;
+            }
+
+            // Обновляем корзину в сессии
+            session(['cart' => $cart]);
+
+            if ($enrolledCount > 0) {
+                return back()->with('success', "Successfully enrolled in {$enrolledCount} free course(s)!");
+            } else {
+                return back()->with('info', 'No new free courses were enrolled.');
+            }
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error enrolling in free courses: ' . $e->getMessage());
+        }
+    }
+
     public function addToCart($locale, $id)
     {
         $course = Course::find($id);
@@ -76,12 +191,12 @@ class CartController extends Controller
             return redirect()->back()->with('info', 'Course is already in your cart!');
         }
 
-        // Добавляем курс в корзину (quantity всегда 1 для курсов)
+        // 🔴 ИСПРАВЛЕНО: Используем правильные названия колонок
         $cart[$id] = [
             "title" => $course->title,
             "title_en" => $course->title_en ?? $course->title,
-            "price" => $course->price,
-            "old_price" => $course->old_price ?? null,
+            "price" => $course->coursePrice, // Исправлено с price на coursePrice
+            "old_price" => $course->courseOldPrice ?? null, // Исправлено с old_price на courseOldPrice
             "thumbnail" => $course->thumbnail_image,
             "image" => $course->thumbnail_image,
             "instructor" => $course->instructor->name ?? 'Unknown Instructor',

@@ -12,17 +12,21 @@ use Exception;
 
 class MaterialController extends Controller
 {
-    public function index()
-    {
-        $materials = Material::paginate(10);
-        return view('backend.course.material.index', compact('materials'));
-    }
+public function index()
+{
+    $materials = Material::with([
+        'lesson.translations', // Загружаем уроки с их переводами
+        'translations'
+    ])->paginate(10);
 
-    public function create()
-    {
-        $lessons = Lesson::all();
-        return view('backend.course.material.create', compact('lessons'));
-    }
+    return view('backend.course.material.index', compact('materials'));
+}
+
+public function create()
+{
+    $lessons = Lesson::with('translations')->get(); // Загружаем уроки с переводами
+    return view('backend.course.material.create', compact('lessons'));
+}
 
     public function store(AddNewRequest $request)
     {
@@ -61,12 +65,12 @@ class MaterialController extends Controller
         }
     }
 
-    public function edit($id)
-    {
-        $material = Material::findOrFail(encryptor('decrypt', $id));
-        $lessons = Lesson::all();
-        return view('backend.course.material.edit', compact('material', 'lessons'));
-    }
+public function edit($id)
+{
+    $material = Material::with('translations')->findOrFail(encryptor('decrypt', $id));
+    $lessons = Lesson::with('translations')->get(); // Загружаем с переводами
+    return view('backend.course.material.edit', compact('material', 'lessons'));
+}
 
     public function update(UpdateRequest $request, $id)
     {

@@ -39,6 +39,17 @@
                     @php
                         $cart = session('cart', []);
                         $cartItems = count($cart);
+                        $hasFreeCourses = false;
+                        $hasPaidCourses = false;
+
+                        // Проверяем типы курсов в корзине
+                        foreach($cart as $id => $details) {
+                            if(($details['price'] ?? 0) == 0) {
+                                $hasFreeCourses = true;
+                            } else {
+                                $hasPaidCourses = true;
+                            }
+                        }
                     @endphp
 
                     @if($cartItems > 0)
@@ -49,7 +60,10 @@
                             <div class="card-body p-0">
                                 <div class="list-group list-group-flush">
                                     @foreach($cart as $id => $details)
-                                        <div class="list-group-item">
+                                        @php
+                                            $isFreeCourse = ($details['price'] ?? 0) == 0;
+                                        @endphp
+                                        <div class="list-group-item {{ $isFreeCourse ? 'bg-light' : '' }}">
                                             <div class="row align-items-center">
                                                 <div class="col-md-2">
                                                     @if(isset($details['thumbnail']) || isset($details['image']))
@@ -69,23 +83,47 @@
                                                     <p class="text-muted small mb-0">
                                                         Instructor: {{ $details['instructor'] ?? 'Unknown' }}
                                                     </p>
-                                                    @if(isset($details['old_price']) && $details['old_price'] > $details['price'])
-                                                        <p class="mb-0">
-                                                            <small><del>${{ number_format($details['old_price'], 2) }}</del></small>
-                                                        </p>
+                                                    @if($isFreeCourse)
+                                                        <span class="badge bg-success">Free Course</span>
+                                                    @else
+                                                        @if(isset($details['old_price']) && $details['old_price'] > $details['price'])
+                                                            <p class="mb-0">
+                                                                <small><del>${{ number_format($details['old_price'], 2) }}</del></small>
+                                                            </p>
+                                                        @endif
                                                     @endif
                                                 </div>
                                                 <div class="col-md-2">
-                                                    <strong class="text-primary">${{ number_format($details['price'], 2) }}</strong>
-                                                    @if(isset($details['old_price']) && $details['old_price'] > $details['price'])
-                                                        <br>
-                                                        <small class="text-success">
-                                                            Save ${{ number_format($details['old_price'] - $details['price'], 2) }}
-                                                        </small>
+                                                    @if($isFreeCourse)
+                                                        <strong class="text-success">FREE</strong>
+                                                    @else
+                                                        <strong class="text-primary">${{ number_format($details['price'], 2) }}</strong>
+                                                        @if(isset($details['old_price']) && $details['old_price'] > $details['price'])
+                                                            <br>
+                                                            <small class="text-success">
+                                                                Save ${{ number_format($details['old_price'] - $details['price'], 2) }}
+                                                            </small>
+                                                        @endif
                                                     @endif
                                                 </div>
                                                 <div class="col-md-2 text-end">
-                                                    <form action="{{ localeRoute('remove.from.cart') }}" method="POST" class="d-inline">
+                                                    {{-- Кнопка "Добавить в мои курсы" для бесплатных курсов --}}
+                                                    @if($isFreeCourse)
+                                                        <div class="mb-2">
+                                                            <form action="{{ localeRoute('courses.enroll.free') }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="course_id" value="{{ $id }}">
+                                                                <button type="submit" class="btn btn-success btn-sm">
+                                                                    <i class="fas fa-user-graduate me-1"></i> Add to My Courses
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                        <small class="text-muted d-block">
+                                                            <i class="fas fa-info-circle me-1"></i>Free - add directly
+                                                        </small>
+                                                    @endif
+
+                                                    <form action="{{ localeRoute('remove.from.cart') }}" method="POST" class="d-inline mt-1">
                                                         @csrf
                                                         @method('DELETE')
                                                         <input type="hidden" name="id" value="{{ $id }}">
@@ -101,6 +139,20 @@
                                 </div>
                             </div>
                         </div>
+
+                        {{-- Уведомление о бесплатных курсах --}}
+                        @if($hasFreeCourses)
+                        <div class="alert alert-info mt-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-info-circle fa-2x me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Free Courses Available</h6>
+                                    <p class="mb-0">You can add free courses directly to "My Courses" without going through checkout.</p>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
                     @else
                         <div class="card border-0 shadow-sm text-center py-5">
                             <div class="card-body">
@@ -124,20 +176,22 @@
                         <div class="card-body">
                             @php
                                 $subtotal = 0;
+                                $freeCoursesCount = 0;
+                                $paidCoursesCount = 0;
+
                                 foreach($cart as $id => $details) {
-                                    $subtotal += $details['price']; // Только цена, без quantity
+                                    if(($details['price'] ?? 0) == 0) {
+                                        $freeCoursesCount++;
+                                    } else {
+                                        $subtotal += $details['price'];
+                                        $paidCoursesCount++;
+                                    }
                                 }
+
                                 $discount = session('coupon_discount', 0);
                                 $totalAfterDiscount = max(0, $subtotal - $discount);
                                 $tax = $totalAfterDiscount * 0.15; // 15% tax
                                 $finalTotal = $totalAfterDiscount + $tax;
-
-                                // Конвертация в GEL (примерный курс: 1 USD = 2.7 GEL)
-                                $exchangeRate = 2.7;
-                                $subtotalGEL = $subtotal * $exchangeRate;
-                                $discountGEL = $discount * $exchangeRate;
-                                $taxGEL = $tax * $exchangeRate;
-                                $finalTotalGEL = $finalTotal * $exchangeRate;
 
                                 // Сохраняем детали корзины в сессии для checkout
                                 session(['cart_details' => [
@@ -145,15 +199,34 @@
                                     'discount' => $discount,
                                     'tax' => $tax,
                                     'total_amount' => $finalTotal,
-                                    'items_count' => $cartItems
+                                    'items_count' => $paidCoursesCount,
+                                    'free_courses_count' => $freeCoursesCount
                                 ]]);
                             @endphp
 
-                            {{-- USD Prices --}}
+                            {{-- Информация о курсах --}}
                             <div class="mb-3">
+                                @if($freeCoursesCount > 0)
+                                <div class="d-flex justify-content-between mb-2 text-success">
+                                    <span>Free Courses:</span>
+                                    <strong>{{ $freeCoursesCount }}</strong>
+                                </div>
+                                @endif
+
+                                @if($paidCoursesCount > 0)
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Paid Courses:</span>
+                                    <strong>{{ $paidCoursesCount }}</strong>
+                                </div>
+                                @endif
+                            </div>
+
+                            {{-- USD Prices (только для платных курсов) --}}
+                            @if($paidCoursesCount > 0)
+                            <div class="mb-3 border-top pt-3">
                                 <h6 class="text-primary mb-2">USD (US Dollar)</h6>
                                 <div class="d-flex justify-content-between mb-1">
-                                    <span>Subtotal ({{ $cartItems }} courses):</span>
+                                    <span>Subtotal ({{ $paidCoursesCount }} paid courses):</span>
                                     <strong>${{ number_format($subtotal, 2) }}</strong>
                                 </div>
 
@@ -174,70 +247,68 @@
                                     <strong class="h5 text-primary">${{ number_format($finalTotal, 2) }}</strong>
                                 </div>
                             </div>
-
-                            {{-- GEL Prices (опционально) --}}
-                            <div class="mb-3 p-3 bg-light rounded">
-                                <h6 class="text-secondary mb-2">GEL (Georgian Lari)</h6>
-                                <div class="d-flex justify-content-between mb-1 small">
-                                    <span>Subtotal:</span>
-                                    <span>₾{{ number_format($subtotalGEL, 2) }}</span>
-                                </div>
-
-                                @if($discount > 0)
-                                <div class="d-flex justify-content-between mb-1 small text-success">
-                                    <span>Discount:</span>
-                                    <span>-₾{{ number_format($discountGEL, 2) }}</span>
-                                </div>
-                                @endif
-
-                                <div class="d-flex justify-content-between mb-1 small">
-                                    <span>Tax (15%):</span>
-                                    <span>₾{{ number_format($taxGEL, 2) }}</span>
-                                </div>
-
-                                <div class="d-flex justify-content-between pt-2 border-top small">
-                                    <span class="fw-bold">Total (GEL):</span>
-                                    <strong>₾{{ number_format($finalTotalGEL, 2) }}</strong>
-                                </div>
-                                <small class="text-muted d-block mt-1">Exchange rate: 1 USD = {{ $exchangeRate }} GEL</small>
+                            @else
+                            <div class="alert alert-success text-center">
+                                <i class="fas fa-gift fa-2x mb-2"></i>
+                                <h6 class="mb-1">All courses are free!</h6>
+                                <p class="mb-0">Add them directly to your courses.</p>
                             </div>
+                            @endif
 
-                        {{-- Coupon Form --}}
-@if(!session('coupon_code'))
-<form action="{{ localeRoute('coupon.check') }}" method="POST" class="mb-3">
-    @csrf
-    <div class="input-group">
-        <input type="text" name="coupon_code" class="form-control"
-               placeholder="Enter coupon code"
-               value="{{ old('coupon_code') }}" required>
-        <button type="submit" class="btn btn-outline-primary">
-            Apply
-        </button>
-    </div>
-</form>
-@else
-<div class="alert alert-success mb-3">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <strong>Coupon Applied:</strong> {{ session('coupon_code') }}
-            <br>
-            <small>Discount: ${{ number_format($discount, 2) }}</small>
-        </div>
-        <form action="{{ localeRoute('coupon.remove') }}" method="POST" class="d-inline">
+                        {{-- Coupon Form (только для платных курсов) --}}
+                        @if($paidCoursesCount > 0 && !session('coupon_code'))
+                        <form action="{{ localeRoute('coupon.check') }}" method="POST" class="mb-3">
+                            @csrf
+                            <div class="input-group">
+                                <input type="text" name="coupon_code" class="form-control"
+                                       placeholder="Enter coupon code"
+                                       value="{{ old('coupon_code') }}" required>
+                                <button type="submit" class="btn btn-outline-primary">
+                                    Apply
+                                </button>
+                            </div>
+                        </form>
+                        @elseif(session('coupon_code') && $paidCoursesCount > 0)
+                        <div class="alert alert-success mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Coupon Applied:</strong> {{ session('coupon_code') }}
+                                    <br>
+                                    <small>Discount: ${{ number_format($discount, 2) }}</small>
+                                </div>
+                                <form action="{{ localeRoute('coupon.remove') }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        @endif
+
+{{-- Checkout Button (только если есть платные курсы) --}}
+<div class="d-grid gap-2">
+    @if($paidCoursesCount > 0)
+        <a href="{{ localeRoute('checkout') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-credit-card me-2"></i>Proceed to Checkout ({{ $paidCoursesCount }})
+        </a>
+    @endif
+
+    {{-- Кнопка для добавления всех бесплатных курсов --}}
+    @if($freeCoursesCount > 0)
+        <form action="{{ localeRoute('courses.enroll.free.all') }}" method="POST" class="d-grid">
             @csrf
-            <button type="submit" class="btn btn-sm btn-outline-danger">
-                <i class="fas fa-times"></i>
+            @foreach($cart as $id => $details)
+                @if(($details['price'] ?? 0) == 0)
+                    <input type="hidden" name="course_ids[]" value="{{ $id }}">
+                @endif
+            @endforeach
+            <button type="submit" class="btn btn-success btn-lg">
+                <i class="fas fa-user-graduate me-2"></i>Add All Free Courses ({{ $freeCoursesCount }})
             </button>
         </form>
-    </div>
-</div>
-@endif
+    @endif
 
-{{-- Checkout Button --}}
-<div class="d-grid gap-2">
-    <a href="{{ localeRoute('checkout') }}" class="btn btn-primary btn-lg">
-        <i class="fas fa-credit-card me-2"></i>Proceed to Checkout
-    </a>
     <a href="{{ localeRoute('frontend.courses') }}" class="btn btn-outline-secondary">
         <i class="fas fa-arrow-left me-2"></i>Continue Shopping
     </a>
@@ -283,6 +354,16 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('form[action*="remove.from.cart"]').forEach(form => {
         form.addEventListener('submit', function(e) {
             if (!confirm('Are you sure you want to remove this course from your cart?')) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // Подтверждение добавления всех бесплатных курсов
+    document.querySelectorAll('form[action*="enroll.free.all"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const freeCoursesCount = this.querySelectorAll('input[name="course_ids[]"]').length;
+            if (!confirm(`Are you sure you want to add all ${freeCoursesCount} free courses to your account?`)) {
                 e.preventDefault();
             }
         });

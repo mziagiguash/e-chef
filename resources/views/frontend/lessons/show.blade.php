@@ -7,7 +7,105 @@
 
 <div class="container py-5">
     <div class="row">
-        <div class="col-12">
+
+{{-- Боковая панель с содержанием курса --}}
+<div class="col-md-4 col-lg-3 order-2 order-md-1">
+    <div class="card sticky-top" style="top: 100px;">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-list-ol me-2"></i>
+                {{ __('Course Content') }}
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+                @foreach($courseLessons as $courseLesson)
+                    @php
+                        $courseLessonTranslation = $courseLesson->translations->where('locale', $locale)->first()
+                            ?? $courseLesson->translations->where('locale', 'en')->first();
+                        $isCurrent = $courseLesson->id === $lesson->id;
+                        $lessonProgress = $userLessonProgress[$courseLesson->id] ?? ['progress' => 0, 'is_completed' => false, 'is_available' => true];
+                        $isCompleted = $lessonProgress['is_completed'];
+                        $isAvailable = $lessonProgress['is_available'];
+                        $progressValue = $lessonProgress['progress'];
+                    @endphp
+
+                    <a href="{{ $isAvailable ? route('lessons.show', ['locale' => $locale, 'course' => $course->id, 'lesson' => $courseLesson->id]) : '#' }}"
+                       class="list-group-item list-group-item-action border-0
+                              {{ $isCurrent ? 'active' : '' }}
+                              {{ $isCompleted ? 'list-group-item-success' : '' }}
+                              {{ !$isAvailable ? 'disabled text-muted' : '' }}"
+                       {{ !$isAvailable ? 'onclick="return false;" style="cursor: not-allowed;"' : '' }}>
+                        <div class="d-flex align-items-center">
+                            {{-- Иконка статуса --}}
+                            @if($isCompleted)
+                                <span class="text-success me-2">
+                                    <i class="fas fa-check-circle"></i>
+                                </span>
+                            @elseif($isCurrent)
+                                <span class="me-2">
+                                    <i class="fas fa-play-circle"></i>
+                                </span>
+                            @elseif(!$isAvailable)
+                                <span class="text-muted me-2">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                            @else
+                                <span class="text-muted me-2">
+                                    <i class="far fa-circle"></i>
+                                </span>
+                            @endif
+
+                            {{-- Название урока --}}
+                            <div class="flex-grow-1">
+                                <small class="d-block {{ $isCurrent ? 'text-white' : 'text-muted' }}">
+                                    {{ __('Lesson :number', ['number' => $courseLesson->order]) }}
+                                </small>
+                                <span class="fw-medium {{ !$isAvailable ? 'text-muted' : '' }}">
+                                    {{ $courseLessonTranslation->title ?? $courseLesson->title }}
+                                </span>
+                            </div>
+
+                            {{-- Прогресс урока --}}
+                            @if($progressValue > 0 && !$isCompleted && $isAvailable)
+                                <small class="{{ $isCurrent ? 'text-white' : 'text-muted' }} ms-2">
+                                    {{ $progressValue }}%
+                                </small>
+                            @endif
+
+                            {{-- Длительность --}}
+                            @if($courseLesson->duration && $isAvailable)
+                                <small class="{{ $isCurrent ? 'text-white' : 'text-muted' }} ms-2">
+                                    {{ gmdate('i:s', $courseLesson->duration) }}
+                                </small>
+                            @endif
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+        <div class="card-footer bg-light">
+            <div class="progress mb-2">
+                <div class="progress-bar bg-success" role="progressbar"
+                     style="width: {{ $progressPercentage }}%;"
+                     aria-valuenow="{{ $progressPercentage }}"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                </div>
+            </div>
+            <small class="text-muted">
+                {{ __('Progress: :completed/:total lessons (:percent%)', [
+                    'completed' => $completedLessonsCount,
+                    'total' => $totalLessons,
+                    'percent' => $progressPercentage
+                ]) }}
+            </small>
+        </div>
+    </div>
+</div>
+
+        {{-- Основной контент урока --}}
+        <div class="col-md-8 col-lg-9 order-1 order-md-2">
             <h1>{{ $lessonTranslation->title ?? $lesson->title }}</h1>
 
             {{-- Хлебные крошки --}}
@@ -24,7 +122,6 @@
                         </a>
                     </li>
                     <li class="breadcrumb-item">
-                        {{-- ИСПРАВЛЕНО: frontend.show -> frontend.courses.show --}}
                         <a href="{{ route('frontend.courses.show', ['locale' => $locale, 'course' => $course->id]) }}">
                             {{ $courseTranslation->title ?? $course->title }}
                         </a>
@@ -173,8 +270,7 @@
                             {{ __('Next Lesson') }} <i class="fas fa-arrow-right ms-2"></i>
                         </a>
                         @else
-                       {{-- ИСПРАВЛЕНО: frontend.show -> frontend.courses.show --}}
-                       <a href="{{ route('frontend.courses.show', ['locale' => $locale, 'course' => $course->id]) }}"
+                        <a href="{{ route('frontend.courses.show', ['locale' => $locale, 'course' => $course->id]) }}"
                            class="btn btn-success">
                             <i class="fas fa-check me-2"></i> {{ __('Complete Course') }}
                         </a>
@@ -235,13 +331,17 @@
 @section('scripts')
 @if($lesson->video_url && !$isYouTube)
 <script>
-// Скрипт для отслеживания прогресса просмотра видео
+// В шаблоне, в секции scripts
 document.addEventListener('DOMContentLoaded', function() {
     const video = document.getElementById('lesson-video');
 
+    if (!video) return;
+
     // Восстановление позиции просмотра
     @if($currentProgress > 0)
-    video.currentTime = (video.duration * {{ $currentProgress }}) / 100;
+    video.addEventListener('loadedmetadata', function() {
+        video.currentTime = (video.duration * {{ $currentProgress }}) / 100;
+    });
     @endif
 
     // Отслеживание прогресса
@@ -249,8 +349,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (video.duration > 0) {
             const progress = (video.currentTime / video.duration) * 100;
 
-            // Обновляем прогресс каждые 5 секунд
-            if (Math.round(progress) % 5 === 0) {
+            // Обновляем прогресс каждые 10 секунд или при значительном изменении
+            if (Math.round(progress) % 10 === 0 || progress >= 90) {
                 fetch('{{ route("lessons.progress.update", ["locale" => $locale, "lesson" => $lesson->id]) }}', {
                     method: 'POST',
                     headers: {
@@ -262,9 +362,29 @@ document.addEventListener('DOMContentLoaded', function() {
                         video_position: Math.floor(video.currentTime),
                         video_duration: Math.floor(video.duration)
                     })
+                }).then(response => response.json())
+                .then(data => {
+                    console.log('Progress updated:', data);
+                    // Можно обновить прогресс в реальном времени на странице
                 });
             }
         }
+    });
+
+    // Обновляем прогресс при завершении видео
+    video.addEventListener('ended', function() {
+        fetch('{{ route("lessons.progress.update", ["locale" => $locale, "lesson" => $lesson->id]) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                progress: 100,
+                video_position: Math.floor(video.duration),
+                video_duration: Math.floor(video.duration)
+            })
+        });
     });
 });
 </script>

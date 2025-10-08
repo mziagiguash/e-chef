@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Course extends Model
 {
@@ -55,11 +56,43 @@ class Course extends Model
     {
         return $this->belongsTo(Instructor::class, 'instructor_id');
     }
+public function students(): BelongsToMany
+    {
+        return $this->belongsToMany(Student::class, 'student_courses')
+            ->withPivot('purchased_at', 'purchase_price', 'status', 'progress', 'last_accessed_at')
+            ->withTimestamps();
+    }
 
     public function lessons()
     {
         return $this->hasMany(Lesson::class);
     }
+// app/Models/Course.php
+public function enrollments()
+{
+    return $this->hasMany(Enrollment::class);
+}
+
+public function reviews()
+{
+    return $this->hasMany(Review::class);
+}
+
+public function getAverageRatingAttribute()
+{
+    return $this->reviews()->avg('rating') ?? 0;
+}
+
+public function getReviewsCountAttribute()
+{
+    return $this->reviews()->count();
+}
+
+
+public function getEnrollmentsCountAttribute()
+{
+    return $this->enrollments()->count();
+}
 
     public function translations()
     {
@@ -200,4 +233,49 @@ public function getTranslation($locale, $field = 'title')
     {
         return $query->with('translations');
     }
+    // В app/Models/User.php
+public function hasCompletedCourse($courseId)
+{
+    // Предположим, что у вас есть модель LessonProgress или подобная
+    $totalLessons = \App\Models\Lesson::where('course_id', $courseId)->count();
+    $completedLessons = \App\Models\LessonProgress::where('user_id', $this->id)
+        ->whereHas('lesson', function($query) use ($courseId) {
+            $query->where('course_id', $courseId);
+        })
+        ->where('is_completed', true)
+        ->count();
+
+    return $totalLessons > 0 && $completedLessons >= $totalLessons;
+}
+
+public function getCourseProgress($courseId)
+{
+    $totalLessons = \App\Models\Lesson::where('course_id', $courseId)->count();
+    if ($totalLessons === 0) return 0;
+
+    $completedLessons = \App\Models\LessonProgress::where('user_id', $this->id)
+        ->whereHas('lesson', function($query) use ($courseId) {
+            $query->where('course_id', $courseId);
+        })
+        ->where('is_completed', true)
+        ->count();
+
+    return round(($completedLessons / $totalLessons) * 100);
+}
+
+public function canReviewCourse($courseId)
+{
+    // Проверяем, купил ли пользователь курс
+    $hasPurchased = $this->hasPurchasedCourse($courseId);
+
+    // Проверяем, завершил ли курс
+    $hasCompleted = $this->hasCompletedCourse($courseId);
+
+    // Проверяем, не оставлял ли уже отзыв
+    $hasReviewed = \App\Models\Review::where('student_id', $this->id)
+        ->where('course_id', $courseId)
+        ->exists();
+
+    return $hasPurchased && $hasCompleted && !$hasReviewed;
+}
 }

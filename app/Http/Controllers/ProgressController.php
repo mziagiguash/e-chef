@@ -1,66 +1,65 @@
 <?php
+// app/Http/Controllers/ProgressController.php
 
 namespace App\Http\Controllers;
 
 use App\Models\Progress;
-use App\Http\Controllers\Controller;
+use App\Models\Student;
 use Illuminate\Http\Request;
 
 class ProgressController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function updateProgress(Request $request, $courseId)
     {
-        //
+        $user = auth()->user();
+        $progress = $request->input('progress', 0);
+        $completed = $request->input('completed', false);
+
+        $courseProgress = Progress::updateOrCreate(
+            [
+                'student_id' => $user->id,
+                'course_id' => $courseId
+            ],
+            [
+                'progress_percentage' => $progress,
+                'completed' => $completed,
+                'last_viewed_at' => now()
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'progress' => $courseProgress->progress_percentage,
+            'completed' => $courseProgress->completed
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function markAsCompleted($courseId)
     {
-        //
-    }
+        $user = auth()->user();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        // Получаем студента (предполагая, что User и Student связаны)
+        $student = Student::find($user->id);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Progress $progress)
-    {
-        //
-    }
+        // Если у вас отдельная модель Student с внешним ключом к User
+        // $student = Student::where('user_id', $user->id)->first();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Progress $progress)
-    {
-        //
-    }
+        $progress = Progress::updateOrCreate(
+            [
+                'student_id' => $user->id,
+                'course_id' => $courseId
+            ],
+            [
+                'progress_percentage' => 100,
+                'completed' => true,
+                'last_viewed_at' => now()
+            ]
+        );
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Progress $progress)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Progress $progress)
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'message' => 'Course marked as completed!',
+            'can_review' => $student->canReviewCourse($courseId)
+        ]);
     }
 }
