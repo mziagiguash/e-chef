@@ -15,17 +15,16 @@ class DatabaseSeeder extends Seeder
         $this->call([
 
     RoleSeeder::class,
-    UserSeeder::class,
     InstructorSeeder::class,
+    StudentSeeder::class,
     CourseCategorySeeder::class,
-    InstructorSeeder::class,
     CourseSeeder::class,
     LessonSeeder::class,
-    //QuizSeeder::class,
-    //QuestionSeeder::class,    // ← Потом вопросы
-   // OptionSeeder::class,
-    //MaterialSeeder::class,
-   // QuizAttemptSeeder::class,
+    QuizSeeder::class,
+    QuestionSeeder::class,
+    OptionSeeder::class,
+    MaterialSeeder::class,
+    //QuizAttemptSeeder::class,
    // AnswerSeeder::class,
         ]);
     }

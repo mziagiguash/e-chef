@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('lesson_id')->index();
             $table->string('title', 255)->nullable(false);
-            $table->enum('type', ['video', 'document', 'quiz'])->nullable(false);
+            $table->enum('type', ['video', 'document', 'audio'])->nullable(false);
             $table->string('content')->nullable();
             $table->text('content_url')->nullable();
             $table->timestamps();
@@ -23,9 +23,9 @@ return new class extends Migration
 
             $table->foreign('lesson_id')->references('id')->on('lessons')->onDelete('cascade');
         });
-    } 
+    }
 
-    /** 
+    /**
      * Reverse the migrations.
      */
     public function down(): void

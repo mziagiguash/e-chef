@@ -13,15 +13,13 @@ class QuizFactory extends Factory
     public function definition(): array
     {
         return [
-            'lesson_id' => Lesson::factory(), // Создаст новый урок
-            'order' => $this->faker->numberBetween(1, 10),
+            'lesson_id' => Lesson::factory(),
+            'title' => $this->faker->words(3, true), // Основное название
+            'questions_count' => $this->faker->numberBetween(5, 15),
+            'time_limit' => $this->faker->numberBetween(10, 60),
+            'passing_score' => $this->faker->numberBetween(60, 80),
+            'max_attempts' => $this->faker->numberBetween(1, 3),
             'is_active' => $this->faker->boolean(80),
-            'time_limit' => $this->faker->numberBetween(15, 120),
-            'passing_score' => $this->faker->numberBetween(60, 90),
-            'max_attempts' => $this->faker->numberBetween(1, 5),
-            'title' => $this->faker->words(3, true), // для обратной совместимости
-            'created_at' => now(),
-            'updated_at' => now(),
         ];
     }
 
@@ -82,6 +80,15 @@ class QuizFactory extends Factory
         return $this->state(function (array $attributes) use ($score) {
             return [
                 'passing_score' => $score,
+            ];
+        });
+    }
+
+    public function withQuestionsCount(int $count): static
+    {
+        return $this->state(function (array $attributes) use ($count) {
+            return [
+                'questions_count' => $count,
             ];
         });
     }

@@ -43,7 +43,7 @@ class StudentController extends Controller
             $student->contact = $request->contact;
             $student->email = $request->email;
             $student->role_id = $request->role_id;
-            $student->date_of_birth = $request->birthDate;
+            $student->date_of_birth = $request->date_of_birth;
             $student->gender = $request->gender;
             $student->status = $request->status;
             $student->password = Hash::make($request->password);
@@ -96,7 +96,7 @@ class StudentController extends Controller
             $student->contact = $request->contac;
             $student->email = $request->email;
             $student->role_id = $request->role_id;
-            $student->date_of_birth = $request->birthDate;
+            $student->date_of_birth = $request->date_of_birth;
             $student->gender = $request->gender;
             $student->status = $request->status;
             $student->password = Hash::make($request->password);

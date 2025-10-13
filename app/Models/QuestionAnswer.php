@@ -10,12 +10,12 @@ class QuestionAnswer extends Model
     protected $fillable = [
         'attempt_id',
         'question_id',
-        'user_id',
         'option_id',
         'text_answer',
         'rating_answer',
         'is_correct',
         'points_earned'
+        // user_id УДАЛЕН
     ];
 
     protected $casts = [
@@ -32,13 +32,16 @@ class QuestionAnswer extends Model
         return $this->belongsTo(Question::class);
     }
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
+    // Метод user() УДАЛЕН - так как поля нет в БД
 
     public function option(): BelongsTo
     {
         return $this->belongsTo(Option::class);
+    }
+
+    // Дополнительный метод для доступа к студенту через попытку
+    public function getStudentAttribute()
+    {
+        return $this->attempt->student;
     }
 }

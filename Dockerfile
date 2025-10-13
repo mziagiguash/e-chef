@@ -13,6 +13,10 @@ RUN docker-php-ext-install pdo pdo_mysql
 # Копирование конфигурации PHP-FPM
 COPY docker/php/php-fpm.conf /usr/local/etc/php-fpm.d/zz-docker.conf
 
+# Установка других зависимостей (например, Composer)
+RUN apt-get update && apt-get install -y \
+    zip unzip git
+
 # Создание директории для логов
 RUN mkdir -p /var/log && touch /var/log/fpm-php.www.log
 

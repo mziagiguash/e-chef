@@ -2,35 +2,28 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory; // ← Добавить
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Quiz extends Model
 {
-    use HasFactory, SoftDeletes; // ← Добавить HasFactory
+    use HasFactory, SoftDeletes;
 
     protected $table = 'quizzes';
 
- protected $fillable = [
-        'lesson_id', 'quiz_id', 'order', 'is_active',
-        'time_limit', 'passing_score', 'max_attempts'
+    protected $fillable = [
+        'lesson_id',
+        'title', // ← ДОБАВИТЬ
+        'questions_count', // ← ДОБАВИТЬ
+        'time_limit',
+        'passing_score',
+        'max_attempts',
+        'is_active'
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($quiz) {
-            if (empty($quiz->quiz_id)) {
-                $quiz->quiz_id = 'quiz_' . uniqid() . '_' . time();
-            }
-        });
-    }
-
-    // Добавить casts для boolean полей
     protected $casts = [
         'is_active' => 'boolean',
         'deleted_at' => 'datetime',
@@ -38,7 +31,7 @@ class Quiz extends Model
 
     protected $dates = ['deleted_at'];
 
- public function lesson(): BelongsTo
+    public function lesson(): BelongsTo
     {
         return $this->belongsTo(Lesson::class);
     }

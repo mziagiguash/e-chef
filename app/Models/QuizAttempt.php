@@ -19,7 +19,7 @@ class QuizAttempt extends Model
 
     protected $fillable = [
         'quiz_id',
-        'user_id',
+        'student_id',
         'score',
         'total_questions',
         'correct_answers',
@@ -49,9 +49,9 @@ public function isPassed(): bool
     return $this->score >= $this->quiz->passing_score;
 }
 
-    public function user(): BelongsTo
+    public function student(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Student::class);
     }
 
     public function answers(): HasMany

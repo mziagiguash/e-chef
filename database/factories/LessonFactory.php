@@ -16,11 +16,10 @@ class LessonFactory extends Factory
         return [
             'course_id' => Course::factory(),
             'quiz_id' => null,
-            'title' => null, // ← ДОЛЖНО БЫТЬ NULL, так как переводы в отдельной таблице
-            'description' => null, // ← ДОЛЖНО БЫТЬ NULL
-            'notes' => null, // ← ДОЛЖНО БЫТЬ NULL
-            'created_at' => now(),
-            'updated_at' => now(),
+            'video' => fake()->url(),
+            'materials' => fake()->paragraphs(2, true),
+            'order' => fake()->numberBetween(1, 20),
+            'is_active' => true,
         ];
     }
 
@@ -52,9 +51,9 @@ class LessonFactory extends Factory
     public function withRandomQuiz(array $quizIds = []): static
     {
         return $this->state(function (array $attributes) use ($quizIds) {
-            if (!empty($quizIds) && $this->faker->boolean(30)) {
+            if (!empty($quizIds) && fake()->boolean(30)) {
                 return [
-                    'quiz_id' => $this->faker->randomElement($quizIds),
+                    'quiz_id' => fake()->randomElement($quizIds),
                 ];
             }
             return ['quiz_id' => null];
@@ -75,6 +74,15 @@ class LessonFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'quiz_id' => null,
+            ];
+        });
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'is_active' => false,
             ];
         });
     }

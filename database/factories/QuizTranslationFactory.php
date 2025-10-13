@@ -19,71 +19,62 @@ class QuizTranslationFactory extends Factory
             'locale' => $locale,
             'title' => $this->generateTitle($locale),
             'description' => $this->generateDescription($locale),
-            'created_at' => now(),
-            'updated_at' => now(),
         ];
     }
 
-    /**
-     * Генерирует заголовок квиза в зависимости от языка
-     */
     private function generateTitle(string $locale): string
     {
         $titles = match($locale) {
             'en' => [
-                'Basic Programming Concepts',
-                'Advanced Algorithms Quiz',
-                'Web Development Fundamentals',
-                'Database Design Test',
-                'Object-Oriented Programming Assessment',
-                'Frontend Frameworks Knowledge Check',
-                'Backend Development Exam',
-                'Testing and Debugging Quiz',
-                'Deployment Strategies Test',
-                'Project Configuration Assessment'
+                'Basic Concepts Quiz',
+                'Advanced Topics Test',
+                'Knowledge Check',
+                'Skills Assessment',
+                'Progress Evaluation',
+                'Understanding Test',
+                'Practice Quiz',
+                'Final Assessment',
+                'Module Review',
+                'Comprehension Check'
             ],
             'ru' => [
-                'Основные концепции программирования',
-                'Продвинутые алгоритмы - Тест',
-                'Основы веб-разработки',
-                'Тест по проектированию баз данных',
-                'Оценка ООП',
-                'Проверка знаний фронтенд фреймворков',
-                'Экзамен по бэкенд разработке',
-                'Тест по тестированию и отладке',
-                'Тест по стратегиям развертывания',
-                'Оценка конфигурации проекта'
+                'Тест по основным понятиям',
+                'Тест по продвинутым темам',
+                'Проверка знаний',
+                'Оценка навыков',
+                'Оценка прогресса',
+                'Тест на понимание',
+                'Практический тест',
+                'Финальная оценка',
+                'Обзор модуля',
+                'Проверка понимания'
             ],
             'ka' => [
-                'პროგრამირების ძირითადი ცნებები',
-                'გაფართოებული ალგორითმების ტესტი',
-                'ვებ-განვითარების საფუძვლები',
-                'მონაცემთა ბაზების დიზაინის ტესტი',
-                'ობიექტზე-ორიენტირებული პროგრამირების შეფასება',
-                'ფრონტენდ ფრეიმვორკების ცოდნის შემოწმება',
-                'ბექენდ განვითარების გამოცდა',
-                'ტესტირების და დებაგინგის ტესტი',
-                'დეპლოიმენტის სტრატეგიების ტესტი',
-                'პროექტის კონფიგურაციის შეფასება'
+                'ძირითადი ცნებების ტესტი',
+                'მოწინავე თემების ტესტი',
+                'ცოდნის შემოწმება',
+                'უნარების შეფასება',
+                'პროგრესის შეფასება',
+                'გაგების ტესტი',
+                'პრაქტიკული ტესტი',
+                'საბოლოო შეფასება',
+                'მოდულის მიმოხილვა',
+                'გაგების შემოწმება'
             ]
         };
 
         return $titles[array_rand($titles)];
     }
 
-    /**
-     * Генерирует описание в зависимости от языка
-     */
     private function generateDescription(string $locale): string
     {
         return match($locale) {
-            'en' => $this->faker->paragraph() . ' Test your knowledge and understanding of the course material.',
-            'ru' => $this->faker->paragraph() . ' Проверьте свои знания и понимание материала курса.',
-            'ka' => $this->faker->paragraph() . ' შეამოწმეთ თქვენი ცოდნა და კურსის მასალის გაგება.'
+            'en' => 'Test your understanding of the lesson material with this comprehensive quiz.',
+            'ru' => 'Проверьте свое понимание материала урока с помощью этого комплексного теста.',
+            'ka' => 'შეამოწმეთ გაკვეთილის მასალის გაგება ამ ყოვლისმომცველი ტესტის საშუალებით.'
         };
     }
 
-    // Состояния для конкретных локалей
     public function english(): static
     {
         return $this->state(function (array $attributes) {

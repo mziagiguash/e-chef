@@ -20,7 +20,7 @@ class AnswerController extends Controller
         $locale = $request->get('lang', app()->getLocale());
 
         $answers = QuestionAnswer::with([ // Изменено с Answer на QuestionAnswer
-            'attempt.user',
+            'attempt.student',
             'question.translations' => function($q) use ($locale) {
                 $q->where('locale', $locale);
             },
@@ -40,7 +40,7 @@ class AnswerController extends Controller
         $locale = $request->get('lang', app()->getLocale());
 
         $answer = QuestionAnswer::with([ // Изменено с Answer на QuestionAnswer
-            'attempt.user',
+            'attempt.student',
             'question.translations' => function($q) use ($locale) {
                 $q->where('locale', $locale);
             },

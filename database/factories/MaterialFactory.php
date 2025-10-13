@@ -12,7 +12,7 @@ class MaterialFactory extends Factory
 
     public function definition()
     {
-        $types = ['video', 'document', 'quiz'];
+        $types = ['video', 'document', 'audio'];
         $type = $this->faker->randomElement($types);
 
         return [
@@ -31,7 +31,7 @@ class MaterialFactory extends Factory
         return match($type) {
             'video' => 'Video lecture material',
             'document' => $this->faker->paragraph(3),
-            'quiz' => 'Quiz instructions and questions',
+            'audio' => 'audio lecture material',
             default => null
         };
     }
@@ -41,7 +41,7 @@ class MaterialFactory extends Factory
         return match($type) {
             'video' => 'https://example.com/videos/' . $this->faker->uuid . '.mp4',
             'document' => 'https://example.com/documents/' . $this->faker->uuid . '.pdf',
-            'quiz' => null,
+            'audio' => 'https://example.com/audios/' . $this->faker->uuid . '.mp3',
             default => null
         };
     }

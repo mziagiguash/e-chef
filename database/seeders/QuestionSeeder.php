@@ -10,90 +10,134 @@ class QuestionSeeder extends Seeder
 {
     public function run()
     {
-        // Получаем все квизы
         $quizzes = Quiz::all();
 
-        if ($quizzes->isEmpty()) {
-            $this->command->info('No quizzes found. Please run QuizSeeder first.');
-            return;
-        }
-
-        // Заменить:
-$questionTypes = ['single', 'multiple', 'text', 'rating'];
-
         foreach ($quizzes as $quiz) {
-            // Создаем 5-10 вопросов для каждого квиза
-            $questionCount = rand(5, 10);
+            $questionsCount = $quiz->questions_count;
 
-            for ($i = 1; $i <= $questionCount; $i++) {
-                $type = $questionTypes[array_rand($questionTypes)];
+            for ($i = 1; $i <= $questionsCount; $i++) {
+                $type = $this->getQuestionType($i);
+
+                // Устанавливаем значения для ВСЕХ полей (они NOT NULL)
+                $minRating = 1; // значение по умолчанию для всех типов
+                $maxRating = 5; // значение по умолчанию для всех типов
+                $maxChoices = 1; // значение по умолчанию
+
+                if ($type === 'multiple') {
+                    $maxChoices = rand(2, 3);
+                } elseif ($type === 'rating') {
+                    // Для rating вопросов оставляем 1-5
+                    $minRating = 1;
+                    $maxRating = 5;
+                } else {
+                    // Для single, text вопросов устанавливаем минимальные значения
+                    $minRating = 1;
+                    $maxRating = 1;
+                }
 
                 $question = Question::create([
                     'quiz_id' => $quiz->id,
                     'type' => $type,
                     'order' => $i,
-                    'points' => rand(1, 5),
-                    'is_required' => rand(0, 1),
-                    'max_choices' => $type === 'multiple' ? rand(2, 4) : null,
-                    'min_rating' => $type === 'rating' ? 1 : null,
-                    'max_rating' => $type === 'rating' ? rand(5, 10) : null,
+                    'points' => $this->getQuestionPoints($type),
+                    'is_required' => true,
+                    'max_choices' => $maxChoices,
+                    'min_rating' => $minRating, // НЕ МОЖЕТ БЫТЬ NULL
+                    'max_rating' => $maxRating, // НЕ МОЖЕТ БЫТЬ NULL
                 ]);
 
-                // Создаем переводы для вопроса
-                foreach (['en', 'ru', 'ka'] as $locale) {
-                    \App\Models\QuestionTranslation::create([
-                        'question_id' => $question->id,
-                        'locale' => $locale,
-                        'content' => $this->generateQuestionContent($locale, $i)
-                    ]);
-                }
+                // Создаем переводы вопроса
+                $this->createQuestionTranslations($question, $i);
             }
         }
-
-        $this->command->info('Questions seeded successfully.');
     }
 
-    private function generateQuestionContent(string $locale, int $number): string
+    private function getQuestionType(int $order): string
     {
-        $questions = match($locale) {
+        // Чередуем типы вопросов
+        $types = ['single', 'multiple', 'text', 'rating'];
+        return $types[($order - 1) % count($types)];
+    }
+
+    private function getQuestionPoints(string $type): int
+    {
+        return match($type) {
+            'single' => 1,
+            'multiple' => 2,
+            'text' => 3,
+            'rating' => 1,
+            default => 1
+        };
+    }
+
+    private function createQuestionTranslations(Question $question, int $order): void
+    {
+        $locales = ['en', 'ru', 'ka'];
+
+        foreach ($locales as $locale) {
+            $question->translations()->create([
+                'locale' => $locale,
+                'content' => $this->generateQuestionContent($locale, $order, $question->type),
+                'explanation' => $this->generateExplanation($locale),
+            ]);
+        }
+    }
+
+    // ... остальные методы без изменений
+    private function generateQuestionContent(string $locale, int $order, string $type): string
+    {
+        $baseQuestions = match($locale) {
             'en' => [
-                "What is the main purpose of version control systems?",
-                "Does Python support object-oriented programming?",
-                "What are the basic principles of OOP?",
-                "What does ACID stand for in databases?",
-                "How does JavaScript handle asynchronous operations?",
-                "What is the main advantage of using MVC architecture?",
-                "What is the difference between HTTP and HTTPS?",
-                "What is responsive web design?",
-                "Why is code documentation important?",
-                "What is the purpose of database indexing?"
+                "What is the main purpose of {$this->getTopic($order)}?",
+                "Which statement best describes {$this->getTopic($order)}?",
+                "Explain the concept of {$this->getTopic($order)}.",
+                "How would you rate your understanding of {$this->getTopic($order)}?",
+                "Select all that apply to {$this->getTopic($order)}:",
             ],
             'ru' => [
-                "Какова основная цель систем контроля версий?",
-                "Поддерживает ли Python объектно-ориентированное программирование?",
-                "Каковы основные принципы ООП?",
-                "Что означает ACID в базах данных?",
-                "Как JavaScript обрабатывает асинхронные операции?",
-                "В чем основное преимущество архитектуры MVC?",
-                "В чем разница между HTTP и HTTPS?",
-                "Что такое адаптивный веб-дизайн?",
-                "Почему важна документация кода?",
-                "Какова цель индексации базы данных?"
+                "Какова основная цель {$this->getTopic($order, 'ru')}?",
+                "Какое утверждение лучше всего описывает {$this->getTopic($order, 'ru')}?",
+                "Объясните концепцию {$this->getTopic($order, 'ru')}.",
+                "Как вы оцениваете свое понимание {$this->getTopic($order, 'ru')}?",
+                "Выберите все, что относится к {$this->getTopic($order, 'ru')}:",
             ],
             'ka' => [
-                "რა არის ვერსიების კონტროლის სისტემების მთავარი მიზანი?",
-                "უჭერს თუ არა Python-ს ობიექტზე-ორიენტირებულ პროგრამირებას?",
-                "რა არის OOP-ის ძირითადი პრინციპები?",
-                "რას ნიშნავს ACID მონაცემთა ბაზებში?",
-                "როგორ ამუშავებს JavaScript ასინქრონულ ოპერაციებს?",
-                "რა არის MVC არქიტექტურის მთავარი უპირატესობა?",
-                "რა განსხვავებაა HTTP-სა და HTTPS-ს შორის?",
-                "რა არის რესპონსივი ვებ-დიზაინი?",
-                "რატომ არის მნიშვნელოვანი კოდის დოკუმენტაცია?",
-                "რა არის მონაცემთა ბაზის ინდექსირების მიზანი?"
+                "რა არის {$this->getTopic($order, 'ka')} მთავარი მიზანი?",
+                "რომელი განცხადება საუკეთესოდ აღწერს {$this->getTopic($order, 'ka')}?",
+                "ახსენით {$this->getTopic($order, 'ka')} კონცეფცია.",
+                "როგორ აფასებთ თქვენს გაგებას {$this->getTopic($order, 'ka')}?",
+                "აირჩიეთ ყველა, რაც ეხება {$this->getTopic($order, 'ka')}:",
             ]
         };
 
-        return $questions[array_rand($questions)] . " (#{$number})";
+        $question = $baseQuestions[array_rand($baseQuestions)];
+
+        return match($type) {
+            'single' => $question . " (Choose one correct answer)",
+            'multiple' => $question . " (Select all correct answers)",
+            'text' => $question . " (Write your answer)",
+            'rating' => $question . " (Rate from 1 to 5)",
+            default => $question
+        };
+    }
+
+    private function getTopic(int $order, string $locale = 'en'): string
+    {
+        $topics = match($locale) {
+            'en' => ['version control', 'object-oriented programming', 'database design', 'web development', 'API design'],
+            'ru' => ['систем контроля версий', 'объектно-ориентированного программирования', 'проектирования баз данных', 'веб-разработки', 'проектирования API'],
+            'ka' => ['ვერსიების კონტროლის', 'ობიექტზე-ორიენტირებული პროგრამირების', 'მონაცემთა ბაზების დიზაინის', 'ვებ-განვითარების', 'API-ის დიზაინის']
+        };
+
+        return $topics[($order - 1) % count($topics)];
+    }
+
+    private function generateExplanation(string $locale): string
+    {
+        return match($locale) {
+            'en' => 'This question tests your understanding of key concepts.',
+            'ru' => 'Этот вопрос проверяет ваше понимание ключевых концепций.',
+            'ka' => 'ეს კითხვი ამოწმებს თქვენს გაგებას ძირითადი კონცეფციების.'
+        };
     }
 }

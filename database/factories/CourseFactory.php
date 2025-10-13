@@ -13,23 +13,6 @@ class CourseFactory extends Factory
         $startDate = $this->faker->dateTimeBetween('now', '+1 year');
 
         return [
-            'status' => $this->faker->randomElement([0, 1, 2]),
-            'title' => json_encode([
-                'en' => $this->faker->sentence(4),
-                'ru' => $this->faker->sentence(4)
-            ]),
-            'description' => json_encode([
-                'en' => $this->faker->paragraphs(3, true),
-                'ru' => $this->faker->paragraphs(3, true)
-            ]),
-            'prerequisites' => json_encode([
-                'en' => $this->faker->sentences(3, true),
-                'ru' => $this->faker->sentences(3, true)
-            ]),
-            'keywords' => json_encode([
-                'en' => implode(', ', $this->faker->words(5)),
-                'ru' => implode(', ', $this->faker->words(5))
-            ]),
             'course_category_id' => CourseCategory::factory(),
             'instructor_id' => Instructor::factory(),
             'courseType' => $this->faker->randomElement(['free', 'paid', 'subscription']),
@@ -42,12 +25,10 @@ class CourseFactory extends Factory
             'course_code' => 'CRS-' . $this->faker->unique()->numberBetween(1000, 9999),
             'thumbnail_video_url' => $this->faker->optional()->url(),
             'tag' => $this->faker->optional()->randomElement(['popular', 'featured', 'upcoming']),
+            'status' => $this->faker->randomElement([0, 1, 2]),
             'image' => $this->faker->imageUrl(800, 600, 'education', true),
             'thumbnail_image' => $this->faker->optional()->imageUrl(400, 300, 'education', true),
             'thumbnail_video_file' => $this->faker->optional()->filePath(),
-            'created_at' => now(),
-            'updated_at' => now(),
-            'deleted_at' => null,
         ];
     }
 }

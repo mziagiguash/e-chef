@@ -85,8 +85,7 @@
                <form action="{{ route('frontend.quizzes.start', [
                     'locale' => $locale,
                     'course' => $course->id,
-                    'lesson' => $lesson->id,
-                    'quiz' => $quiz->id
+                    'lesson' => $lesson->id
                 ]) }}" method="POST" id="quiz-form">
                     @csrf
 
@@ -191,17 +190,17 @@
                     </div>
                 </form>
             @else
-                {{-- Results Link --}}
-                <div class="text-center">
-                    <a href="{{ route('frontend.quizzes.results', [
-                        'locale' => $locale,
-                        'course' => $course->id,
-                        'lesson' => $lesson->id,
-                        'attempt' => $quiz->attempts()->where('user_id', auth()->id())->latest()->first()->id ?? 0
-                    ]) }}" class="btn btn-outline-primary">
-                        <i class="fas fa-chart-bar me-2"></i> {{ __('View Previous Results') }}
-                    </a>
-                </div>
+{{-- Results Link --}}
+<div class="text-center">
+    <a href="{{ route('frontend.quizzes.results', [
+        'locale' => $locale,
+        'course' => $course->id,
+        'lesson' => $lesson->id,
+        'attempt' => $quiz->attempts()->where('student_id', $student->id)->latest()->first()->id ?? 0
+    ]) }}" class="btn btn-outline-primary">
+        <i class="fas fa-chart-bar me-2"></i> {{ __('View Previous Results') }}
+    </a>
+</div>
             @endif
 
         </div>

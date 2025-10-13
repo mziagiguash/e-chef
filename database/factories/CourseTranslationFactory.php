@@ -21,8 +21,6 @@ class CourseTranslationFactory extends Factory
             'description' => $this->generateDescription($locale),
             'prerequisites' => $this->generatePrerequisites($locale),
             'keywords' => $this->generateKeywords($locale),
-            'created_at' => now(),
-            'updated_at' => now(),
         ];
     }
 
@@ -58,9 +56,9 @@ class CourseTranslationFactory extends Factory
     private function generateDescription(string $locale): string
     {
         return match($locale) {
-            'en' => $this->faker->paragraphs(3, true) . ' Learn from industry experts and build real projects.',
-            'ru' => $this->faker->paragraphs(3, true) . ' Учитесь у экспертов отрасли и создавайте реальные проекты.',
-            'ka' => $this->faker->paragraphs(3, true) . ' ისწავლეთ ინდუსტრიის ექსპერტებისგან და ააგეთ რეალური პროექტები.'
+            'en' => $this->faker->paragraphs(3, true),
+            'ru' => $this->faker->paragraphs(3, true),
+            'ka' => $this->faker->paragraphs(3, true)
         };
     }
 

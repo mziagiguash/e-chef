@@ -56,7 +56,8 @@ class Course extends Model
     {
         return $this->belongsTo(Instructor::class, 'instructor_id');
     }
-public function students(): BelongsToMany
+
+    public function students(): BelongsToMany
     {
         return $this->belongsToMany(Student::class, 'student_courses')
             ->withPivot('purchased_at', 'purchase_price', 'status', 'progress', 'last_accessed_at')
@@ -67,57 +68,113 @@ public function students(): BelongsToMany
     {
         return $this->hasMany(Lesson::class);
     }
-// app/Models/Course.php
-public function enrollments()
-{
-    return $this->hasMany(Enrollment::class);
-}
 
-public function reviews()
-{
-    return $this->hasMany(Review::class);
-}
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class);
+    }
 
-public function getAverageRatingAttribute()
-{
-    return $this->reviews()->avg('rating') ?? 0;
-}
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 
-public function getReviewsCountAttribute()
-{
-    return $this->reviews()->count();
-}
+    // ДОБАВЛЯЕМ НЕДОСТАЮЩИЕ МЕТОДЫ ДЛЯ ПРОГРЕССА
+    public function getCompletedLessonsCount($studentId)
+    {
+        return \App\Models\LessonProgress::whereHas('lesson', function($query) {
+                $query->where('course_id', $this->id);
+            })
+            ->where('student_id', $studentId)
+            ->where('is_completed', true)
+            ->count();
+    }
 
+    public function getTotalLessonsCount()
+    {
+        return $this->lessons()->count();
+    }
 
-public function getEnrollmentsCountAttribute()
-{
-    return $this->enrollments()->count();
-}
+    public function hasPurchasedCourse($studentId)
+    {
+        return $this->students()->where('student_id', $studentId)->exists();
+    }
+
+    public function hasCompletedCourse($studentId)
+    {
+        $totalLessons = $this->getTotalLessonsCount();
+        $completedLessons = $this->getCompletedLessonsCount($studentId);
+
+        return $totalLessons > 0 && $completedLessons >= $totalLessons;
+    }
+
+    public function getCourseProgress($studentId)
+    {
+        $totalLessons = $this->getTotalLessonsCount();
+        $completedLessons = $this->getCompletedLessonsCount($studentId);
+
+        if ($totalLessons === 0) {
+            return 0;
+        }
+
+        return round(($completedLessons / $totalLessons) * 100);
+    }
+
+    public function canReviewCourse($studentId)
+    {
+        // Проверяем, купил ли студент курс
+        $hasPurchased = $this->hasPurchasedCourse($studentId);
+
+        // Проверяем, завершил ли курс
+        $hasCompleted = $this->hasCompletedCourse($studentId);
+
+        // Проверяем, не оставлял ли уже отзыв
+        $hasReviewed = \App\Models\Review::where('student_id', $studentId)
+            ->where('course_id', $this->id)
+            ->exists();
+
+        return $hasPurchased && $hasCompleted && !$hasReviewed;
+    }
+
+    // Существующие методы
+    public function getAverageRatingAttribute()
+    {
+        return $this->reviews()->avg('rating') ?? 0;
+    }
+
+    public function getReviewsCountAttribute()
+    {
+        return $this->reviews()->count();
+    }
+
+    public function getEnrollmentsCountAttribute()
+    {
+        return $this->enrollments()->count();
+    }
 
     public function translations()
     {
         return $this->hasMany(CourseTranslation::class, 'course_id');
     }
 
+    // ... остальные существующие методы остаются без изменений
     public function getTranslationModel($locale = null)
     {
         $locale = $locale ?: app()->getLocale();
         return $this->translations->where('locale', $locale)->first();
     }
 
-// В модели Course
-public function getTranslation($locale, $field = 'title')
-{
-    $translation = $this->translations->where('locale', $locale)->first();
+    public function getTranslation($locale, $field = 'title')
+    {
+        $translation = $this->translations->where('locale', $locale)->first();
 
-    if ($translation && isset($translation->{$field})) {
-        return $translation->{$field};
+        if ($translation && isset($translation->{$field})) {
+            return $translation->{$field};
+        }
+
+        $fallback = $this->translations->where('locale', 'en')->first();
+        return $fallback->{$field} ?? '';
     }
-
-    // Fallback to English or return empty string
-    $fallback = $this->translations->where('locale', 'en')->first();
-    return $fallback->{$field} ?? '';
-}
 
     public function getNextLesson($currentLessonOrder)
     {
@@ -233,49 +290,8 @@ public function getTranslation($locale, $field = 'title')
     {
         return $query->with('translations');
     }
-    // В app/Models/User.php
-public function hasCompletedCourse($courseId)
+    public function getRouteKeyName()
 {
-    // Предположим, что у вас есть модель LessonProgress или подобная
-    $totalLessons = \App\Models\Lesson::where('course_id', $courseId)->count();
-    $completedLessons = \App\Models\LessonProgress::where('user_id', $this->id)
-        ->whereHas('lesson', function($query) use ($courseId) {
-            $query->where('course_id', $courseId);
-        })
-        ->where('is_completed', true)
-        ->count();
-
-    return $totalLessons > 0 && $completedLessons >= $totalLessons;
-}
-
-public function getCourseProgress($courseId)
-{
-    $totalLessons = \App\Models\Lesson::where('course_id', $courseId)->count();
-    if ($totalLessons === 0) return 0;
-
-    $completedLessons = \App\Models\LessonProgress::where('user_id', $this->id)
-        ->whereHas('lesson', function($query) use ($courseId) {
-            $query->where('course_id', $courseId);
-        })
-        ->where('is_completed', true)
-        ->count();
-
-    return round(($completedLessons / $totalLessons) * 100);
-}
-
-public function canReviewCourse($courseId)
-{
-    // Проверяем, купил ли пользователь курс
-    $hasPurchased = $this->hasPurchasedCourse($courseId);
-
-    // Проверяем, завершил ли курс
-    $hasCompleted = $this->hasCompletedCourse($courseId);
-
-    // Проверяем, не оставлял ли уже отзыв
-    $hasReviewed = \App\Models\Review::where('student_id', $this->id)
-        ->where('course_id', $courseId)
-        ->exists();
-
-    return $hasPurchased && $hasCompleted && !$hasReviewed;
+    return 'id'; // или другое поле, если используется slug
 }
 }

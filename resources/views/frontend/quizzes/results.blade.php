@@ -40,7 +40,14 @@
                         </div>
                         <div class="col-md-4">
                             <div class="fw-bold">{{ __('Time Taken') }}</div>
-                            <div class="h4">{{ $attempt->time_taken_formatted }}</div>
+                            <div class="h4">
+                                @php
+                                    // Форматируем время
+                                    $minutes = floor($attempt->time_taken / 60);
+                                    $seconds = $attempt->time_taken % 60;
+                                    echo $minutes . ':' . str_pad($seconds, 2, '0', STR_PAD_LEFT);
+                                @endphp
+                            </div>
                         </div>
                         <div class="col-md-4">
                             <div class="fw-bold">{{ __('Attempt') }}</div>
@@ -52,7 +59,7 @@
 
                     <h5 class="mb-3">{{ __('Question Review') }}</h5>
 
-                    @foreach($attempt->answers as $answerIndex => $answer)
+                    @foreach($answers as $answerIndex => $answer)
                         @php
                             $question = $answer->question;
                             $questionContent = $question->getTranslation($locale, 'content') ?? $question->content ?? __('Question #:number', ['number' => $answerIndex + 1]);
@@ -103,7 +110,7 @@
                                         <strong>{{ __('Correct answer') }}:</strong>
                                         @if($question->type === 'single')
                                             @php
-                                                $correctOption = $question->correctOptions->first();
+                                                $correctOption = $question->options->where('is_correct', true)->first();
                                                 if ($correctOption) {
                                                     $correctOptionText = $correctOption->getTranslation($locale, 'text') ?? $correctOption->text ?? __('Option :key', ['key' => strtoupper($correctOption->key)]);
                                                     echo '<span class="badge bg-success">' . strtoupper($correctOption->key) . '</span> ' . $correctOptionText;
@@ -111,7 +118,7 @@
                                             @endphp
                                         @elseif($question->type === 'multiple')
                                             @php
-                                                $correctOptions = $question->correctOptions;
+                                                $correctOptions = $question->options->where('is_correct', true);
                                                 $correctOptionsText = [];
                                                 foreach ($correctOptions as $correctOption) {
                                                     $correctOptionsText[] = '<span class="badge bg-success">' . strtoupper($correctOption->key) . '</span> ' .
@@ -120,7 +127,7 @@
                                                 echo implode(', ', $correctOptionsText);
                                             @endphp
                                         @elseif($question->type === 'text')
-                                            {{ $question->correct_option ?? __('Text answer') }}
+                                            {{ $question->correct_answer ?? __('Text answer') }}
                                         @elseif($question->type === 'rating')
                                             {{ __('Rating question') }}
                                         @endif

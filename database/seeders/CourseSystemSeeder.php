@@ -19,7 +19,7 @@ use App\Models\{
     QuestionTranslation,
     Option,
     OptionTranslation,
-    Answer,
+    QuestionAnswer,
     QuizAttempt
 };
 
@@ -30,7 +30,7 @@ class CourseSystemSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
         // Очищаем все таблицы в правильном порядке (сначала дочерние, потом родительские)
-        Answer::truncate();
+        QuestionAnswer::truncate();
         OptionTranslation::truncate();
         Option::truncate();
         QuestionTranslation::truncate();
@@ -183,7 +183,7 @@ class CourseSystemSeeder extends Seeder
                 $option->update(['is_correct' => $isCorrect]);
 
                 // Создаем ответ (answer)
-                $answer = Answer::create([
+                $answer = QuestionAnswer::create([
                     'question_id' => $question->id,
                     'option_id' => $option->id,
                     'is_correct' => $isCorrect,
@@ -205,6 +205,6 @@ class CourseSystemSeeder extends Seeder
         $this->command->info('   • Quizzes: ' . Quiz::count());
         $this->command->info('   • Questions: ' . Question::count());
         $this->command->info('   • Options: ' . Option::count());
-        $this->command->info('   • Answers: ' . Answer::count());
+        $this->command->info('   • Answers: ' . QuestionAnswer::count());
     }
 }

@@ -4,93 +4,83 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Quiz;
-use App\Models\QuizTranslation;
 use App\Models\Lesson;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Schema;
 
 class QuizSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        // Получаем существующие уроки
-        $lessons = Lesson::with('translations')->get();
-
-        if ($lessons->isEmpty()) {
-            $this->command->info('No lessons found. Please seed lessons first.');
-            return;
-        }
-
-        $quizCount = 0;
+        $lessons = Lesson::all();
 
         foreach ($lessons as $lesson) {
-            if (rand(1, 100) <= 30) {
-                // Генерируем уникальный quiz_id
-                $quizId = 'quiz_' . Str::random(10) . '_' . time();
+            // Создаем квиз для каждого урока (только один квиз на урок)
+            $quiz = Quiz::create([
+                'lesson_id' => $lesson->id,
+                'title' => 'Quiz for ' . $lesson->translations->first()->title,
+                'questions_count' => $this->generateQuestionsCount(),
+                'time_limit' => $this->generateTimeLimit(),
+                'passing_score' => $this->generatePassingScore(),
+                'max_attempts' => $this->generateMaxAttempts(),
+                'is_active' => true,
+            ]);
 
-                $quiz = Quiz::create([
-                    'lesson_id' => $lesson->id,
-                    'quiz_id' => $quizId, // Обязательное поле
-                    'is_active' => true,
-                    'time_limit' => rand(15, 45),
-                    'passing_score' => rand(60, 80),
-                    'max_attempts' => rand(1, 3),
-                    'created_at' => now(),
-                    'updated_at' => now(),
+            // Создаем переводы для квиза
+            $locales = ['en', 'ru', 'ka'];
+
+            foreach ($locales as $locale) {
+                $lessonTranslation = $lesson->translations->where('locale', $locale)->first();
+                $lessonTitle = $lessonTranslation ? $lessonTranslation->title : $lesson->translations->first()->title;
+
+                $quiz->translations()->create([
+                    'locale' => $locale,
+                    'title' => $this->generateQuizTitle($locale, $lessonTitle),
+                    'description' => $this->generateQuizDescription($locale),
                 ]);
-
-                // Создаем переводы для квиза
-                $this->createQuizTranslations($quiz, $lesson);
-
-                // Обновляем lesson с quiz_id (если такое поле существует)
-                if (Schema::hasColumn('lessons', 'quiz_id')) {
-                    $lesson->update(['quiz_id' => $quiz->id]);
-                }
-
-                $quizCount++;
             }
         }
-
-        $this->command->info("✅ Created {$quizCount} quizzes successfully!");
-        $this->command->info("📊 For {$lessons->count()} lessons");
     }
 
-    private function createQuizTranslations(Quiz $quiz, Lesson $lesson): void
+    private function generateQuestionsCount(): int
     {
-        $lessonTranslations = [];
-        foreach ($lesson->translations as $translation) {
-            $lessonTranslations[$translation->locale] = $translation;
-        }
+        $counts = [5, 8, 10, 12, 15];
+        return $counts[array_rand($counts)];
+    }
 
-        $translations = [
-            'en' => [
-                'title' => "Quiz: " . ($lessonTranslations['en']->title ?? 'Lesson ' . $lesson->id),
-                'description' => "Test your knowledge of this lesson with this comprehensive quiz."
-            ],
-            'ru' => [
-                'title' => "Тест: " . ($lessonTranslations['ru']->title ?? 'Урок ' . $lesson->id),
-                'description' => "Проверьте свои знания этого урока с помощью этого комплексного теста."
-            ],
-            'ka' => [
-                'title' => "ქვიზი: " . ($lessonTranslations['ka']->title ?? 'გაკვეთილი ' . $lesson->id),
-                'description' => "გამოცადეთ თქვენი ცოდნა ამ გაკვეთილის შესახებ ამ ყოვლისმომცველი ქვიზით."
-            ]
-        ];
+    private function generateTimeLimit(): int
+    {
+        $limits = [10, 15, 20, 30, 45, 60];
+        return $limits[array_rand($limits)];
+    }
 
-        foreach ($translations as $locale => $data) {
-            if (!isset($lessonTranslations[$locale])) {
-                $this->command->warn("No {$locale} translation found for lesson ID: {$lesson->id}");
-                continue;
-            }
+    private function generatePassingScore(): int
+    {
+        $scores = [60, 65, 70, 75, 80];
+        return $scores[array_rand($scores)];
+    }
 
-            QuizTranslation::create([
-                'quiz_id' => $quiz->id,
-                'locale' => $locale,
-                'title' => $data['title'],
-                'description' => $data['description'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
+    private function generateMaxAttempts(): int
+    {
+        $attempts = [1, 2, 3];
+        return $attempts[array_rand($attempts)];
+    }
+
+    private function generateQuizTitle(string $locale, string $lessonTitle): string
+    {
+        $prefixes = match($locale) {
+            'en' => ['Quiz: ', 'Test: ', 'Assessment: ', 'Knowledge Check: '],
+            'ru' => ['Тест: ', 'Проверка: ', 'Оценка: ', 'Экзамен: '],
+            'ka' => ['ტესტი: ', 'შემოწმება: ', 'შეფასება: ', 'გამოცდა: ']
+        };
+
+        return $prefixes[array_rand($prefixes)] . $lessonTitle;
+    }
+
+    private function generateQuizDescription(string $locale): string
+    {
+        return match($locale) {
+            'en' => 'Complete this quiz to test your understanding of the lesson material.',
+            'ru' => 'Пройдите этот тест, чтобы проверить свое понимание материала урока.',
+            'ka' => 'შეავსეთ ეს ტესტი, რათა შეამოწმოთ გაკვეთილის მასალის გაგება.'
+        };
     }
 }

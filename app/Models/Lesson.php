@@ -15,9 +15,11 @@ class Lesson extends Model
 
     protected $fillable = [
         'course_id',
-        'quiz_id', // ← добавить
+        'quiz_id',
+        'video',
+        'materials', // ← ЭТО ПОЛЕ СТРОКОВОЕ!
         'order',
-        'is_active',
+        'is_active'
     ];
 
     protected $casts = [
@@ -144,4 +146,8 @@ class Lesson extends Model
     {
         return $this->materials->pluck('type')->unique()->toArray();
     }
+    public function getRouteKeyName()
+{
+    return 'id'; // или другое поле, если используется slug
+}
 }

@@ -246,18 +246,18 @@ Route::prefix('{locale}')
         Route::get('/searchCourse', [SearchCourseController::class, 'index'])->name('searchCourse');
         Route::get('/event-search', [EventSearchController::class, 'index'])->name('event.search');
 
-        // Маршруты для уроков и квизов
-        Route::prefix('courses/{course}/lessons/{lesson}')->group(function () {
-            Route::get('/', [LessonController::class, 'show'])->name('lessons.show');
+  // Маршруты для уроков и квизов
+    Route::prefix('courses/{course}/lessons/{lesson}')->group(function () {
+        Route::get('/', [LessonController::class, 'show'])->name('lessons.show')->scopeBindings();
 
-            Route::prefix('quizzes/{quiz}')->group(function () {
-                Route::get('/', [QuizController::class, 'show'])->name('frontend.quizzes.show')->scopeBindings();
-                Route::post('/start', [QuizController::class, 'start'])->name('frontend.quizzes.start');
-                Route::get('/attempt/{attempt}', [QuizController::class, 'attempt'])->name('frontend.quizzes.attempt');
-                Route::post('/attempt/{attempt}/submit', [QuizController::class, 'submit'])->name('frontend.quizzes.submit');
-                Route::get('/results/{attempt}', [QuizController::class, 'results'])->name('frontend.quizzes.results');
-            });
+        Route::prefix('quiz')->group(function () {
+            Route::get('/', [QuizController::class, 'show'])->name('frontend.quizzes.show')->scopeBindings();
+            Route::post('/start', [QuizController::class, 'start'])->name('frontend.quizzes.start')->scopeBindings();
+            Route::get('/attempt/{attempt}', [QuizController::class, 'attempt'])->name('frontend.quizzes.attempt')->scopeBindings();
+            Route::post('/attempt/{attempt}/submit', [QuizController::class, 'submit'])->name('frontend.quizzes.submit')->scopeBindings();
+            Route::get('/results/{attempt}', [QuizController::class, 'results'])->name('frontend.quizzes.results')->scopeBindings();
         });
+    });
 
         // Редирект
         Route::get('courses/{id}/back', function ($locale, $id) {

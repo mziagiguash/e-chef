@@ -4,120 +4,150 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Lesson;
-use App\Models\LessonTranslation;
-use App\Models\Course;
+use Illuminate\Support\Str;
 
 class LessonSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        $courses = Course::all();
-
-        if ($courses->isEmpty()) {
-            $this->command->info('No courses found. Please seed courses first.');
-            return;
-        }
-
-        $totalLessons = 0;
+        $courses = \App\Models\Course::all();
 
         foreach ($courses as $course) {
-            $lessonCount = rand(8, 12);
+            $lessonsCount = $course->lesson; // Используем количество уроков из курса
 
-            for ($i = 0; $i < $lessonCount; $i++) {
-                $lessonNumber = $i + 1;
-
+            for ($i = 1; $i <= $lessonsCount; $i++) {
                 $lesson = Lesson::create([
                     'course_id' => $course->id,
-                    'quiz_id' => null,
-                    'order' => $lessonNumber, // теперь поле order существует
+                    'quiz_id' => null, // Будет установлено в QuizSeeder
+                    'video' => 'https://example.com/videos/lesson-' . $i . '.mp4',
+                    'materials' => $this->generateMaterials(),
+                    'order' => $i,
                     'is_active' => true,
-                    'created_at' => now(),
-                    'updated_at' => now(),
                 ]);
 
                 // Создаем переводы для урока
-                $this->createLessonTranslations($lesson, $lessonNumber);
-                $totalLessons++;
+                $locales = ['en', 'ru', 'ka'];
+
+                foreach ($locales as $locale) {
+                    $lesson->translations()->create([
+                        'locale' => $locale,
+                        'title' => $this->generateLessonTitle($locale, $i),
+                        'description' => $this->generateLessonDescription($locale),
+                        'notes' => $this->generateLessonNotes($locale),
+                    ]);
+                }
             }
-
-            $this->command->info("Created {$lessonCount} lessons for course ID: {$course->id}");
         }
-
-        $this->command->info("✅ Total {$totalLessons} lessons seeded successfully!");
-        $this->command->info("📊 For {$courses->count()} courses");
     }
 
-    private function createLessonTranslations(Lesson $lesson, int $lessonNumber): void
+    private function generateLessonTitle(string $locale, int $order): string
     {
-        $titles = [
+        $titles = match($locale) {
             'en' => [
-                'Introduction to the Course',
-                'Setting Up Development Environment',
-                'Basic Concepts and Fundamentals',
-                'Advanced Techniques',
-                'Practical Examples',
-                'Project Setup',
-                'Debugging and Troubleshooting',
-                'Best Practices',
-                'Performance Optimization',
-                'Security Considerations',
-                'Deployment Strategies',
-                'Testing Methodology'
+                "Introduction to Course Concepts",
+                "Advanced Techniques and Methods",
+                "Practical Implementation Guide",
+                "Best Practices and Patterns",
+                "Real-world Applications",
+                "Troubleshooting and Debugging",
+                "Performance Optimization",
+                "Project Setup and Configuration",
+                "Testing Strategies",
+                "Deployment and Maintenance"
             ],
             'ru' => [
-                'Введение в курс',
-                'Настройка среды разработки',
-                'Основные концепции и основы',
-                'Продвинутые техники',
-                'Практические примеры',
-                'Настройка проекта',
-                'Отладка и решение проблем',
-                'Лучшие практики',
-                'Оптимизация производительности',
-                'Вопросы безопасности',
-                'Стратегии развертывания',
-                'Методология тестирования'
+                "Введение в концепции курса",
+                "Продвинутые техники и методы",
+                "Руководство по практической реализации",
+                "Лучшие практики и паттерны",
+                "Применение в реальных проектах",
+                "Поиск и устранение неисправностей",
+                "Оптимизация производительности",
+                "Настройка и конфигурация проекта",
+                "Стратегии тестирования",
+                "Развертывание и поддержка"
             ],
             'ka' => [
-                'კურსში გაცნობა',
-                'განვითარების გარემოს დაყენება',
-                'ძირითადი კონცეფციები და საფუძვლები',
-                'მოწინავე ტექნიკა',
-                'პრაქტიკული მაგალითები',
-                'პროექტის დაყენება',
-                'დებაგინგი და პრობლემების გადაჭრა',
-                'საუკეთესო პრაქტიკები',
-                'შესრულების ოპტიმიზაცია',
-                'უსაფრთხოების მოსაზრებები',
-                'დეპლოიმენტის სტრატეგიები',
-                'ტესტირების მეთოდოლოგია'
+                "კურსის კონცეფციების შესავალი",
+                "მოწინავე ტექნიკა და მეთოდები",
+                "პრაქტიკული განხორციელების სახელმძღვანელო",
+                "საუკეთესო პრაქტიკები და ნიმუშები",
+                "რეალური პროექტების გამოყენება",
+                "ხარვეზების აღმოფხვრა და დებაგინგი",
+                "წარმადობის ოპტიმიზაცია",
+                "პროექტის დაყენება და კონფიგურაცია",
+                "ტესტირების სტრატეგიები",
+                "განლაგება და მხარდაჭერა"
             ]
+        };
+
+        return "Lesson {$order}: " . $titles[array_rand($titles)];
+    }
+
+    private function generateLessonDescription(string $locale): string
+    {
+        $descriptions = match($locale) {
+            'en' => [
+                "In this lesson, you will learn the fundamental concepts that form the basis of the entire course. We'll cover essential terminology and basic principles.",
+                "This lesson focuses on practical implementation of the concepts discussed. You'll work through real-world examples and build your skills step by step.",
+                "Advanced techniques and optimization strategies are the main focus here. Learn how to improve performance and write more efficient code.",
+                "Best practices and industry standards are covered in depth. Understand how professionals approach common challenges and solutions."
+            ],
+            'ru' => [
+                "В этом уроке вы изучите фундаментальные концепции, которые составляют основу всего курса. Мы рассмотрим основную терминологию и базовые принципы.",
+                "Этот урок посвящен практической реализации обсуждаемых концепций. Вы будете работать с реальными примерами и постепенно развивать свои навыки.",
+                "Основное внимание здесь уделяется продвинутым техникам и стратегиям оптимизации. Узнайте, как улучшить производительность и писать более эффективный код.",
+                "Лучшие практики и отраслевые стандарты рассматриваются подробно. Поймите, как профессионалы подходят к общим проблемам и решениям."
+            ],
+            'ka' => [
+                "ამ გაკვეთილში თქვენ შეისწავლით ფუნდამენტურ კონცეფციებს, რომლებიც მთელი კურსის საფუძველს წარმოადგენს. ჩვენ განვიხილავთ ძირითად ტერმინოლოგიას და ძირითად პრინციპებს.",
+                "ეს გაკვეთილი ორიენტირებულია განხილული კონცეფციების პრაქტიკულ განხორციელებაზე. თქვენ იმუშავებთ რეალურ მაგალითებზე და ეტაპობრივად განავითარებთ თქვენს უნარებს.",
+                "აქ ძირითადი ყურადღება ექცევა მოწინავე ტექნიკას და ოპტიმიზაციის სტრატეგიებს. გაიგეთ, როგორ გააუმჯობესოთ შესრულება და დაწეროთ უფრო ეფექტური კოდი.",
+                "საუკეთესო პრაქტიკები და ინდუსტრიული სტანდარტები დეტალურად არის განხილული. გაიგეთ, როგორ უახლოვდებიან პროფესიონალები საერთო გამოწვევებს და გადაწყვეტილებებს."
+            ]
+        };
+
+        return $descriptions[array_rand($descriptions)];
+    }
+
+    private function generateLessonNotes(string $locale): string
+    {
+        $notes = match($locale) {
+            'en' => [
+                "Key points to remember:\n• Practice regularly\n• Review previous lessons\n• Don't hesitate to ask questions",
+                "Important notes:\n• Take your time with exercises\n• Experiment with code\n• Join community discussions",
+                "Study tips:\n• Create cheat sheets\n• Work on mini-projects\n• Teach others what you learn"
+            ],
+            'ru' => [
+                "Ключевые моменты:\n• Регулярно практикуйтесь\n• Повторяйте предыдущие уроки\n• Не стесняйтесь задавать вопросы",
+                "Важные заметки:\n• Не торопитесь с упражнениями\n• Экспериментируйте с кодом\n• Присоединяйтесь к обсуждениям в сообществе",
+                "Советы по изучению:\n• Создавайте шпаргалки\n• Работайте над мини-проектами\n• Учите других тому, что узнали"
+            ],
+            'ka' => [
+                "საკვანძო პუნქტები:\n• რეგულარული პრაქტიკა\n• წინა გაკვეთილების მიმოხილვა\n• შეკითხვების დასმაში ნუ დაგეგდებთ",
+                "მნიშვნელოვანი შენიშვნები:\n• დრო დაუთმეთ სავარჯიშოებს\n• ექსპერიმენტები განახორციელეთ კოდთან\n• შეუერთდით საზოგადოების განხილვებს",
+                "სწავლის რჩევები:\n• შექმენით მოხსენებები\n• იმუშავეთ მინი-პროექტებზე\n• სხვებს ასწავლეთ ის, რაც ისწავლეთ"
+            ]
+        };
+
+        $urls = [
+            'https://example.com/resources/lesson-notes.pdf',
+            'https://example.com/docs/additional-reading',
+            'https://example.com/videos/supplementary-materials'
         ];
 
-        $descriptions = [
-            'en' => "This is lesson {$lessonNumber} of the course. Learn important concepts and techniques.",
-            'ru' => "Это урок {$lessonNumber} курса. Изучите важные концепции и техники.",
-            'ka' => "ეს არის კურსის {$lessonNumber} გაკვეთილი. ისწავლეთ მნიშვნელოვანი კონცეფციები და ტექნიკა."
+        return $notes[array_rand($notes)] . "\n\nAdditional resources: " . $urls[array_rand($urls)];
+    }
+
+    private function generateMaterials(): string
+    {
+        $materials = [
+            "Download the exercise files from the resources section. Complete all practice exercises before moving to the next lesson.",
+            "Reference materials include code samples, documentation links, and recommended reading lists.",
+            "Practice projects and real-world examples are provided to help reinforce the concepts learned in this lesson.",
+            "Additional resources include video tutorials, cheat sheets, and community forum links for further learning."
         ];
 
-        $notes = [
-            'en' => "Key points for lesson {$lessonNumber}",
-            'ru' => "Ключевые моменты урока {$lessonNumber}",
-            'ka' => "გაკვეთილის {$lessonNumber} ძირითადი მომენტები"
-        ];
-
-        foreach (['en', 'ru', 'ka'] as $locale) {
-            $titleIndex = ($lessonNumber - 1) % count($titles[$locale]);
-
-            LessonTranslation::create([
-                'lesson_id' => $lesson->id,
-                'locale' => $locale,
-                'title' => "Lesson {$lessonNumber}: " . $titles[$locale][$titleIndex],
-                'description' => $descriptions[$locale],
-                'notes' => $notes[$locale],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
+        return $materials[array_rand($materials)];
     }
 }

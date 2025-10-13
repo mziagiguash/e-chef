@@ -3,7 +3,7 @@
 
 @push('styles')
 <!-- Datatable -->
-<link href="{{asset('vendor/datatables/css/jquery.dataTables.min.css')}}" rel="stylesheet>
+<link href="{{asset('vendor/datatables/css/jquery.dataTables.min.css')}}" rel="stylesheet">
 @endpush
 
 @section('content')
@@ -82,13 +82,13 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="mr-3">
-                                                    <img src="{{ $a->attempt->user->avatar ?? asset('images/default-avatar.png') }}"
+                                                    <img src="{{ $a->attempt->student->avatar ?? asset('images/default-avatar.png') }}"
                                                          class="rounded-circle" width="35" height="35" alt="Avatar">
                                                 </div>
                                                 <div>
-                                                    <strong>{{ $a->attempt->user->name ?? 'N/A' }}</strong>
+                                                    <strong>{{ $a->attempt->student->name ?? 'N/A' }}</strong>
                                                     <br>
-                                                    <small class="text-muted">{{ $a->attempt->user->email ?? '' }}</small>
+                                                    <small class="text-muted">{{ $a->attempt->student->email ?? '' }}</small>
                                                 </div>
                                             </div>
                                         </td>

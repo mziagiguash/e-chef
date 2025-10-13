@@ -6,18 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
-    {
-        Schema::create('option_translations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('option_id')->constrained()->onDelete('cascade');
-            $table->string('locale', 10)->index();
-            $table->text('text');
 
-            $table->unique(['option_id', 'locale']);
-            $table->timestamps();
-        });
-    }
+public function up()
+{
+    Schema::create('option_translations', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('option_id')->constrained()->onDelete('cascade');
+        $table->string('locale', 10)->index();
+        $table->text('text')->comment('Option text content');
+
+        $table->unique(['option_id', 'locale']);
+        $table->timestamps();
+    });
+}
 
     public function down()
     {

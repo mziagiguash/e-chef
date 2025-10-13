@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
-class SslController extends Controller
+class sslController extends Controller
 {
     private $sslStoreId;
     private $sslStorePassword;

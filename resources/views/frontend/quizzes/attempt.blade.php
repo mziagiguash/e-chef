@@ -12,7 +12,7 @@
                 <a href="{{ route('frontend.quizzes.show', [
                     'locale' => $locale,
                     'course' => $course->id,
-                    'lesson' => $lesson->id
+                    'lesson' => $lesson->id,
                 ]) }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left me-2"></i> {{ __('Back') }}
                 </a>
@@ -30,7 +30,7 @@
                     @php
                         $timeLimit = $quiz->time_limit ? $quiz->time_limit . ' ' . __('minutes') : __('No limit');
                         $passingScore = $quiz->passing_score . '%';
-                        $currentAttempt = $quiz->attempts()->where('user_id', auth()->id())->count();
+                        $currentAttempt = $quiz->attempts()->where('student_id', $student->id)->count();
                         $maxAttempts = $quiz->max_attempts > 0 ? $quiz->max_attempts : '∞';
                     @endphp
 
@@ -47,10 +47,16 @@
                             <strong><i class="fas fa-trophy me-2"></i> {{ __('Passing Score') }}:</strong>
                             {{ $passingScore }}
                         </div>
-                        <div class="col-md-4">
-                            <strong><i class="fas fa-redo me-2"></i> {{ __('Attempt') }}:</strong>
-                            {{ $currentAttempt + 1 }}/{{ $maxAttempts }}
-                        </div>
+{{-- В секции с информацией о попытках --}}
+<div class="col-md-4">
+    <strong><i class="fas fa-redo me-2"></i> {{ __('Attempt') }}:</strong>
+    @php
+        // 🔴 ИСПРАВЛЕНО: проверяем существование $student
+        $currentAttempt = $student ? $quiz->attempts()->where('student_id', $student->id)->count() : 0;
+        $maxAttempts = $quiz->max_attempts > 0 ? $quiz->max_attempts : '∞';
+    @endphp
+    {{ $currentAttempt + 1 }}/{{ $maxAttempts }}
+</div>
                     </div>
                 </div>
             </div>

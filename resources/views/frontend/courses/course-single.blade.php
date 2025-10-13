@@ -126,8 +126,10 @@
                                         $lessonTitle = $lessonTranslation->title ?? $lesson->translations->first()->title ?? $lesson->title ?? __('No Title');
                                         $lessonDescription = $lessonTranslation->description ?? $lesson->translations->first()->description ?? $lesson->description ?? '';
 
-                                        $materialsCount = $lesson->materials ? $lesson->materials->count() : 0;
-                                        $hasQuiz = $lesson->quiz ? true : false;
+                                        $materialsCount = is_object($lesson->materials) && method_exists($lesson->materials, 'count')
+        ? $lesson->materials->count()
+        : 0;
+        $hasQuiz = $lesson->quiz ? true : false;
                                         $isAvailable = $index === 0 ? true : ($lesson->is_available ?? false);
                                     @endphp
                                     <div class="list-group-item border-0">
@@ -178,7 +180,7 @@
                                             </div>
 
                                             <div class="flex-shrink-0">
-                                                @if($isAvailable)
+                                                 @if($isAvailable)
                                                     <a href="{{ route('lessons.show', [
                                                         'locale' => $locale,
                                                         'course' => $course->id,

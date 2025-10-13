@@ -4,170 +4,129 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Material;
-use App\Models\MaterialTranslation;
 use App\Models\Lesson;
-use Illuminate\Support\Facades\DB;
 
 class MaterialSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
-        // Получаем существующие уроки
         $lessons = Lesson::all();
 
-        if ($lessons->isEmpty()) {
-            $this->command->info('No lessons found. Please seed lessons first.');
-            return;
-        }
-
-        $totalMaterials = 0;
-
         foreach ($lessons as $lesson) {
-            // Создаем 3-6 материалов для каждого урока
-            $materialsPerLesson = rand(3, 6);
+            // Создаем 2-4 материала для каждого урока
+            $materialsCount = rand(2, 4);
 
-            for ($i = 1; $i <= $materialsPerLesson; $i++) {
-                $type = $this->getRandomType($i);
-
+            for ($i = 1; $i <= $materialsCount; $i++) {
                 $material = Material::create([
                     'lesson_id' => $lesson->id,
-                    'title' => $this->generateTitle($type, $i),
-                    'type' => $type,
-                    'content' => $this->generateContent($type),
-                    'content_url' => $this->generateContentUrl($type),
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'title' => $this->generateMaterialTitle($i),
+                    'type' => $this->generateMaterialType($i),
+                    'content' => $this->generateMaterialContent($i),
+                    'content_url' => $this->generateContentUrl($i),
                 ]);
 
-                // Создаем переводы для материала
-                $this->createMaterialTranslations($material, $type, $i);
+                // Создаем переводы для каждого языка
+                $locales = ['en', 'ru', 'ka'];
 
-                $totalMaterials++;
+                foreach ($locales as $locale) {
+                    $material->translations()->create([
+                        'locale' => $locale,
+                        'title' => $this->generateTranslatedTitle($locale, $i),
+                        'content' => $this->generateTranslatedContent($locale),
+                    ]);
+                }
             }
-
-            $this->command->info("Created {$materialsPerLesson} materials for lesson ID: {$lesson->id}");
         }
-
-        $this->command->info("✅ Total {$totalMaterials} materials with translations seeded successfully!");
-        $this->command->info("📊 For {$lessons->count()} lessons");
     }
 
-    private function getRandomType(int $index): string
+    private function generateMaterialTitle(int $index): string
     {
-        $types = ['video', 'document', 'quiz'];
+        $titles = [
+            "Lecture Notes",
+            "Video Tutorial",
+            "Practice Exercises",
+            "Reference Materials",
+            "Code Examples",
+            "Additional Resources",
+            "Study Guide",
+            "Quick Reference"
+        ];
 
-        // Первый материал обычно видео, последний может быть квизом
-        if ($index === 1) return 'video';
-        if ($index >= 4 && rand(0, 1)) return 'quiz';
+        return $titles[array_rand($titles)] . " {$index}";
+    }
 
+    private function generateMaterialType(int $index): string
+    {
+        $types = ['video', 'document', 'audio'];
         return $types[array_rand($types)];
     }
 
-    private function generateTitle(string $type, int $index): string
+    private function generateMaterialContent(int $index): string
     {
-        $titles = [
-            'video' => [
-                'Introduction Video',
-                'Lecture Recording',
-                'Tutorial Video',
-                'Demo Session'
-            ],
-            'document' => [
-                'Study Guide',
-                'Reference Material',
-                'Exercise Sheet',
-                'Reading Assignment'
-            ],
-            'quiz' => [
-                'Knowledge Check',
-                'Practice Quiz',
-                'Assessment Test'
-            ]
+        $contents = [
+            "Complete lecture notes with code examples and explanations.",
+            "Step-by-step tutorial covering all concepts from the lesson.",
+            "Practice exercises to reinforce your understanding.",
+            "Additional reference materials and external resources.",
+            "Code samples and implementation examples.",
+            "Study guide with key points and summaries."
         ];
 
-        return $titles[$type][array_rand($titles[$type])] . " {$index}";
+        return $contents[array_rand($contents)];
     }
 
-    private function generateContent(string $type): string
+    private function generateContentUrl(int $index): string
     {
+        $types = ['video', 'document', 'audio'];
+        $type = $types[array_rand($types)];
+        $uuid = uniqid();
+
         return match($type) {
-            'video' => 'Video lecture content for this lesson',
-            'document' => 'Study material and references for this topic',
-            'quiz' => 'Test your understanding of the concepts covered',
-            default => 'Learning material'
+            'video' => "https://example.com/videos/material-{$index}-{$uuid}.mp4",
+            'document' => "https://example.com/documents/material-{$index}-{$uuid}.pdf",
+            'audio' => "https://example.com/audios/material-{$index}-{$uuid}.mp3",
+            default => "https://example.com/materials/material-{$index}-{$uuid}"
         };
     }
 
-    private function generateContentUrl(string $type): ?string
+    private function generateTranslatedTitle(string $locale, int $index): string
     {
-        return match($type) {
-            'video' => 'https://example.com/videos/' . uniqid() . '.mp4',
-            'document' => 'https://example.com/documents/' . uniqid() . '.pdf',
-            'quiz' => null,
-            default => null
+        $titles = match($locale) {
+            'en' => [
+                "Lecture Notes",
+                "Video Tutorial",
+                "Practice Exercises",
+                "Reference Materials",
+                "Code Examples",
+                "Additional Resources"
+            ],
+            'ru' => [
+                "Лекционные материалы",
+                "Видеоурок",
+                "Практические упражнения",
+                "Справочные материалы",
+                "Примеры кода",
+                "Дополнительные ресурсы"
+            ],
+            'ka' => [
+                "ლექციის მასალები",
+                "ვიდეო გაკვეთილი",
+                "პრაქტიკული სავარჯიშოები",
+                "საცნობარო მასალები",
+                "კოდის მაგალითები",
+                "დამატებითი რესურსები"
+            ]
         };
+
+        return $titles[array_rand($titles)] . " {$index}";
     }
 
-    private function createMaterialTranslations($material, string $type, int $index): void
+    private function generateTranslatedContent(string $locale): string
     {
-        $locales = ['en', 'ru', 'ka'];
-
-        foreach ($locales as $locale) {
-            MaterialTranslation::create([
-                'material_id' => $material->id,
-                'locale' => $locale,
-                'title' => $this->getTranslatedTitle($type, $index, $locale),
-                'content' => $this->getTranslatedContent($type, $locale),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-    }
-
-    private function getTranslatedTitle(string $type, int $index, string $locale): string
-    {
-        $titles = [
-            'video' => [
-                'en' => ["Introduction Video", "Lecture Recording", "Tutorial Video", "Demo Session"],
-                'ru' => ["Вводное видео", "Запись лекции", "Обучающее видео", "Демо-сессия"],
-                'ka' => ["შესავალი ვიდეო", "ლექციის ჩანაწერი", "სასწავლო ვიდეო", "დემო სესია"]
-            ],
-            'document' => [
-                'en' => ["Study Guide", "Reference Material", "Exercise Sheet", "Reading Assignment"],
-                'ru' => ["Учебное пособие", "Справочный материал", "Лист с упражнениями", "Задание для чтения"],
-                'ka' => ["სასწავლო სახელმძღვანელო", "საცნობარო მასალა", "სავარჯიშო ფურცელი", "კითხვის დავალება"]
-            ],
-            'quiz' => [
-                'en' => ["Knowledge Check", "Practice Quiz", "Assessment Test"],
-                'ru' => ["Проверка знаний", "Практический тест", "Оценочный тест"],
-                'ka' => ["ცოდნის შემოწმება", "პრაქტიკული ტესტი", "შეფასების ტესტი"]
-            ]
-        ];
-
-        $availableTitles = $titles[$type][$locale] ?? $titles[$type]['en'];
-        return $availableTitles[array_rand($availableTitles)] . " {$index}";
-    }
-
-    private function getTranslatedContent(string $type, string $locale): string
-    {
-        $content = [
-            'video' => [
-                'en' => 'Video lecture content for this lesson',
-                'ru' => 'Видео лекция для этого урока',
-                'ka' => 'ვიდეო ლექცია ამ გაკვეთილისთვის'
-            ],
-            'document' => [
-                'en' => 'Study material and references for this topic',
-                'ru' => 'Учебный материал и ссылки по этой теме',
-                'ka' => 'სასწავლო მასალა და ლიტერატურა ამ თემისთვის'
-            ],
-            'quiz' => [
-                'en' => 'Test your understanding of the concepts covered',
-                'ru' => 'Проверьте свое понимание рассмотренных концепций',
-                'ka' => 'გამოცადეთ თქვენი理解 ნახcoveredებული კონცეფციების'
-            ]
-        ];
-
-        return $content[$type][$locale] ?? $content[$type]['en'];
+        return match($locale) {
+            'en' => "Educational materials to support your learning journey. Includes examples and exercises.",
+            'ru' => "Образовательные материалы для поддержки вашего обучения. Включает примеры и упражнения.",
+            'ka' => "საგანმანათლებლო მასალები თქვენი სწავლის მხარდასაჭერად. მოიცავს მაგალითებს და სავარჯიშოებს."
+        };
     }
 }

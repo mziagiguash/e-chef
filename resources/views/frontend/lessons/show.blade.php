@@ -200,46 +200,57 @@
                     </div>
                     @endif
 
-                    {{-- Материалы урока --}}
-                    @if($lesson->materials && $lesson->materials->count() > 0)
-                    <div class="mt-4">
-                        <h5>
-                            <i class="fas fa-file-download me-2"></i>
-                            {{ __('Downloadable Materials:') }}
-                        </h5>
-                        <div class="list-group">
-                            @foreach($lesson->materials as $material)
-                            @php
-                                $materialTranslation = $material->translations->where('locale', $locale)->first()
-                                    ?? $material->translations->where('locale', 'en')->first();
-                            @endphp
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        @if($material->type === 'document')
-                                            <i class="fas fa-file-pdf text-danger me-2"></i>
-                                        @elseif($material->type === 'presentation')
-                                            <i class="fas fa-file-powerpoint text-warning me-2"></i>
-                                        @else
-                                            <i class="fas fa-file text-secondary me-2"></i>
-                                        @endif
-                                        <strong>{{ $materialTranslation->title ?? $material->title }}</strong>
-                                        <small class="text-muted ms-2">({{ $material->type }})</small>
-                                    </div>
-                                    <a href="{{ $material->file_path }}"
-                                       class="btn btn-outline-primary btn-sm"
-                                       download>
-                                        <i class="fas fa-download me-1"></i> {{ __('Download') }}
-                                    </a>
-                                </div>
-                                @if($materialTranslation->description ?? $material->description)
-                                <p class="mt-2 mb-0 small text-muted">{{ $materialTranslation->description ?? $material->description }}</p>
-                                @endif
-                            </div>
-                            @endforeach
-                        </div>
+{{-- Материалы урока --}}
+@php
+    $materials = $lesson->materials ?? collect();
+    // Если materials - это строка, преобразуем в коллекцию
+    if (is_string($materials)) {
+        $materials = collect();
+    }
+    $materialsCount = is_object($materials) && method_exists($materials, 'count') ? $materials->count() : 0;
+@endphp
+
+@if($materialsCount > 0)
+<div class="mt-4">
+    <h5>
+        <i class="fas fa-file-download me-2"></i>
+        {{ __('Downloadable Materials:') }}
+    </h5>
+    <div class="list-group">
+        @foreach($materials as $material)
+            @php
+                $materialTranslation = $material->translations->where('locale', $locale)->first()
+                    ?? $material->translations->where('locale', 'en')->first();
+            @endphp
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        @if($material->type === 'document')
+                            <i class="fas fa-file-pdf text-danger me-2"></i>
+                        @elseif($material->type === 'presentation')
+                            <i class="fas fa-file-powerpoint text-warning me-2"></i>
+                        @elseif($material->type === 'audio') {{-- 🔴 ДОБАВЛЕНО audio --}}
+                            <i class="fas fa-music text-info me-2"></i>
+                        @else
+                            <i class="fas fa-file text-secondary me-2"></i>
+                        @endif
+                        <strong>{{ $materialTranslation->title ?? $material->title }}</strong>
+                        <small class="text-muted ms-2">({{ $material->type }})</small>
                     </div>
-                    @endif
+                    <a href="{{ $material->file_path }}"
+                       class="btn btn-outline-primary btn-sm"
+                       download>
+                        <i class="fas fa-download me-1"></i> {{ __('Download') }}
+                    </a>
+                </div>
+                @if($materialTranslation->description ?? $material->description)
+                <p class="mt-2 mb-0 small text-muted">{{ $materialTranslation->description ?? $material->description }}</p>
+                @endif
+            </div>
+        @endforeach
+    </div>
+</div>
+@endif
                 </div>
             </div>
 
@@ -313,8 +324,7 @@
                         <a href="{{ route('frontend.quizzes.show', [
                             'locale' => $locale,
                             'course' => $course->id,
-                            'lesson' => $lesson->id,
-                            'quiz' => $lesson->quiz->id
+                            'lesson' => $lesson->id
                         ]) }}" class="btn btn-primary">
                             <i class="fas fa-play me-2"></i> {{ __('Start Quiz') }}
                         </a>

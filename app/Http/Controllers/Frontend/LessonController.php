@@ -11,177 +11,207 @@ use Illuminate\Support\Facades\Auth;
 
 class LessonController extends Controller
 {
-    public function show($locale, $courseId, $lessonId)
-    {
-        try {
+public function show($locale, $course, $lesson)
+{
+    try {
+        \Log::debug('=== LESSON SHOW ===', ['course' => $course, 'lesson' => $lesson]);
+
+        // Если параметры - это ID, находим модели
+        if (!is_object($course)) {
             $course = Course::with(['translations' => function($q) use ($locale) {
                 $q->where('locale', $locale);
-            }])->findOrFail($courseId);
+            }])->findOrFail($course);
+        }
 
+        if (!is_object($lesson)) {
             $lesson = Lesson::with([
-                'quiz',
-                'materials',
-                'translations' => function($q) use ($locale) {
-                    $q->where('locale', $locale);
-                }
-            ])->findOrFail($lessonId);
+    'quiz',
+    // 🔴 ИСПРАВЛЯЕМ: materials -> lessonMaterials или правильное имя отношения
+    'materials' => function($query) use ($locale) {
+        $query->with(['translations' => function($q) use ($locale) {
+            $q->where('locale', $locale);
+        }]);
+    },
+    'translations' => function($q) use ($locale) {
+        $q->where('locale', $locale);
+    }
+])->findOrFail($lesson);
+        }
 
-            // Проверяем, принадлежит ли урок курсу
-            if ($lesson->course_id != $course->id) {
-                abort(404, 'Lesson does not belong to this course');
+        // Проверяем принадлежность
+        if ($lesson->course_id != $course->id) {
+            abort(404, 'Lesson does not belong to this course');
+        }
+
+        // Получаем переводы
+        $courseTranslation = $course->translations->first() ?? $course->translations()->where('locale', 'en')->first();
+        $lessonTranslation = $lesson->translations->first() ?? $lesson->translations()->where('locale', 'en')->first();
+
+        // Проверяем тип видео (YouTube или загруженное)
+        $isYouTube = false;
+        $youTubeId = null;
+
+        // 🔴 ВАЖНО: Проверяем какое поле используется для видео
+        $videoField = $lesson->video_url ?? $lesson->video;
+        \Log::debug('Video field check', [
+            'video_url' => $lesson->video_url,
+            'video' => $lesson->video,
+            'used_field' => $videoField
+        ]);
+
+        if ($videoField) {
+            $isYouTube = $this->isYouTubeUrl($videoField);
+            if ($isYouTube) {
+                $youTubeId = $this->getYouTubeId($videoField);
             }
+        }
 
-            // Получаем переводы
-            $courseTranslation = $course->translations->first() ?? $course->translations()->where('locale', 'en')->first();
-            $lessonTranslation = $lesson->translations->first() ?? $lesson->translations()->where('locale', 'en')->first();
+        // Получаем все уроки курса для боковой панели
+        $courseLessons = $course->lessons()
+            ->with(['translations' => function($q) use ($locale) {
+                $q->where('locale', $locale);
+            }])
+            ->orderBy('order')
+            ->get();
 
-            // Проверяем тип видео (YouTube или загруженное)
-            $isYouTube = false;
-            $youTubeId = null;
+        \Log::debug('Course lessons count', ['count' => $courseLessons->count()]);
 
-            if ($lesson->video_url) {
-                $isYouTube = $this->isYouTubeUrl($lesson->video_url);
-                if ($isYouTube) {
-                    $youTubeId = $this->getYouTubeId($lesson->video_url);
+        // Прогресс студента
+        $userLessonProgress = [];
+        $completedLessonsCount = 0;
+        $currentProgress = 0;
+
+        $student = $this->getCurrentStudent();
+        \Log::debug('Student found', ['student' => $student ? $student->id : 'null']);
+
+        if ($student) {
+            // Получаем прогресс по всем урокам курса
+            $progressRecords = $student->lessonProgress()
+                ->whereIn('lesson_id', $courseLessons->pluck('id'))
+                ->get()
+                ->keyBy('lesson_id');
+
+            // Обновляем текущий урок
+            $student->updateLessonProgress($lesson, [
+                'progress' => 100,
+                'video_position' => 0,
+                'video_duration' => 0
+            ]);
+
+            // Перезагружаем прогресс после обновления
+            $progressRecords = $student->lessonProgress()
+                ->whereIn('lesson_id', $courseLessons->pluck('id'))
+                ->get()
+                ->keyBy('lesson_id');
+
+            foreach ($courseLessons as $courseLesson) {
+                $progress = $progressRecords->get($courseLesson->id);
+                $progressValue = $progress ? $progress->progress : 0;
+                $isCompleted = $progress ? $progress->is_completed : false;
+
+                $isAvailable = $this->isLessonAvailable($courseLesson, $courseLessons, $progressRecords);
+
+                $userLessonProgress[$courseLesson->id] = [
+                    'progress' => $progressValue,
+                    'is_completed' => $isCompleted,
+                    'is_available' => $isAvailable
+                ];
+
+                if ($isCompleted) {
+                    $completedLessonsCount++;
+                }
+
+                if ($courseLesson->id == $lesson->id) {
+                    $currentProgress = $progressValue;
                 }
             }
-
-            // Получаем все уроки курса для боковой панели
-            $courseLessons = $course->lessons()
-                ->with(['translations' => function($q) use ($locale) {
-                    $q->where('locale', $locale);
-                }])
-                ->orderBy('order')
-                ->orderBy('id')
-                ->get();
-
-            // ИСПРАВЛЕНО: Работаем напрямую со студентами
-            $userLessonProgress = [];
-            $completedLessonsCount = 0;
-            $currentProgress = 100; // При переходе на урок сразу 100%
-
-            // Получаем ID студента из сессии или другого источника
-            $studentId = $this->getStudentId();
-
-            if ($studentId) {
-                $student = Student::find($studentId);
-
-                if ($student) {
-                    // Получаем прогресс по всем урокам курса
-                    $progressRecords = $student->lessonProgress()
-                        ->whereIn('lesson_id', $courseLessons->pluck('id'))
-                        ->get()
-                        ->keyBy('lesson_id');
-
-                    // ОБНОВЛЯЕМ ТЕКУЩИЙ УРОК - отмечаем как завершенный
-                    $student->updateLessonProgress($lesson, [
-                        'progress' => 100,
-                        'video_position' => 0,
-                        'video_duration' => 0
-                    ]);
-
-                    // Обновляем записи прогресса после сохранения
-                    $progressRecords = $student->lessonProgress()
-                        ->whereIn('lesson_id', $courseLessons->pluck('id'))
-                        ->get()
-                        ->keyBy('lesson_id');
-
-                    foreach ($courseLessons as $courseLesson) {
-                        $progress = $progressRecords->get($courseLesson->id);
-                        $progressValue = $progress ? $progress->progress : 0;
-                        $isCompleted = $progress ? $progress->is_completed : false;
-
-                        // Урок доступен если он первый ИЛИ предыдущий завершен
-                        $isAvailable = $this->isLessonAvailable($courseLesson, $courseLessons, $progressRecords);
-
-                        $userLessonProgress[$courseLesson->id] = [
-                            'progress' => $progressValue,
-                            'is_completed' => $isCompleted,
-                            'is_available' => $isAvailable
-                        ];
-
-                        if ($isCompleted) {
-                            $completedLessonsCount++;
-                        }
-
-                        // Прогресс текущего урока
-                        if ($courseLesson->id == $lesson->id) {
-                            $currentProgress = $progressValue;
-                        }
-                    }
-                }
-            } else {
-                // Для неавторизованных студентов
-                foreach ($courseLessons as $courseLesson) {
-                    $userLessonProgress[$courseLesson->id] = [
-                        'progress' => 0,
-                        'is_completed' => false,
-                        'is_available' => $this->isLessonAvailable($courseLesson, $courseLessons, collect())
-                    ];
-                }
+        } else {
+            // Для неавторизованных студентов
+            foreach ($courseLessons as $courseLesson) {
+                $userLessonProgress[$courseLesson->id] = [
+                    'progress' => 0,
+                    'is_completed' => false,
+                    'is_available' => $this->isLessonAvailable($courseLesson, $courseLessons, collect())
+                ];
             }
+        }
 
-            $totalLessons = $courseLessons->count();
-            $progressPercentage = $totalLessons > 0 ? round(($completedLessonsCount / $totalLessons) * 100) : 0;
+        $totalLessons = $courseLessons->count();
+        $progressPercentage = $totalLessons > 0 ? round(($completedLessonsCount / $totalLessons) * 100) : 0;
 
-            // Навигация между уроками
-            $lessons = $course->lessons()->orderBy('order')->get();
-            $currentIndex = $lessons->search(function ($item) use ($lesson) {
-                return $item->id === $lesson->id;
-            });
+        // Навигация между уроками
+        $lessons = $course->lessons()->orderBy('order')->get();
+        $currentIndex = $lessons->search(function ($item) use ($lesson) {
+            return $item->id === $lesson->id;
+        });
 
-            $previousLesson = $currentIndex > 0 ? $lessons[$currentIndex - 1] : null;
-            $nextLesson = $currentIndex < $lessons->count() - 1 ? $lessons[$currentIndex + 1] : null;
+        $previousLesson = $currentIndex > 0 ? $lessons[$currentIndex - 1] : null;
+        $nextLesson = $currentIndex < $lessons->count() - 1 ? $lessons[$currentIndex + 1] : null;
 
-            // Инструктор
-            $instructor = $course->instructor;
-            $instructorTranslation = $instructor->translations->where('locale', $locale)->first()
-                ?? $instructor->translations->where('locale', 'en')->first();
-            $instructorName = $instructorTranslation->name ?? $instructor->name ?? __('No Instructor');
+        \Log::debug('Rendering view', [
+            'course_id' => $course->id,
+            'lesson_id' => $lesson->id,
+            'previous_lesson' => $previousLesson ? $previousLesson->id : 'null',
+            'next_lesson' => $nextLesson ? $nextLesson->id : 'null'
+        ]);
 
-            return view('frontend.lessons.show', compact(
-                'locale',
-                'course',
-                'lesson',
-                'courseTranslation',
-                'lessonTranslation',
-                'instructorName',
-                'previousLesson',
-                'nextLesson',
-                'currentProgress',
-                'isYouTube',
-                'youTubeId',
-                'courseLessons',
-                'userLessonProgress',
-                'completedLessonsCount',
-                'totalLessons',
-                'progressPercentage'
-            ));
+        return view('frontend.lessons.show', compact(
+            'locale',
+            'course',
+            'lesson',
+            'courseTranslation',
+            'lessonTranslation',
+            'previousLesson',
+            'nextLesson',
+            'currentProgress',
+            'isYouTube',
+            'youTubeId',
+            'courseLessons',
+            'userLessonProgress',
+            'completedLessonsCount',
+            'totalLessons',
+            'progressPercentage'
+        ));
 
-        } catch (\Exception $e) {
-            abort(404, 'Course or lesson not found');
+    } catch (\Exception $e) {
+        \Log::error('Lesson show error: ' . $e->getMessage());
+        \Log::error('Stack trace: ' . $e->getTraceAsString());
+        abort(404, 'Course or lesson not found: ' . $e->getMessage());
+    }
+}
+
+private function getCurrentStudent()
+{
+    $studentId = session('student_id');
+
+    // Если нет student_id в сессии, пробуем получить из userId
+    if (!$studentId && session('userId')) {
+        $studentId = encryptor('decrypt', session('userId'));
+        if ($studentId) {
+            session(['student_id' => $studentId]);
         }
     }
 
+    if ($studentId) {
+        return Student::find($studentId);
+    }
+
+    return null;
+}
     /**
-     * Получает ID студента (нужно адаптировать под вашу логику авторизации)
+     * Получает текущего студента
      */
+
     private function getStudentId()
     {
-        // Вариант 1: Если у вас есть сессия с ID студента
-        // return session('student_id');
+        // Вариант 1: Если студент привязан к пользователю Laravel
+        if (Auth::check()) {
+            $user = Auth::user();
+            // Предполагаем, что у пользователя есть student_id
+            return $user->student ?? Student::find($user->student_id);
+        }
 
-        // Вариант 2: Если студент привязан к пользователю Laravel
-        // if (Auth::check()) {
-        //     $user = Auth::user();
-        //     return $user->student_id; // если есть такое поле
-        // }
-
-        // Вариант 3: Для тестирования - возвращаем ID первого студента
-        $student = Student::first();
-        return $student ? $student->id : null;
-
-        // return null; // если студент не найден
+        return null; // если студент не найден
     }
 
     /**
