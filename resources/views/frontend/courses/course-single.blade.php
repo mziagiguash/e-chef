@@ -109,104 +109,133 @@
                     </div>
                     @endif
 
-                    {{-- РАЗДЕЛ УРОКОВ - ТОЛЬКО ДЛЯ ПОЛЬЗОВАТЕЛЕЙ С ДОСТУПОМ --}}
-                    @if($student)
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-dark text-white">
-                            <h5 class="mb-0">
-                                <i class="fas fa-list me-2"></i>
-                                {{ __('Course Curriculum') }} ({{ $totalLessons }} {{ __('lessons') }})
-                            </h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="list-group list-group-flush">
-                                @forelse($course->lessons as $index => $lesson)
-                                    @php
-                                        $lessonTranslation = $lesson->translations->where('locale', $locale)->first();
-                                        $lessonTitle = $lessonTranslation->title ?? $lesson->translations->first()->title ?? $lesson->title ?? __('No Title');
-                                        $lessonDescription = $lessonTranslation->description ?? $lesson->translations->first()->description ?? $lesson->description ?? '';
+{{-- РАЗДЕЛ УРОКОВ - ТОЛЬКО ДЛЯ ПОЛЬЗОВАТЕЛЕЙ С ДОСТУПОМ --}}
+@if($student)
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">
+            <i class="fas fa-list me-2"></i>
+            {{ __('Course Curriculum') }} ({{ $totalLessons }} {{ __('lessons') }})
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+            @forelse($course->lessons as $index => $lesson)
+                @php
+                    $lessonTranslation = $lesson->translations->where('locale', $locale)->first();
+                    $lessonTitle = $lessonTranslation->title ?? $lesson->translations->first()->title ?? $lesson->title ?? __('No Title');
+                    $lessonDescription = $lessonTranslation->description ?? $lesson->translations->first()->description ?? $lesson->description ?? '';
 
-                                        $materialsCount = is_object($lesson->materials) && method_exists($lesson->materials, 'count')
-        ? $lesson->materials->count()
-        : 0;
-        $hasQuiz = $lesson->quiz ? true : false;
-                                        $isAvailable = $index === 0 ? true : ($lesson->is_available ?? false);
-                                    @endphp
-                                    <div class="list-group-item border-0">
-                                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
-                                            <div class="flex-grow-1" style="min-width: 0;">
-                                                <div class="d-flex align-items-start mb-2">
-                                                    <span class="badge bg-primary me-2 mt-1">{{ $index + 1 }}</span>
-                                                    <div class="flex-grow-1" style="min-width: 0;">
-                                                        <h6 class="mb-1 text-truncate" title="{{ $lessonTitle }}">{{ $lessonTitle }}</h6>
+                    $materialsCount = is_object($lesson->materials) && method_exists($lesson->materials, 'count')
+                        ? $lesson->materials->count()
+                        : 0;
+                    $hasQuiz = $lesson->quiz ? true : false;
 
-                                                        @if($lessonDescription)
-                                                        <div class="lesson-description mb-2">
-                                                            <p class="text-muted small mb-1 description-preview" style="display: block;">
-                                                                {{ Str::limit($lessonDescription, 120) }}
-                                                            </p>
-                                                            @if(strlen($lessonDescription) > 120)
-                                                            <button class="btn btn-link p-0 text-primary toggle-description"
-                                                                    data-full="{{ e($lessonDescription) }}"
-                                                                    data-preview="{{ Str::limit($lessonDescription, 120) }}">
-                                                                <small>{{ __('Show more') }}</small>
-                                                            </button>
-                                                            @endif
-                                                        </div>
-                                                        @endif
-                                                    </div>
-                                                </div>
+                    // 🔴 ИСПРАВЛЕНИЕ: Определяем доступность урока на основе прогресса
+                    $isFirstLesson = $index === 0;
+                    $lessonProgress = $userLessonProgress[$lesson->id] ?? ['progress' => 0, 'is_completed' => false, 'is_available' => false];
+                    $isCompleted = $lessonProgress['is_completed'] ?? false;
+                    $isAvailable = $isFirstLesson || $isCompleted || ($userLessonProgress[$course->lessons[$index-1]->id]['is_completed'] ?? false);
+                @endphp
 
-                                                {{-- Информация о уроке --}}
-                                                <div class="d-flex flex-wrap gap-2 mb-2">
-                                                    @if($lesson->video_url)
-                                                        <span class="keyword-badge" style="background-color: #4681f4">
-                                                            <i class="fas fa-video me-1"></i> {{ __('Video') }}
-                                                        </span>
-                                                    @endif
+                <div class="list-group-item border-0">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <div class="d-flex align-items-start mb-2">
+                                <span class="badge bg-primary me-2 mt-1">{{ $index + 1 }}</span>
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <h6 class="mb-1 text-truncate" title="{{ $lessonTitle }}">{{ $lessonTitle }}</h6>
 
-                                                    @if($hasQuiz)
-                                                        <span class="keyword-badge" style="background-color: #ffc107; color: #000;">
-                                                            <i class="fas fa-graduation-cap me-1"></i> {{ __('Quiz') }}
-                                                        </span>
-                                                    @endif
-
-                                                    @if($materialsCount > 0)
-                                                        <span class="keyword-badge" style="background-color: #28a745">
-                                                            <i class="fas fa-file-download me-1"></i> {{ __('Materials') }} ({{ $materialsCount }})
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            </div>
-
-                                            <div class="flex-shrink-0">
-                                                 @if($isAvailable)
-                                                    <a href="{{ route('lessons.show', [
-                                                        'locale' => $locale,
-                                                        'course' => $course->id,
-                                                        'lesson' => $lesson->id
-                                                    ]) }}" class="btn btn-primary btn-sm">
-                                                        <i class="fas fa-play me-1"></i> {{ __('Start') }}
-                                                    </a>
-                                                @else
-                                                    <button class="btn btn-secondary btn-sm" disabled>
-                                                        <i class="fas fa-lock me-1"></i> {{ __('Locked') }}
-                                                    </button>
-                                                @endif
-                                            </div>
-                                        </div>
+                                    @if($lessonDescription)
+                                    <div class="lesson-description mb-2">
+                                        <p class="text-muted small mb-1 description-preview" style="display: block;">
+                                            {{ Str::limit($lessonDescription, 120) }}
+                                        </p>
+                                        @if(strlen($lessonDescription) > 120)
+                                        <button class="btn btn-link p-0 text-primary toggle-description"
+                                                data-full="{{ e($lessonDescription) }}"
+                                                data-preview="{{ Str::limit($lessonDescription, 120) }}">
+                                            <small>{{ __('Show more') }}</small>
+                                        </button>
+                                        @endif
                                     </div>
-                                @empty
-                                    <div class="list-group-item text-center py-5">
-                                        <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
-                                        <h6 class="mb-2">{{ __('No lessons added yet') }}</h6>
-                                        <p class="text-muted small mb-0">{{ __('Follow course updates') }}</p>
-                                    </div>
-                                @endforelse
+                                    @endif
+                                </div>
+                            </div>
+
+                            {{-- Информация о уроке --}}
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                @if($lesson->video_url)
+                                    <span class="keyword-badge" style="background-color: #4681f4">
+                                        <i class="fas fa-video me-1"></i> {{ __('Video') }}
+                                    </span>
+                                @endif
+
+                                @if($hasQuiz)
+                                    <span class="keyword-badge" style="background-color: #ffc107; color: #000;">
+                                        <i class="fas fa-graduation-cap me-1"></i> {{ __('Quiz') }}
+                                    </span>
+                                @endif
+
+                                @if($materialsCount > 0)
+                                    <span class="keyword-badge" style="background-color: #28a745">
+                                        <i class="fas fa-file-download me-1"></i> {{ __('Materials') }} ({{ $materialsCount }})
+                                    </span>
+                                @endif
+
+                                {{-- 🔴 ДОБАВЛЕНО: Статус урока --}}
+                                @if($isCompleted)
+                                    <span class="keyword-badge" style="background-color: #28a745">
+                                        <i class="fas fa-check me-1"></i> {{ __('Completed') }}
+                                    </span>
+                                @elseif($isAvailable && $lessonProgress['progress'] > 0)
+                                    <span class="keyword-badge" style="background-color: #17a2b8">
+                                        <i class="fas fa-play me-1"></i> {{ __('In Progress') }} ({{ $lessonProgress['progress'] }}%)
+                                    </span>
+                                @endif
                             </div>
                         </div>
+
+                        <div class="flex-shrink-0">
+                            @if($isAvailable)
+                                @if($isCompleted)
+                                    <a href="{{ route('lessons.show', [
+                                        'locale' => $locale,
+                                        'course' => $course->id,
+                                        'lesson' => $lesson->id
+                                    ]) }}" class="btn btn-success btn-sm">
+                                        <i class="fas fa-redo me-1"></i> {{ __('Review') }}
+                                    </a>
+                                @else
+                                    <a href="{{ route('lessons.show', [
+                                        'locale' => $locale,
+                                        'course' => $course->id,
+                                        'lesson' => $lesson->id
+                                    ]) }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-play me-1"></i>
+                                        {{ $lessonProgress['progress'] > 0 ? __('Continue') : __('Start') }}
+                                    </a>
+                                @endif
+                            @else
+                                <button class="btn btn-secondary btn-sm" disabled>
+                                    <i class="fas fa-lock me-1"></i> {{ __('Locked') }}
+                                </button>
+                            @endif
+                        </div>
                     </div>
-                    @else
+                </div>
+            @empty
+                <div class="list-group-item text-center py-5">
+                    <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                    <h6 class="mb-2">{{ __('No lessons added yet') }}</h6>
+                    <p class="text-muted small mb-0">{{ __('Follow course updates') }}</p>
+                </div>
+            @endforelse
+        </div>
+    </div>
+</div>
+@else
+{{-- РАЗДЕЛ ДЛЯ ПОЛЬЗОВАТЕЛЕЙ БЕЗ ДОСТУПА --}}
                     {{-- РАЗДЕЛ ДЛЯ ПОЛЬЗОВАТЕЛЕЙ БЕЗ ДОСТУПА --}}
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-dark text-white">
@@ -317,127 +346,163 @@
                     </div>
                     @endif
 
-                    {{-- БЛОК С ЦЕНОЙ И ОФОРМЛЕНИЕМ --}}
-                    <div class="courseCard--wrapper mb-4">
-                        <div class="cart border-0 shadow-sm">
-                            <div class="cart__price p-3 bg-light rounded-top">
-                                <div class="current-price d-flex justify-content-between align-items-center">
-                                    <h3 class="font-title--sm mb-0">
-                                        @if($course->price > 0)
-                                            {{ $currencySymbol }}{{ number_format($course->price * $currencyRate, 2) }}
-                                        @else
-                                            {{ __('Free') }}
-                                        @endif
-                                    </h3>
-                                    @if($course->old_price > 0 && $course->old_price > $course->price)
-                                        <div class="text-end">
-                                            <p class="mb-0"><del class="text-muted">{{ $currencySymbol }}{{ number_format($course->old_price * $currencyRate, 2) }}</del></p>
-                                            @php
-                                                $discount = (($course->old_price - $course->price) / $course->old_price) * 100;
-                                            @endphp
-                                            <div class="current-discount">
-                                                <p class="font-para--md mb-0 text-success">{{ round($discount) }}% {{ __('off') }}</p>
-                                            </div>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <div class="cart__checkout-process p-3">
-                                @if(!$hasAccess)
-                                    {{-- Кнопки покупки для пользователей без доступа --}}
-                                    @if($course->old_price > 0 && $course->old_price > $course->price)
-                                        <p class="time-left text-center text-muted mb-3">
-                                            <i class="fas fa-clock me-1"></i>
-                                            <span>{{ __('5 hours to remaining this price') }}</span>
-                                        </p>
-                                    @endif
-
-                                    <div class="d-grid gap-2">
-                                        <a href="{{ route('add.to.cart', ['locale' => $locale, 'id' => $course->id]) }}"
-                                           class="text-white button button-lg button--primary w-100 btn btn-primary">
-                                            {{ __('Add to Cart') }}
-                                        </a>
-                                        <a href="{{ route('checkout', ['locale' => $locale]) }}?course_id={{ $course->id }}"
-                                           class="button button-lg button--primary-outline mt-0 w-100 btn btn-outline-primary">
-                                            {{ __('Buy Now') }}
-                                        </a>
-                                    </div>
-                                @else
-                                    {{-- Информация о доступе для пользователей с доступом --}}
-                                    <div class="alert alert-success mb-0 text-center">
-                                        <i class="fas fa-check-circle me-2"></i>
-                                        {{ __('You have full access to this course') }}
-                                        <br>
-                                        <small class="mt-1 d-block">
-                                            <a href="{{ route('lessons.show', ['locale' => $locale, 'course' => $course->id, 'lesson' => $course->lessons->first()->id ?? 0]) }}"
-                                               class="btn btn-primary btn-sm mt-2">
-                                                <i class="fas fa-play me-1"></i> {{ __('Start Learning') }}
-                                            </a>
-                                        </small>
-                                    </div>
-                                @endif
-                            </div>
-
-                            {{-- Остальные блоки (включения, шеринг) --}}
-                            <div class="cart__includes-info p-3 border-top">
-                                <h6 class="font-title--card mb-3">{{ __('This course includes:') }}</h6>
-                                <ul class="list-unstyled mb-0">
-                                    <li class="d-flex align-items-center mb-2">
-                                        <span class="me-2"><i class="fas fa-infinity text-primary"></i></span>
-                                        <p class="font-para--md mb-0">{{ __('Full Lifetime Access') }}</p>
-                                    </li>
-                                    <li class="d-flex align-items-center mb-2">
-                                        <span class="me-2"><i class="fas fa-undo text-primary"></i></span>
-                                        <p class="font-para--md mb-0">{{ __('30 Days Money Back Guarantee') }}</p>
-                                    </li>
-                                    <li class="d-flex align-items-center mb-2">
-                                        <span class="me-2"><i class="fas fa-file-download text-primary"></i></span>
-                                        <p class="font-para--md mb-0">{{ __('Free Exercises File') }}</p>
-                                    </li>
-                                    <li class="d-flex align-items-center mb-2">
-                                        <span class="me-2"><i class="fas fa-mobile-alt text-primary"></i></span>
-                                        <p class="font-para--md mb-0">{{ __('Access on Mobile, Tablet and TV') }}</p>
-                                    </li>
-                                    <li class="d-flex align-items-center">
-                                        <span class="me-2"><i class="fas fa-certificate text-primary"></i></span>
-                                        <p class="font-para--md mb-0">{{ __('Certificate of Completion') }}</p>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div class="cart__share-content p-3 border-top">
-                                <h6 class="font-title--card mb-3">{{ __('Share This Course') }}</h6>
-                                <ul class="social-icons social-icons--outline list-unstyled d-flex gap-2 mb-0">
-                                    <li>
-                                        <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
-                                            <i class="fab fa-instagram"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
-                                            <i class="fab fa-linkedin-in"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
-                                            <i class="fab fa-twitter"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
-                                            <i class="fab fa-youtube"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
-                                            <i class="fab fa-facebook-f"></i>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
+ {{-- БЛОК С ЦЕНОЙ И ОФОРМЛЕНИЕМ --}}
+<div class="courseCard--wrapper mb-4">
+    <div class="cart border-0 shadow-sm">
+        <div class="cart__price p-3 bg-light rounded-top">
+            <div class="current-price d-flex justify-content-between align-items-center">
+                <h3 class="font-title--sm mb-0">
+                    @if($course->price > 0)
+                        {{ $currencySymbol }}{{ number_format($course->price * $currencyRate, 2) }}
+                    @else
+                        {{ __('Free') }}
+                    @endif
+                </h3>
+                @if($course->old_price > 0 && $course->old_price > $course->price)
+                    <div class="text-end">
+                        <p class="mb-0"><del class="text-muted">{{ $currencySymbol }}{{ number_format($course->old_price * $currencyRate, 2) }}</del></p>
+                        @php
+                            $discount = (($course->old_price - $course->price) / $course->old_price) * 100;
+                        @endphp
+                        <div class="current-discount">
+                            <p class="font-para--md mb-0 text-success">{{ round($discount) }}% {{ __('off') }}</p>
                         </div>
                     </div>
+                @endif
+            </div>
+        </div>
+
+        <div class="cart__checkout-process p-3">
+            @if(!$hasAccess)
+                {{-- Кнопки покупки для пользователей без доступа --}}
+                @if($course->old_price > 0 && $course->old_price > $course->price)
+                    <p class="time-left text-center text-muted mb-3">
+                        <i class="fas fa-clock me-1"></i>
+                        <span>{{ __('5 hours to remaining this price') }}</span>
+                    </p>
+                @endif
+
+                <div class="d-grid gap-2">
+                    <a href="{{ route('add.to.cart', ['locale' => $locale, 'id' => $course->id]) }}"
+                       class="text-white button button-lg button--primary w-100 btn btn-primary">
+                        {{ __('Add to Cart') }}
+                    </a>
+                    <a href="{{ route('checkout', ['locale' => $locale]) }}?course_id={{ $course->id }}"
+                       class="button button-lg button--primary-outline mt-0 w-100 btn btn-outline-primary">
+                        {{ __('Buy Now') }}
+                    </a>
+                </div>
+            @else
+                {{-- Информация о доступе для пользователей с доступом --}}
+                <div class="alert alert-success mb-0 text-center">
+                    <i class="fas fa-check-circle me-2"></i>
+                    {{ __('You can start or continue learning') }}
+                    <br>
+                    <small class="mt-1 d-block">
+                        @php
+                            // 🔴 ИСПРАВЛЕНО: Используем переданный userLessonProgress
+                            $nextLessonToContinue = null;
+                            if (isset($userLessonProgress) && count($course->lessons) > 0) {
+                                foreach($course->lessons as $lesson) {
+                                    $lessonProgress = $userLessonProgress[$lesson->id] ?? ['progress' => 0, 'is_completed' => false, 'is_available' => false];
+                                    if ($lessonProgress['is_available'] && !$lessonProgress['is_completed']) {
+                                        $nextLessonToContinue = $lesson;
+                                        break;
+                                    }
+                                }
+                                // Если все уроки завершены, показываем первый урок для повторения
+                                if (!$nextLessonToContinue) {
+                                    $nextLessonToContinue = $course->lessons->first();
+                                }
+                            } else {
+                                // Если нет данных о прогрессе, показываем первый урок
+                                $nextLessonToContinue = $course->lessons->first();
+                            }
+                        @endphp
+
+                        @if($nextLessonToContinue)
+                            @php
+                                $lessonProgress = $userLessonProgress[$nextLessonToContinue->id] ?? ['progress' => 0, 'is_completed' => false];
+                            @endphp
+                            <a href="{{ route('lessons.show', [
+                                'locale' => $locale,
+                                'course' => $course->id,
+                                'lesson' => $nextLessonToContinue->id
+                            ]) }}" class="btn btn-primary btn-sm mt-2">
+                                <i class="fas fa-play me-1"></i>
+                                @if($lessonProgress['progress'] > 0 && !$lessonProgress['is_completed'])
+                                    {{ __('Continue Learning') }}
+                                @elseif($lessonProgress['is_completed'])
+                                    {{ __('Review Course') }}
+                                @else
+                                    {{ __('Continue Learning') }}
+                                @endif
+                            </a>
+                        @endif
+                    </small>
+                </div>
+            @endif
+        </div>{{-- Закрытие cart__checkout-process --}}
+
+        {{-- Остальные блоки (включения, шеринг) --}}
+        <div class="cart__includes-info p-3 border-top">
+            <h6 class="font-title--card mb-3">{{ __('This course includes:') }}</h6>
+            <ul class="list-unstyled mb-0">
+                <li class="d-flex align-items-center mb-2">
+                    <span class="me-2"><i class="fas fa-infinity text-primary"></i></span>
+                    <p class="font-para--md mb-0">{{ __('Full Lifetime Access') }}</p>
+                </li>
+                <li class="d-flex align-items-center mb-2">
+                    <span class="me-2"><i class="fas fa-undo text-primary"></i></span>
+                    <p class="font-para--md mb-0">{{ __('30 Days Money Back Guarantee') }}</p>
+                </li>
+                <li class="d-flex align-items-center mb-2">
+                    <span class="me-2"><i class="fas fa-file-download text-primary"></i></span>
+                    <p class="font-para--md mb-0">{{ __('Free Exercises File') }}</p>
+                </li>
+                <li class="d-flex align-items-center mb-2">
+                    <span class="me-2"><i class="fas fa-mobile-alt text-primary"></i></span>
+                    <p class="font-para--md mb-0">{{ __('Access on Mobile, Tablet and TV') }}</p>
+                </li>
+                <li class="d-flex align-items-center">
+                    <span class="me-2"><i class="fas fa-certificate text-primary"></i></span>
+                    <p class="font-para--md mb-0">{{ __('Certificate of Completion') }}</p>
+                </li>
+            </ul>
+        </div>
+
+        <div class="cart__share-content p-3 border-top">
+            <h6 class="font-title--card mb-3">{{ __('Share This Course') }}</h6>
+            <ul class="social-icons social-icons--outline list-unstyled d-flex gap-2 mb-0">
+                <li>
+                    <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-dark" style="width: 36px; height: 36px;">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
 
                     {{-- ИНФОРМАЦИЯ О КУРСЕ --}}
                     <div class="card mb-4 border-0 shadow-sm">

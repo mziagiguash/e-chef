@@ -199,10 +199,9 @@ private function getCurrentStudent()
             return redirect()->route('frontend.courses.show', ['locale' => $locale, 'course' => $course->id]);
         }
     }
-
-    /**
-     * Show full course for students who have access
-     */
+/**
+ * Show full course for students who have access
+ */
 private function showFullCourse($locale, Course $course, $student = null)
 {
     try {
@@ -251,7 +250,8 @@ private function showFullCourse($locale, Course $course, $student = null)
         // Категория
         $categoryName = $categoryTranslation->category_name ?? $course->courseCategory->translations->first()->name ?? $course->courseCategory->category_name ?? __('No Category');
 
-        // Получаем прогресс студента
+        // 🔴 ИСПРАВЛЕНО: Получаем прогресс по каждому уроку из student_lesson_progress
+        $userLessonProgress = [];
         $progress = 0;
         $completedLessons = 0;
         $totalLessons = $course->lessons->count();
@@ -260,10 +260,30 @@ private function showFullCourse($locale, Course $course, $student = null)
 
         if ($student) {
             $studentId = $student->id;
-            $completedLessons = $student->lessonProgress()
-                ->where('course_id', $course->id)
-                ->where('is_completed', true)
-                ->count();
+
+            // Получаем прогресс для каждого урока
+            foreach ($course->lessons as $index => $lesson) {
+                $lessonProgress = $this->getLessonProgress($student->id, $lesson->id);
+
+                // Определяем доступность урока
+                $isFirstLesson = $index === 0;
+                $previousLesson = $index > 0 ? $course->lessons[$index - 1] : null;
+
+                // Урок доступен если он первый ИЛИ предыдущий урок завершен
+                $isAvailable = $isFirstLesson ||
+                              ($previousLesson &&
+                               ($userLessonProgress[$previousLesson->id]['is_completed'] ?? false));
+
+                $userLessonProgress[$lesson->id] = [
+                    'progress' => $lessonProgress['progress'],
+                    'is_completed' => $lessonProgress['is_completed'],
+                    'is_available' => $isAvailable
+                ];
+
+                if ($lessonProgress['is_completed']) {
+                    $completedLessons++;
+                }
+            }
 
             $progress = $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
             $canGenerateCertificate = $progress >= 100;
@@ -277,23 +297,16 @@ private function showFullCourse($locale, Course $course, $student = null)
             'student_id' => $studentId,
             'progress' => $progress,
             'total_lessons' => $totalLessons,
-            'completed_lessons' => $completedLessons
+            'completed_lessons' => $completedLessons,
+            'lesson_progress' => $userLessonProgress
         ]);
 
         $hasAccess = true;
 
-        \Log::info('Showing full course version', [
-            'course_id' => $course->id,
-            'student_id' => $studentId,
-            'progress' => $progress,
-            'total_lessons' => $totalLessons,
-            'completed_lessons' => $completedLessons
-        ]);
-
         return view('frontend.courses.course-single', compact(
             'course',
             'student',
-            'hasAccess', // Добавляем эту переменную
+            'hasAccess',
             'progress',
             'completedLessons',
             'totalLessons',
@@ -308,7 +321,8 @@ private function showFullCourse($locale, Course $course, $student = null)
             'instructorDesignation',
             'categoryName',
             'locale',
-            'currencySymbol'
+            'currencySymbol',
+            'userLessonProgress' // 🔴 ПЕРЕДАЕМ прогресс по урокам в шаблон
         ));
 
     } catch (\Exception $e) {
@@ -316,10 +330,35 @@ private function showFullCourse($locale, Course $course, $student = null)
         abort(404, 'Course not found: ' . $e->getMessage());
     }
 }
-
 /**
- * Show simple course preview for students who don't have access
+ * 🔴 ИСПРАВЛЕНО: Метод для получения прогресса урока из student_lesson_progress
  */
+private function getLessonProgress($studentId, $lessonId)
+{
+    $progressRecord = \DB::table('student_lesson_progress')
+        ->where('student_id', $studentId)
+        ->where('lesson_id', $lessonId)
+        ->first();
+
+    \Log::debug('Getting lesson progress', [
+        'student_id' => $studentId,
+        'lesson_id' => $lessonId,
+        'progress_record' => $progressRecord
+    ]);
+
+    if ($progressRecord) {
+        return [
+            'progress' => $progressRecord->progress ?? 0,
+            'is_completed' => (bool)($progressRecord->is_completed ?? false)
+        ];
+    }
+
+    return [
+        'progress' => 0,
+        'is_completed' => false
+    ];
+}
+
 /**
  * Show simple course preview for students who don't have access
  */

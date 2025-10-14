@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class QuestionAnswer extends Model
 {
@@ -15,7 +16,6 @@ class QuestionAnswer extends Model
         'rating_answer',
         'is_correct',
         'points_earned'
-        // user_id УДАЛЕН
     ];
 
     protected $casts = [
@@ -32,14 +32,16 @@ class QuestionAnswer extends Model
         return $this->belongsTo(Question::class);
     }
 
-    // Метод user() УДАЛЕН - так как поля нет в БД
+    public function selectedOptions(): BelongsToMany
+    {
+        return $this->belongsToMany(Option::class, 'question_answer_options', 'question_answer_id', 'option_id');
+    }
 
     public function option(): BelongsTo
     {
         return $this->belongsTo(Option::class);
     }
 
-    // Дополнительный метод для доступа к студенту через попытку
     public function getStudentAttribute()
     {
         return $this->attempt->student;

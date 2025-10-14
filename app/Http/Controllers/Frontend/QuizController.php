@@ -44,19 +44,16 @@ public function show($locale, $course, $lesson)
             abort(404, 'Quiz not found for this lesson');
         }
 
-        // Загружаем вопросы с переводами
+        // 🔴 ИСПРАВЛЯЕМ: Загружаем вопросы с переводами правильно
         $quiz->load([
             'questions' => function($query) use ($locale) {
                 $query->orderBy('order', 'asc')
                       ->with([
-                          'translations' => function($q) use ($locale) {
-                              $q->where('locale', $locale);
-                          },
+                          // Загружаем все переводы, фильтрацию сделаем в шаблоне
+                          'translations',
                           'options' => function($q) use ($locale) {
                               $q->orderBy('order', 'asc')
-                                ->with(['translations' => function($q2) use ($locale) {
-                                    $q2->where('locale', $locale);
-                                }]);
+                                ->with(['translations']); // Загружаем все переводы опций
                           }
                       ]);
             }
@@ -76,7 +73,6 @@ public function show($locale, $course, $lesson)
 
         $canAttempt = $quiz->max_attempts === 0 || $attemptsCount < $quiz->max_attempts;
 
-        // 🔴 ДОБАВЛЯЕМ $student в compact
         return view('frontend.quizzes.show', compact(
             'quiz', 'course', 'lesson', 'attemptsCount', 'canAttempt', 'locale', 'student'
         ));
@@ -86,6 +82,7 @@ public function show($locale, $course, $lesson)
         abort(404, 'Quiz not found');
     }
 }
+
 
 public function start(Request $request, $locale, $course, $lesson)
 {
@@ -184,6 +181,11 @@ public function attempt($locale, $course, $lesson, $attemptId)
             ->where('student_id', $student->id)
             ->firstOrFail();
 
+        // 🔴 ДОБАВЛЯЕМ: Получаем номер текущей попытки
+        $currentAttempt = $quiz->attempts()
+            ->where('student_id', $student->id)
+            ->count();
+
         // Проверяем статус
         if ($attempt->status === 'completed') {
             return redirect()->route('frontend.quizzes.results', [
@@ -194,24 +196,20 @@ public function attempt($locale, $course, $lesson, $attemptId)
             ]);
         }
 
-        // Загружаем вопросы с переводами
+        // Загружаем вопросы с переводами правильно
         $questions = Question::with([
-            'translations' => function($q) use ($locale) {
-                $q->where('locale', $locale);
-            },
+            'translations', // Загружаем все переводы
             'options' => function($q) use ($locale) {
                 $q->orderBy('order', 'asc')
-                  ->with(['translations' => function($q2) use ($locale) {
-                      $q2->where('locale', $locale);
-                  }]);
+                  ->with(['translations']); // Загружаем все переводы опций
             }
         ])->where('quiz_id', $quiz->id)
           ->orderBy('order', 'asc')
           ->get();
 
-        // 🔴 ДОБАВЛЯЕМ $student в compact
+        // 🔴 ИСПРАВЛЯЕМ: Добавляем $currentAttempt в compact
         return view('frontend.quizzes.attempt', compact(
-            'quiz', 'course', 'lesson', 'attempt', 'questions', 'locale', 'student'
+            'quiz', 'course', 'lesson', 'attempt', 'questions', 'locale', 'student', 'currentAttempt'
         ));
 
     } catch (\Exception $e) {
@@ -225,122 +223,127 @@ public function attempt($locale, $course, $lesson, $attemptId)
 }
 
   public function submit(Request $request, $locale, Course $course, Lesson $lesson, $attemptId)
-    {
-        try {
-            // Получаем текущего студента
-            $student = $this->getCurrentStudent();
+{
+    try {
+        // Получаем текущего студента
+        $student = $this->getCurrentStudent();
 
-            if (!$student) {
-                return redirect()->back()->with('error', 'Student not found');
-            }
+        if (!$student) {
+            return redirect()->back()->with('error', 'Student not found');
+        }
 
-            // Проверяем принадлежность
-            if ($lesson->course_id != $course->id) {
-                abort(404, 'Lesson does not belong to this course');
-            }
+        // Проверяем принадлежность
+        if ($lesson->course_id != $course->id) {
+            abort(404, 'Lesson does not belong to this course');
+        }
 
-            // Получаем квиз через отношение
-            $quiz = $lesson->quiz;
-            if (!$quiz) {
-                abort(404, 'Quiz not found for this lesson');
-            }
+        // Получаем квиз через отношение
+        $quiz = $lesson->quiz;
+        if (!$quiz) {
+            abort(404, 'Quiz not found for this lesson');
+        }
 
-            // Находим попытку (ИСПРАВЛЕНО: student_id вместо user_id)
-            $attempt = QuizAttempt::where('id', $attemptId)
-                ->where('quiz_id', $quiz->id)
-                ->where('student_id', $student->id) // ← ИСПРАВЛЕНО
-                ->firstOrFail();
+        // Находим попытку (ИСПРАВЛЕНО: student_id вместо user_id)
+        $attempt = QuizAttempt::where('id', $attemptId)
+            ->where('quiz_id', $quiz->id)
+            ->where('student_id', $student->id) // ← ИСПРАВЛЕНО
+            ->firstOrFail();
 
-            // Проверяем, что попытка еще не завершена
-            if ($attempt->status === 'completed') {
-                return redirect()->route('frontend.quizzes.results', [
-                    'locale' => $locale,
-                    'course' => $course->id,
-                    'lesson' => $lesson->id,
-                    'attempt' => $attempt->id
-                ]);
-            }
-
-            // Получаем ответы из формы
-            $answers = $request->input('answers', []);
-            $totalQuestions = $quiz->questions()->count();
-            $correctAnswers = 0;
-
-            // Обрабатываем каждый ответ
-            foreach ($answers as $questionId => $answerData) {
-                $question = Question::find($questionId);
-
-                if (!$question) continue;
-
-                $isCorrect = false;
-                $pointsEarned = 0;
-
-                // Обработка в зависимости от типа вопроса
-                switch ($question->type) {
-                    case 'single':
-                        $isCorrect = $this->checkSingleAnswer($question, $answerData);
-                        break;
-
-                    case 'multiple':
-                        $isCorrect = $this->checkMultipleAnswer($question, $answerData);
-                        break;
-
-                    case 'text':
-                        $isCorrect = $this->checkTextAnswer($question, $answerData);
-                        break;
-
-                    case 'rating':
-                        $isCorrect = true; // Рейтинговые вопросы всегда считаются правильными
-                        break;
-                }
-
-                if ($isCorrect) {
-                    $correctAnswers++;
-                    $pointsEarned = $question->points;
-                }
-
-                // Сохраняем ответ (ИСПРАВЛЕНО: без user_id)
-                QuestionAnswer::create([
-                    'attempt_id' => $attempt->id,
-                    'question_id' => $questionId,
-                    'option_id' => $this->getOptionId($answerData),
-                    'text_answer' => $this->getTextAnswer($answerData, $question->type),
-                    'rating_answer' => $this->getRatingAnswer($answerData, $question->type),
-                    'is_correct' => $isCorrect,
-                    'points_earned' => $pointsEarned,
-                ]);
-            }
-
-            // Рассчитываем результат
-            $score = $totalQuestions > 0 ? round(($correctAnswers / $totalQuestions) * 100) : 0;
-
-            // Обновляем попытку
-            $attempt->update([
-                'score' => $score,
-                'correct_answers' => $correctAnswers,
-                'completed_at' => now(),
-                'time_taken' => now()->diffInSeconds($attempt->started_at),
-                'status' => 'completed',
-            ]);
-
-            // Перенаправляем на страницу результатов
+        // Проверяем, что попытка еще не завершена
+        if ($attempt->status === 'completed') {
             return redirect()->route('frontend.quizzes.results', [
                 'locale' => $locale,
                 'course' => $course->id,
                 'lesson' => $lesson->id,
                 'attempt' => $attempt->id
             ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Quiz submit error: ' . $e->getMessage());
-            return redirect()->route('frontend.quizzes.attempt', [
-                'locale' => $locale,
-                'course' => $course->id,
-                'lesson' => $lesson->id,
-                'attempt' => $attemptId
-            ])->with('error', __('Error submitting quiz'));
         }
+
+        // Получаем ответы из формы
+        $answers = $request->input('answers', []);
+        $totalQuestions = $quiz->questions()->count();
+        $correctAnswers = 0;
+
+        // Обрабатываем каждый ответ
+        foreach ($answers as $questionId => $answerData) {
+            $question = Question::find($questionId);
+
+            if (!$question) continue;
+
+            $isCorrect = false;
+            $pointsEarned = 0;
+
+            // Обработка в зависимости от типа вопроса
+            switch ($question->type) {
+                case 'single':
+                    $isCorrect = $this->checkSingleAnswer($question, $answerData);
+                    break;
+
+                case 'multiple':
+                    $isCorrect = $this->checkMultipleAnswer($question, $answerData);
+                    break;
+
+                case 'text':
+                    $isCorrect = $this->checkTextAnswer($question, $answerData);
+                    break;
+
+                case 'rating':
+                    $isCorrect = true; // Рейтинговые вопросы всегда считаются правильными
+                    break;
+            }
+
+            if ($isCorrect) {
+                $correctAnswers++;
+                $pointsEarned = $question->points;
+            }
+
+            // Сохраняем основной ответ (ИСПРАВЛЕНО: без user_id)
+            $questionAnswer = QuestionAnswer::create([
+                'attempt_id' => $attempt->id,
+                'question_id' => $questionId,
+                'option_id' => $this->getOptionId($answerData, $question->type),
+                'text_answer' => $this->getTextAnswer($answerData, $question->type),
+                'rating_answer' => $this->getRatingAnswer($answerData, $question->type),
+                'is_correct' => $isCorrect,
+                'points_earned' => $pointsEarned,
+            ]);
+
+            // 🔴 ИСПРАВЛЕНИЕ: Для множественного выбора сохраняем все выбранные опции в промежуточную таблицу
+            if ($question->type === 'multiple' && is_array($answerData)) {
+                $questionAnswer->selectedOptions()->sync($answerData);
+            }
+        }
+
+        // Рассчитываем результат
+        $score = $totalQuestions > 0 ? round(($correctAnswers / $totalQuestions) * 100) : 0;
+
+        // Обновляем попытку
+        $attempt->update([
+            'score' => $score,
+            'correct_answers' => $correctAnswers,
+            'completed_at' => now(),
+            'time_taken' => now()->diffInSeconds($attempt->started_at),
+            'status' => 'completed',
+        ]);
+
+        // Перенаправляем на страницу результатов
+        return redirect()->route('frontend.quizzes.results', [
+            'locale' => $locale,
+            'course' => $course->id,
+            'lesson' => $lesson->id,
+            'attempt' => $attempt->id
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Quiz submit error: ' . $e->getMessage());
+        return redirect()->route('frontend.quizzes.attempt', [
+            'locale' => $locale,
+            'course' => $course->id,
+            'lesson' => $lesson->id,
+            'attempt' => $attemptId
+        ])->with('error', __('Error submitting quiz'));
     }
+}
 
  public function results($locale, $course, $lesson, $attemptId)
 {
@@ -377,12 +380,15 @@ public function attempt($locale, $course, $lesson, $attemptId)
             ->with('quiz')
             ->firstOrFail();
 
-        // Загружаем ответы с вопросами
+        // 🔴 ИСПРАВЛЕНИЕ: Загружаем ответы с вопросами и ВЫБРАННЫМИ ОПЦИЯМИ для множественного выбора
         $answers = QuestionAnswer::with([
             'question.translations' => function($q) use ($locale) {
                 $q->where('locale', $locale);
             },
             'option.translations' => function($q) use ($locale) {
+                $q->where('locale', $locale);
+            },
+            'selectedOptions.translations' => function($q) use ($locale) {
                 $q->where('locale', $locale);
             }
         ])->where('attempt_id', $attempt->id)
@@ -455,13 +461,13 @@ private function getCurrentStudent()
         return !empty(trim($answerData));
     }
 
-    private function getOptionId($answerData)
-    {
-        if (is_array($answerData)) {
-            return null; // Для множественного выбора не сохраняем option_id
-        }
-        return is_numeric($answerData) ? $answerData : null;
+private function getOptionId($answerData, $questionType)
+{
+    if ($questionType === 'multiple') {
+        return null; // 🔴 ИСПРАВЛЕНИЕ: Для множественного выбора основной option_id = null
     }
+    return is_numeric($answerData) ? $answerData : null;
+}
 
     private function getTextAnswer($answerData, $questionType)
     {
