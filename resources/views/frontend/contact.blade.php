@@ -17,6 +17,32 @@
 </div>
 <!-- Breadcrumb Ends Here -->
 
+<!-- Уведомления -->
+@if(session('success'))
+<div class="container mt-4">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="las la-check-circle me-2"></i>
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+@endif
+
+@if($errors->any())
+<div class="container mt-4">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="las la-exclamation-triangle me-2"></i>
+        <strong>Please fix the following errors:</strong>
+        <ul class="mb-0 mt-1">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+@endif
+
 <!-- Contact Hero Area Starts Here -->
 <section class="section section--bg-white hero hero--one">
     <div class="container">
@@ -100,34 +126,75 @@
                     class="img-fluid contact-feature-shape" />
             </div>
             <div class="col-lg-7 form-area">
-                <form action="#">
+                <form action="{{ localeRoute('contact.submit') }}" method="POST">
+                    @csrf
+
                     <div class="row g-3">
                         <div class="col-lg-6">
-                            <label for="name">Name</label>
-                            <input type="text" class="form-control form-control--focused" placeholder="Type here..."
-                                id="name" />
+                            <label for="name" class="form-label">Name *</label>
+                            <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                   name="name" id="name"
+                                   value="{{ old('name',
+                                       auth()->check() && auth()->user()->student_id ?
+                                           (App\Models\Student::find(auth()->user()->student_id)->name ?? '') :
+                                       (auth()->check() && auth()->user()->instructor_id ?
+                                           (App\Models\Instructor::find(auth()->user()->instructor_id)->name ?? '') :
+                                       (auth()->check() ? auth()->user()->name : ''))) }}"
+                                   required placeholder="Your full name">
+                            @error('name')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-lg-6">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" placeholder="Type here..." id="email" />
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                   name="email" id="email"
+                                   value="{{ old('email',
+                                       auth()->check() && auth()->user()->student_id ?
+                                           (App\Models\Student::find(auth()->user()->student_id)->email ?? '') :
+                                       (auth()->check() && auth()->user()->instructor_id ?
+                                           (App\Models\Instructor::find(auth()->user()->instructor_id)->email ?? '') :
+                                       (auth()->check() ? auth()->user()->email : ''))) }}"
+                                   required placeholder="your.email@example.com">
+                            @error('email')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
-                    <div class="row my-lg-2 my-2">
+
+                    <div class="row mt-3">
                         <div class="col-12">
-                            <label for="subject">Subject</label>
-                            <input type="text" id="subject" class="form-control" placeholder="Type here..." />
+                            <label for="subject" class="form-label">Subject *</label>
+                            <input type="text" class="form-control @error('subject') is-invalid @enderror"
+                                   name="subject" id="subject"
+                                   value="{{ old('subject') }}"
+                                   required placeholder="What is this regarding?">
+                            @error('subject')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
-                    <div class="row">
+
+                    <div class="row mt-3">
                         <div class="col-12">
-                            <label for="message">Messages</label>
-                            <textarea id="message" placeholder="Type here..." class="form-control"></textarea>
+                            <label for="message" class="form-label">Message *</label>
+                            <textarea class="form-control @error('message') is-invalid @enderror"
+                                      name="message" id="message"
+                                      rows="6" required
+                                      placeholder="Please describe your inquiry in detail...">{{ old('message') }}</textarea>
+                            @error('message')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                            <div class="form-text">Minimum 10 characters required.</div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="text-end">
-                            <button type="submit" class="button button-lg button--primary fw-normal">Send
-                                Message</button>
+
+                    <div class="row mt-4">
+                        <div class="col-12 text-end">
+                            <button type="submit" class="button button-lg button--primary fw-normal">
+                                <i class="las la-paper-plane me-2"></i>
+                                Send Message
+                            </button>
                         </div>
                     </div>
                 </form>

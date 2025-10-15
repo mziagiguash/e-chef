@@ -18,6 +18,8 @@ use App\Http\Controllers\Backend\Quizzes\AnswerController as answer;
 use App\Http\Controllers\Backend\Reviews\ReviewController as review;
 use App\Http\Controllers\Backend\Communication\DiscussionController as discussion;
 use App\Http\Controllers\Backend\Communication\MessageController as message;
+use App\Http\Controllers\Backend\Communication\ContactMessageController as ContactMessageController;
+
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SearchCourseController;
@@ -27,9 +29,10 @@ use App\Http\Controllers\Frontend\FreeCheckoutController;
 
 use App\Http\Controllers\CertificateController as CertificateController;
 
-use App\Http\Controllers\Frontend\StudentCourseController;
+use App\Http\Controllers\Frontend\StudentNotificationController;
 
 use App\Http\Controllers\Frontend\WatchCourseController as WatchCourseController;
+use App\Http\Controllers\Frontend\ContactController;
 
 use App\Http\Controllers\Frontend\LessonController as LessonController;
 use App\Http\Controllers\Backend\LessonController as lesson;
@@ -47,27 +50,6 @@ use App\Http\Controllers\Students\sslController as sslcz;
 use App\Http\Controllers\Frontend\QuizController;
 use App\Http\Controllers\Frontend\FrontendInstructorController;
 
-/*
-|--------------------------------------------------------------------------
-| Debug Route
-|--------------------------------------------------------------------------
-*/
-Route::get('/debug-course/{id}', function($id) {
-    try {
-        $course = \App\Models\Course::find($id);
-        if ($course) {
-            return response()->json([
-                'exists' => true,
-                'title' => $course->title,
-                'status' => $course->status
-            ]);
-        } else {
-            return response()->json(['exists' => false]);
-        }
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()]);
-    }
-});
 
 /*
 |--------------------------------------------------------------------------
@@ -127,7 +109,17 @@ Route::middleware(['checkrole'])->prefix('admin')->group(function () {
     Route::resource('discussion', discussion::class);
     Route::resource('message', message::class);
     Route::resource('coupon', coupon::class);
-
+ // Contact Messages Routes
+    Route::get('/contact-messages', [ContactMessageController::class, 'index'])
+        ->name('contact-messages.index');
+    Route::get('/contact-messages/{id}', [ContactMessageController::class, 'show'])
+        ->name('contact-messages.show');
+    Route::post('/contact-messages/{id}/update-status', [ContactMessageController::class, 'updateStatus'])
+        ->name('contact-messages.update-status');
+    Route::delete('/contact-messages/{id}', [ContactMessageController::class, 'destroy'])
+        ->name('contact-messages.destroy');
+        Route::post('/contact-messages/{id}/send-response', [ContactMessageController::class, 'sendResponse'])
+        ->name('contact-messages.send-response');
    // Маршруты для Enrollment
     Route::get('/enrollment/statistics', [enrollment::class, 'statistics'])
         ->name('enrollment.statistics');
@@ -207,6 +199,9 @@ Route::prefix('{locale}')
             Route::post('/profile/save', [stu_profile::class, 'save_profile'])->name('student_save_profile');
             Route::post('/profile/savePass', [stu_profile::class, 'change_password'])->name('change_password');
             Route::post('/change-image', [stu_profile::class, 'changeImage'])->name('change_image');
+ Route::get('/notifications', [StudentNotificationController::class, 'index'])->name('student.notifications');
+    Route::post('/notifications/{id}/mark-read', [StudentNotificationController::class, 'markAsRead'])->name('student.notifications.mark-read');
+    Route::post('/notifications/mark-all-read', [StudentNotificationController::class, 'markAllAsRead'])->name('student.notifications.mark-all-read');
 
             // SSL Payment Routes - ВНУТРИ защищенной группы студентов
             Route::post('/payment/ssl/submit', [sslcz::class, 'store'])->name('payment.ssl.submit');
@@ -270,7 +265,8 @@ Route::prefix('{locale}')
         // 🧾 Static pages
         Route::get('/about', fn() => view('frontend.about'))->name('about');
         Route::get('/contact', fn() => view('frontend.contact'))->name('contact');
-    });
+        Route::post('/contact', [App\Http\Controllers\Frontend\ContactController::class, 'submit'])->name('contact.submit');
+     });
 
 /*
 |--------------------------------------------------------------------------
@@ -278,6 +274,59 @@ Route::prefix('{locale}')
 |--------------------------------------------------------------------------
 */
 
+// routes/web.php
+
+// Тестовый маршрут для уведомлений (временный)
+Route::get('/test-notification-system', function() {
+    // Проверяем таблицу уведомлений
+    $notificationsCount = \App\Models\Notification::count();
+    $notifications = \App\Models\Notification::orderBy('created_at', 'desc')->get();
+
+    // Создаем тестовое уведомление для студента с ID 1
+    $testNotification = \App\Models\Notification::create([
+        'student_id' => 1, // ID первого студента
+        'type' => 'test_system',
+        'title' => 'System Test Notification',
+        'message' => 'This is a system test to verify notifications are working.',
+        'is_read' => false,
+    ]);
+
+    return response()->json([
+        'status' => 'success',
+        'notifications_count' => $notificationsCount,
+        'new_notification_id' => $testNotification->id,
+        'all_notifications' => $notifications->toArray()
+    ]);
+});
+
+// routes/web.php
+
+// Правильный тестовый маршрут для студента
+Route::get('/student/test-notification', function() {
+    try {
+        // Пытаемся получить студента через правильный guard
+        if (Auth::guard('student')->check()) {
+            $student = Auth::guard('student')->user();
+
+            $notification = \App\Models\Notification::create([
+                'student_id' => $student->id,
+                'type' => 'test',
+                'title' => 'Test Notification - System Working!',
+                'message' => 'This is a test notification to verify the notification system is working correctly.',
+                'is_read' => false,
+            ]);
+
+            return redirect()->route('studentdashboard')->with('success', 'Test notification created! Check your notifications tab.');
+        } else {
+            return redirect()->route('student.login')->with('error', 'Please login as student first.');
+        }
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
+})->name('student.test-notification');
 
 Route::get('/check-courses', function () {
     $courses = \App\Models\Course::withCount('lessons')->get();

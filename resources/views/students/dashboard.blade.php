@@ -109,10 +109,6 @@
             <!-- Nav  -->
             <nav class="students-info-intro__nav">
     <div class="nav" id="nav-tab" role="tablist">
-        <button class="nav-link active" id="nav-profile-tab" data-bs-toggle="tab"
-            data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile"
-            aria-selected="true">{{ __('stud_dashboard.dashboard') }}</button>
-
         <button class="nav-link" id="nav-coursesall-tab" data-bs-toggle="tab"
             data-bs-target="#nav-coursesall" type="button" role="tab" aria-controls="nav-coursesall"
             aria-selected="false">{{ __('stud_dashboard.all_courses') }}</button>
@@ -129,12 +125,17 @@
             data-bs-target="#nav-purchase" type="button" role="tab" aria-controls="nav-purchase"
             aria-selected="false">{{ __('stud_dashboard.purchase_history') }}</button>
 
+{{-- Новая вкладка для уведомлений --}}
+        <button class="nav-link" id="nav-notifications-tab" data-bs-toggle="tab"
+            data-bs-target="#nav-notifications" type="button" role="tab" aria-controls="nav-notifications"
+            aria-selected="false">
+            Notifications
+            @if($unread_notifications_count > 0)
+                <span class="badge bg-danger ms-1">{{ $unread_notifications_count }}</span>
+            @endif
+        </button>
         <button class="nav-link">
             <a href="{{ localeRoute('student_profile') }}" class="text-secondary">{{ __('stud_dashboard.profile') }}</a>
-        </button>
-
-        <button class="nav-link">
-            <a href="{{ localeRoute('home') }}" class="text-secondary">{{ __('stud_dashboard.home') }}</a>
         </button>
     </div>
 </nav>
@@ -161,7 +162,104 @@
                         </section>
                     </div>
                 </div>
+{{-- Notifications Tab --}}
+<div class="tab-pane fade" id="nav-notifications" role="tabpanel" aria-labelledby="nav-notifications-tab">
+        {{-- ОТЛАДОЧНАЯ ИНФОРМАЦИЯ --}}
+    <div class="alert alert-info mb-4">
+        <h6>Notifications Debug Info:</h6>
+        <p><strong>Student ID:</strong> {{ $student_info->id }}</p>
+        <p><strong>Unread Count:</strong> {{ $unread_notifications_count }}</p>
+        <p><strong>Total Notifications:</strong> {{ $notifications->count() }}</p>
+        <p><strong>Last Notification:</strong>
+            @if($notifications->count() > 0)
+                {{ $notifications->first()->created_at->diffForHumans() }}
+            @else
+                No notifications
+            @endif
+        </p>
+    </div>
 
+    <div class="notifications-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="font-title--card">My Notifications</h5>
+            @if($unread_notifications_count > 0)
+                <form action="{{ localeRoute('student.notifications.mark-all-read') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                        <i class="las la-check-double me-1"></i>Mark All as Read
+                    </button>
+                </form>
+            @endif
+        </div>
+
+        <div class="notifications-list">
+            @forelse($notifications as $notification)
+                <div class="notification-item card mb-3 {{ $notification->is_read ? 'bg-light' : 'border-primary' }}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    @if(!$notification->is_read)
+                                        <span class="badge bg-primary me-2">New</span>
+                                    @endif
+                                    <h6 class="mb-0 {{ $notification->is_read ? 'text-muted' : 'text-dark' }}">
+                                        {{ $notification->title }}
+                                    </h6>
+                                </div>
+                                <p class="mb-2 {{ $notification->is_read ? 'text-muted' : '' }}">
+                                    {{ $notification->message }}
+                                </p>
+                                <small class="text-muted">
+                                    <i class="las la-clock me-1"></i>
+                                    {{ $notification->created_at->diffForHumans() }}
+                                </small>
+
+                                {{-- Ответ на контактное сообщение --}}
+                                @if($notification->type === 'contact_message_replied' && $notification->contact_message)
+                                    <div class="mt-3 p-3 bg-white border rounded">
+                                        <strong class="text-primary">Admin Response:</strong>
+                                        <p class="mb-1 mt-1">{{ $notification->contact_message->admin_notes }}</p>
+                                        <small class="text-muted">
+                                            Status:
+                                            <span class="badge bg-{{ $notification->contact_message->status === 'resolved' ? 'success' : 'warning' }}">
+                                                {{ ucfirst($notification->contact_message->status) }}
+                                            </span>
+                                        </small>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="notification-actions ms-3">
+                                @if(!$notification->is_read)
+                                    <form action="{{ localeRoute('student.notifications.mark-read', $notification->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Mark as Read">
+                                            <i class="las la-check"></i>
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="text-center py-5">
+                    <i class="las la-bell-slash fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No Notifications</h5>
+                    <p class="text-muted">You don't have any notifications yet.</p>
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Убираем пагинацию, так как показываем только последние 5 уведомлений --}}
+        @if($notifications->count() >= 5)
+            <div class="text-center mt-4">
+                <a href="{{ localeRoute('student.notifications.all') }}" class="btn btn-outline-primary">
+                    View All Notifications
+                </a>
+            </div>
+        @endif
+    </div>
+</div>
     {{-- All Courses --}}
 <div class="tab-pane fade" id="nav-coursesall" role="tabpanel" aria-labelledby="nav-coursesall-tab">
     <div class="row">

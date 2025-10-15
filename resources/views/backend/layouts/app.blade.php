@@ -246,8 +246,11 @@
                             <span class="nav-text">Forum</span>
                         </a>
                         <ul aria-expanded="false">
-                            <li><a href="{{route('discussion.index')}}"><i class="las la-comment-alt"></i>Discussion</a></li> <!-- Исправлено: route -->
-                            <li><a href="{{route('message.index')}}"><i class="las la-envelope"></i>Messages</a></li> <!-- Исправлено: route -->
+                            <ul aria-expanded="false">
+    <li><a href="{{ route('discussion.index') }}"><i class="las la-comment-alt"></i>Discussion</a></li>
+    <li><a href="{{ route('message.index') }}"><i class="las la-envelope"></i>Messages</a></li>
+    <li><a href="{{ route('contact-messages.index') }}"><i class="las la-headset"></i>Contact Messages</a></li>
+</ul>
                         </ul>
                     </li>
                 </ul>

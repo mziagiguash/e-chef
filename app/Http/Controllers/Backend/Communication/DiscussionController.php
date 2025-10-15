@@ -13,7 +13,7 @@ class DiscussionController extends Controller
      */
 public function index()
 {
-    $discussion = Discussion::with(['user', 'user.role', 'course'])->paginate(10);
+    $discussion = Discussion::with(['student', 'course'])->paginate(10);
     return view('backend.communication.discussion.index', compact('discussion'));
 }
 

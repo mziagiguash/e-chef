@@ -31,7 +31,6 @@
     @if($course->course_code)
     <p class="text-muted mb-0">{{ $course->course_code }}</p>
     @endif
-    {{-- Бейдж доступа в виде флажка --}}
 {{-- Альтернативный современный стиль --}}
 @if($hasAccess)
 <div class="access-flag-modern access-flag-modern--success mt-3">
@@ -235,7 +234,6 @@
     </div>
 </div>
 @else
-{{-- РАЗДЕЛ ДЛЯ ПОЛЬЗОВАТЕЛЕЙ БЕЗ ДОСТУПА --}}
                     {{-- РАЗДЕЛ ДЛЯ ПОЛЬЗОВАТЕЛЕЙ БЕЗ ДОСТУПА --}}
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-dark text-white">
@@ -396,7 +394,7 @@
                 {{-- Информация о доступе для пользователей с доступом --}}
                 <div class="alert alert-success mb-0 text-center">
                     <i class="fas fa-check-circle me-2"></i>
-                    {{ __('You can start or continue learning') }}
+                    {{ __('You have full access to this course') }}
                     <br>
                     <small class="mt-1 d-block">
                         @php
@@ -442,7 +440,7 @@
                     </small>
                 </div>
             @endif
-        </div>{{-- Закрытие cart__checkout-process --}}
+        </div>
 
         {{-- Остальные блоки (включения, шеринг) --}}
         <div class="cart__includes-info p-3 border-top">
