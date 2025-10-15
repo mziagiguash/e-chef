@@ -57,7 +57,17 @@
     </div>
     <div class="card-body">
         <form action="{{ route('contact-messages.send-response', $contactMessage->id) }}" method="POST">
-            @csrf
+    @csrf
+
+    {{-- Отладочная информация --}}
+    <div class="alert alert-info mb-3">
+        <h6>Debug Info:</h6>
+        <p><strong>Contact Message ID:</strong> {{ $contactMessage->id }}</p>
+        <p><strong>Sender Type:</strong> {{ $contactMessage->sender_type }}</p>
+        <p><strong>Sender ID:</strong> {{ $contactMessage->sender_id }}</p>
+        <p><strong>Student ID:</strong> {{ $contactMessage->sender_type === 'student' ? $contactMessage->sender_id : 'N/A' }}</p>
+    </div>
+    @csrf
 
             <div class="form-group">
                 <label for="response_subject"><strong>Subject *</strong></label>

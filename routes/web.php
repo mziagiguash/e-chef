@@ -199,9 +199,12 @@ Route::prefix('{locale}')
             Route::post('/profile/save', [stu_profile::class, 'save_profile'])->name('student_save_profile');
             Route::post('/profile/savePass', [stu_profile::class, 'change_password'])->name('change_password');
             Route::post('/change-image', [stu_profile::class, 'changeImage'])->name('change_image');
- Route::get('/notifications', [StudentNotificationController::class, 'index'])->name('student.notifications');
-    Route::post('/notifications/{id}/mark-read', [StudentNotificationController::class, 'markAsRead'])->name('student.notifications.mark-read');
+    // 🔴 ИСПРАВЛЕНО: Используем StudentNotificationController
+    Route::get('/debug-notifications', [StudentNotificationController::class, 'debugNotifications'])->name('student.debug-notifications');
+    Route::get('/notifications', [StudentNotificationController::class, 'getNotifications'])->name('student.notifications');
+    Route::post('/notifications/{notificationId}/mark-read', [StudentNotificationController::class, 'markAsRead'])->name('student.notifications.mark-read');
     Route::post('/notifications/mark-all-read', [StudentNotificationController::class, 'markAllAsRead'])->name('student.notifications.mark-all-read');
+    Route::get('/notifications/unread-count', [StudentNotificationController::class, 'getUnreadCount'])->name('student.notifications.unread-count');
 
             // SSL Payment Routes - ВНУТРИ защищенной группы студентов
             Route::post('/payment/ssl/submit', [sslcz::class, 'store'])->name('payment.ssl.submit');
@@ -273,60 +276,16 @@ Route::prefix('{locale}')
 | Debug Route
 |--------------------------------------------------------------------------
 */
-
 // routes/web.php
 
-// Тестовый маршрут для уведомлений (временный)
-Route::get('/test-notification-system', function() {
-    // Проверяем таблицу уведомлений
-    $notificationsCount = \App\Models\Notification::count();
-    $notifications = \App\Models\Notification::orderBy('created_at', 'desc')->get();
-
-    // Создаем тестовое уведомление для студента с ID 1
-    $testNotification = \App\Models\Notification::create([
-        'student_id' => 1, // ID первого студента
-        'type' => 'test_system',
-        'title' => 'System Test Notification',
-        'message' => 'This is a system test to verify notifications are working.',
-        'is_read' => false,
-    ]);
-
-    return response()->json([
-        'status' => 'success',
-        'notifications_count' => $notificationsCount,
-        'new_notification_id' => $testNotification->id,
-        'all_notifications' => $notifications->toArray()
-    ]);
+// Маршруты для уведомлений студента
+Route::prefix('student')->group(function () {
+    Route::get('/debug-notifications', [studashboard::class, 'debugNotifications'])->name('student.debug-notifications');
+    Route::get('/notifications', [studashboard::class, 'getNotifications'])->name('student.notifications');
+    Route::post('/notifications/{notificationId}/mark-read', [studashboard::class, 'markAsRead'])->name('student.notifications.mark-read');
+    Route::post('/notifications/mark-all-read', [studashboard::class, 'markAllAsRead'])->name('student.notifications.mark-all-read');
 });
 
-// routes/web.php
-
-// Правильный тестовый маршрут для студента
-Route::get('/student/test-notification', function() {
-    try {
-        // Пытаемся получить студента через правильный guard
-        if (Auth::guard('student')->check()) {
-            $student = Auth::guard('student')->user();
-
-            $notification = \App\Models\Notification::create([
-                'student_id' => $student->id,
-                'type' => 'test',
-                'title' => 'Test Notification - System Working!',
-                'message' => 'This is a test notification to verify the notification system is working correctly.',
-                'is_read' => false,
-            ]);
-
-            return redirect()->route('studentdashboard')->with('success', 'Test notification created! Check your notifications tab.');
-        } else {
-            return redirect()->route('student.login')->with('error', 'Please login as student first.');
-        }
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ], 500);
-    }
-})->name('student.test-notification');
 
 Route::get('/check-courses', function () {
     $courses = \App\Models\Course::withCount('lessons')->get();

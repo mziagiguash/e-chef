@@ -59,7 +59,9 @@
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+{{-- resources/views/backend/communication/contact-message/index.blade.php --}}
+
+<tbody>
     @forelse ($contactMessages as $message)
     <tr>
         <td>{{ $message->id }}</td>
@@ -67,32 +69,12 @@
             <strong>{{ $message->name }}</strong>
             <br>
             <small class="text-muted">
-                @if($message->sender_type === 'student' && $message->student)
-                    {{ $message->student->name }} (Student)
-                @elseif($message->sender_type === 'instructor' && $message->instructor)
-                    {{ $message->instructor->name }} (Instructor)
-                @elseif($message->sender_type)
-                    {{ ucfirst($message->sender_type) }} (ID: {{ $message->sender_id }})
-                @else
-                    Guest
-                @endif
+                {{-- 🔴 ИСПРАВЛЕНО: Используем безопасные методы --}}
+                {{ $message->sender_display_name }}
             </small>
         </td>
         <td>
-    @if($message->resolved_at)
-        {{ $message->resolved_at->format('M d, Y H:i') }}
-    @else
-        <span class="text-muted">Not resolved</span>
-    @endif
-</td>
-        <td>
-            @if($message->sender_type === 'student' && $message->student)
-                {{ $message->student->email }}
-            @elseif($message->sender_type === 'instructor' && $message->instructor)
-                {{ $message->instructor->email }}
-            @else
-                {{ $message->email }}
-            @endif
+            {{ $message->sender_display_email }}
         </td>
         <td>{{ Str::limit($message->subject, 50) }}</td>
         <td>

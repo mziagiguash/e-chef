@@ -1,17 +1,17 @@
 <?php
+// app/Http\Controllers\Students\DashboardController.php
 
 namespace App\Http\Controllers\Students;
 
 use App\Http\Controllers\Controller;
+use App\Models\UserNotification; // 🔴 ДОБАВИТЬ
 use App\Models\Student;
-use App\Models\Enrollment;
 use App\Models\Course;
-use App\Models\Lesson;
+use App\Models\Enrollment;
 use App\Models\Checkout;
+use App\Models\Lesson;
 use App\Models\StudentLessonProgress;
-use App\Models\UserNotification; // Добавлена модель Notification
-use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema; // 🔴 ДОБАВИТЬ
 
 class DashboardController extends Controller
 {
@@ -32,37 +32,29 @@ class DashboardController extends Controller
                            ->with('error', 'Student not found');
         }
 
-        // 🔴 ДОБАВЛЕНО: ПРОВЕРКА И ЛОГИРОВАНИЕ УВЕДОМЛЕНИЙ
+        // 🔴 ДОБАВЛЕНО: БАЗОВЫЙ КОД ДЛЯ УВЕДОМЛЕНИЙ В ДАШБОРДЕ
         $unread_notifications_count = 0;
         $notifications = collect();
 
         try {
-            // Проверяем существование таблицы уведомлений
-            if (\Schema::hasTable('notifications')) {
+            if (Schema::hasTable('user_notifications')) {
                 $unread_notifications_count = UserNotification::where('student_id', $student_id)
                     ->where('is_read', false)
                     ->count();
 
                 $notifications = UserNotification::where('student_id', $student_id)
                     ->orderBy('created_at', 'desc')
-                    ->take(10) // Увеличили лимит для тестирования
+                    ->take(10)
                     ->get();
 
-                // Логируем для отладки
-                \Log::info('Dashboard notifications', [
+                \Log::info('=== STUDASHBOARD USER NOTIFICATIONS ===', [
                     'student_id' => $student_id,
                     'unread_count' => $unread_notifications_count,
-                    'total_notifications' => $notifications->count(),
-                    'notifications_sample' => $notifications->take(3)->pluck('title')
+                    'total_notifications' => $notifications->count()
                 ]);
-            } else {
-                \Log::warning('Notifications table does not exist');
             }
         } catch (\Exception $e) {
-            \Log::error('Error fetching notifications: ' . $e->getMessage(), [
-                'student_id' => $student_id,
-                'error' => $e->getMessage()
-            ]);
+            \Log::error('Error fetching user notifications in studashboard: ' . $e->getMessage());
         }
 
         // Получаем все enrollment с отношениями
@@ -149,7 +141,7 @@ class DashboardController extends Controller
             'completed_courses_count' => $completed_courses_count,
             'unread_notifications_count' => $unread_notifications_count,
             'notifications_count' => $notifications->count(),
-            'has_notifications_table' => \Schema::hasTable('notifications')
+            'has_user_notifications_table' => Schema::hasTable('user_notifications')
         ]);
 
         return view('students.dashboard', compact(
@@ -165,8 +157,8 @@ class DashboardController extends Controller
             'completed_courses_count',
             'course',
             'checkout',
-            'unread_notifications_count',
-            'notifications'
+            'unread_notifications_count', // 🔴 ДОБАВИТЬ
+            'notifications' // 🔴 ДОБАВИТЬ
         ));
     }
 
@@ -251,97 +243,5 @@ class DashboardController extends Controller
         ];
     }
 
-    /**
-     * 🔴 ДОБАВЛЕНО: Метод для отладки уведомлений
-     */
-    public function debugNotifications()
-    {
-        $student_id = session('userId') ? encryptor('decrypt', session('userId')) : null;
 
-        if (!$student_id) {
-            return response()->json(['error' => 'Student not logged in'], 401);
-        }
-
-        try {
-            $hasTable = \Schema::hasTable('notifications');
-            $notifications = $hasTable ?
-                UserNotification::where('student_id', $student_id)->get() :
-                collect();
-
-            return response()->json([
-                'student_id' => $student_id,
-                'has_notifications_table' => $hasTable,
-                'total_notifications' => $notifications->count(),
-                'unread_count' => $hasTable ?
-                    UserNotification::where('student_id', $student_id)->where('is_read', false)->count() : 0,
-                'notifications' => $notifications->take(5),
-                'table_structure' => $hasTable ? \Schema::getColumnListing('notifications') : []
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'student_id' => $student_id
-            ], 500);
-        }
-    }
-
-    /**
-     * 🔴 ДОБАВЛЕНО: Метод для получения всех уведомлений
-     */
-    public function getNotifications()
-    {
-        $student_id = session('userId') ? encryptor('decrypt', session('userId')) : null;
-
-        if (!$student_id) {
-            return response()->json(['error' => 'Student not found'], 401);
-        }
-
-        $notifications = UserNotification::where('student_id', $student_id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
-        return response()->json($notifications);
-    }
-
-    /**
-     * 🔴 ДОБАВЛЕНО: Метод для пометки уведомления как прочитанного
-     */
-    public function markAsRead($notificationId)
-    {
-        $student_id = session('userId') ? encryptor('decrypt', session('userId')) : null;
-
-        if (!$student_id) {
-            return response()->json(['error' => 'Student not found'], 401);
-        }
-
-        $notification = UserNotification::where('id', $notificationId)
-            ->where('student_id', $student_id)
-            ->first();
-
-        if (!$notification) {
-            return response()->json(['error' => 'Notification not found'], 404);
-        }
-
-        $notification->update(['is_read' => true]);
-
-        return response()->json(['success' => true]);
-    }
-
-    /**
-     * 🔴 ДОБАВЛЕНО: Метод для пометки всех уведомлений как прочитанных
-     */
-    public function markAllAsRead()
-    {
-        $student_id = session('userId') ? encryptor('decrypt', session('userId')) : null;
-
-        if (!$student_id) {
-            return response()->json(['error' => 'Student not found'], 401);
-        }
-
-        Notification::where('student_id', $student_id)
-            ->where('is_read', false)
-            ->update(['is_read' => true]);
-
-        return response()->json(['success' => true]);
-    }
 }

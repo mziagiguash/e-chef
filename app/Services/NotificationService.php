@@ -12,53 +12,81 @@ class NotificationService
         return UserNotification::create($data);
     }
 
-    public static function contactMessageReplied($contactMessage)
-    {
-        \Log::info('=== CREATING USER NOTIFICATION ===');
-        \Log::info('Contact Message Details:', [
-            'id' => $contactMessage->id,
+public static function contactMessageReplied($contactMessage)
+{
+    \Log::info('=== NOTIFICATION SERVICE - CONTACT MESSAGE REPLY ===');
+    \Log::info('Contact Message Details:', [
+        'id' => $contactMessage->id,
+        'sender_type' => $contactMessage->sender_type,
+        'sender_id' => $contactMessage->sender_id,
+        'name' => $contactMessage->name,
+        'email' => $contactMessage->email
+    ]);
+
+    // 🔴 ИСПРАВЛЕНО: Если sender_type = null, пытаемся найти студента по email
+    if ($contactMessage->sender_type === 'student' && $contactMessage->sender_id) {
+        // Случай 1: Есть sender_type и sender_id
+        return self::createNotificationForStudent($contactMessage->sender_id, $contactMessage);
+    }
+    elseif (empty($contactMessage->sender_type) && !empty($contactMessage->email)) {
+        // Случай 2: sender_type = null, но есть email - ищем студента
+        return self::createNotificationByEmail($contactMessage);
+    }
+    else {
+        \Log::warning('❌ CANNOT CREATE NOTIFICATION - No student identification', [
             'sender_type' => $contactMessage->sender_type,
-            'sender_id' => $contactMessage->sender_id
+            'sender_id' => $contactMessage->sender_id,
+            'email' => $contactMessage->email
         ]);
-
-        if ($contactMessage->sender_type === 'student' && $contactMessage->sender_id) {
-            $notification = self::create([
-                'student_id' => $contactMessage->sender_id,
-                'type' => 'contact_message_replied',
-                'title' => 'Response to: ' . $contactMessage->subject,
-                'message' => 'An administrator has responded to your contact message. Click to view details.',
-                'contact_message_id' => $contactMessage->id,
-                'data' => [
-                    'contact_message_id' => $contactMessage->id,
-                    'subject' => $contactMessage->subject,
-                    'admin_response' => $contactMessage->admin_notes
-                ]
-            ]);
-
-            \Log::info('✅ USER NOTIFICATION CREATED SUCCESSFULLY', [
-                'notification_id' => $notification->id,
-                'student_id' => $notification->student_id
-            ]);
-
-            return $notification;
-        }
-
-        \Log::warning('❌ CANNOT CREATE NOTIFICATION - Not a student message');
         return null;
     }
+}
 
-    
-    public static function courseUpdate($studentId, $course, $message)
-    {
-        return self::create([
+private static function createNotificationForStudent($studentId, $contactMessage)
+{
+    try {
+        $notification = self::create([
             'student_id' => $studentId,
-            'type' => 'course_update',
-            'title' => 'Course Update: ' . $course->title,
-            'message' => $message,
+            'type' => 'contact_message_replied',
+            'title' => 'Response to: ' . $contactMessage->subject,
+            'message' => 'An administrator has responded to your contact message.',
+            'contact_message_id' => $contactMessage->id,
             'data' => [
-                'course_id' => $course->id,
-                'course_title' => $course->title
+                'contact_message_id' => $contactMessage->id,
+                'subject' => $contactMessage->subject,
+                'admin_response' => $contactMessage->admin_notes
             ]
         ]);
+
+        \Log::info('✅ NOTIFICATION CREATED FOR STUDENT ID', [
+            'notification_id' => $notification->id,
+            'student_id' => $studentId
+        ]);
+
+        return $notification;
+
+    } catch (\Exception $e) {
+        \Log::error('❌ ERROR CREATING NOTIFICATION FOR STUDENT: ' . $e->getMessage());
+        return null;
     }
+}
+
+private static function createNotificationByEmail($contactMessage)
+{
+    // Ищем студента по email
+    $student = \App\Models\Student::where('email', $contactMessage->email)->first();
+
+    if ($student) {
+        \Log::info('Found student by email', [
+            'email' => $contactMessage->email,
+            'student_id' => $student->id,
+            'student_name' => $student->name
+        ]);
+
+        return self::createNotificationForStudent($student->id, $contactMessage);
+    } else {
+        \Log::warning('No student found with email: ' . $contactMessage->email);
+        return null;
+    }
+}
 }

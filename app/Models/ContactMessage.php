@@ -28,38 +28,58 @@ class ContactMessage extends Model
         'resolved_at' => 'datetime'
     ];
 
-    // Отношение со студентом
+    // 🔴 ИСПРАВЛЕНО: Простые отношения без условий where
     public function student()
     {
-        return $this->belongsTo(Student::class, 'sender_id')->where('sender_type', 'student');
+        return $this->belongsTo(Student::class, 'sender_id');
     }
 
-    // Отношение с инструктором
     public function instructor()
     {
-        return $this->belongsTo(Instructor::class, 'sender_id')->where('sender_type', 'instructor');
+        return $this->belongsTo(Instructor::class, 'sender_id');
     }
 
-    // Универсальное отношение с отправителем
-    public function sender()
-    {
-        if ($this->sender_type === 'student') {
-            return $this->belongsTo(Student::class, 'sender_id');
-        } elseif ($this->sender_type === 'instructor') {
-            return $this->belongsTo(Instructor::class, 'sender_id');
-        }
-
-        // Возвращаем пустое отношение для гостей
-        return $this->belongsTo(Student::class, 'sender_id')->whereRaw('1 = 0');
-    }
-
-    // Отношение с админом
     public function assignedAdmin()
     {
         return $this->belongsTo(User::class, 'assigned_admin_id');
     }
 
-    // Scopes для фильтрации
+    // 🔴 ДОБАВЛЕНО: Безопасные методы доступа
+    public function getSafeStudentAttribute()
+    {
+        return $this->sender_type === 'student' ? $this->student : null;
+    }
+
+    public function getSafeInstructorAttribute()
+    {
+        return $this->sender_type === 'instructor' ? $this->instructor : null;
+    }
+
+    public function getSenderDisplayNameAttribute()
+    {
+        if ($this->sender_type === 'student' && $this->safe_student) {
+            return $this->safe_student->name . ' (Student)';
+        } elseif ($this->sender_type === 'instructor' && $this->safe_instructor) {
+            return $this->safe_instructor->name . ' (Instructor)';
+        } elseif ($this->sender_type) {
+            return ucfirst($this->sender_type) . ($this->sender_id ? ' (ID: ' . $this->sender_id . ')' : '');
+        } else {
+            return $this->name . ' (Guest)';
+        }
+    }
+
+    public function getSenderDisplayEmailAttribute()
+    {
+        if ($this->sender_type === 'student' && $this->safe_student) {
+            return $this->safe_student->email;
+        } elseif ($this->sender_type === 'instructor' && $this->safe_instructor) {
+            return $this->safe_instructor->email;
+        } else {
+            return $this->email;
+        }
+    }
+
+    // Scopes
     public function scopeNew($query)
     {
         return $query->where('status', 'new');
@@ -68,68 +88,5 @@ class ContactMessage extends Model
     public function scopeResolved($query)
     {
         return $query->where('status', 'resolved');
-    }
-
-    public function scopeFromStudent($query)
-    {
-        return $query->where('sender_type', 'student');
-    }
-
-    public function scopeFromInstructor($query)
-    {
-        return $query->where('sender_type', 'instructor');
-    }
-
-    // Helpers
-    public function markAsResolved()
-    {
-        $this->update([
-            'status' => 'resolved',
-            'resolved_at' => now()
-        ]);
-    }
-// Добавляем методы-хелперы
-public function getResolvedAtFormattedAttribute()
-{
-    return $this->resolved_at ? $this->resolved_at->format('M d, Y H:i') : 'Not resolved';
-}
-
-public function getCreatedAtFormattedAttribute()
-{
-    return $this->created_at->format('M d, Y H:i');
-}
-
-public function getResolvedAtDiffForHumansAttribute()
-{
-    return $this->resolved_at ? $this->resolved_at->diffForHumans() : null;
-}
-
-    public function isNew()
-    {
-        return $this->status === 'new';
-    }
-
-    // Получаем имя отправителя
-    public function getSenderDisplayNameAttribute()
-    {
-        if ($this->sender_type === 'student' && $this->relationLoaded('student') && $this->student) {
-            return $this->student->name . ' (Student)';
-        } elseif ($this->sender_type === 'instructor' && $this->relationLoaded('instructor') && $this->instructor) {
-            return $this->instructor->name . ' (Instructor)';
-        }
-
-        return $this->name . ' (Guest)';
-    }
-
-    // Получаем email отправителя
-    public function getSenderDisplayEmailAttribute()
-    {
-        if ($this->sender_type === 'student' && $this->relationLoaded('student') && $this->student) {
-            return $this->student->email;
-        } elseif ($this->sender_type === 'instructor' && $this->relationLoaded('instructor') && $this->instructor) {
-            return $this->instructor->email;
-        }
-
-        return $this->email;
     }
 }

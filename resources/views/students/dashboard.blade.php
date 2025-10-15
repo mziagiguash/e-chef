@@ -163,27 +163,13 @@
                     </div>
                 </div>
 {{-- Notifications Tab --}}
+{{-- В секции уведомлений --}}
 <div class="tab-pane fade" id="nav-notifications" role="tabpanel" aria-labelledby="nav-notifications-tab">
-        {{-- ОТЛАДОЧНАЯ ИНФОРМАЦИЯ --}}
-    <div class="alert alert-info mb-4">
-        <h6>Notifications Debug Info:</h6>
-        <p><strong>Student ID:</strong> {{ $student_info->id }}</p>
-        <p><strong>Unread Count:</strong> {{ $unread_notifications_count }}</p>
-        <p><strong>Total Notifications:</strong> {{ $notifications->count() }}</p>
-        <p><strong>Last Notification:</strong>
-            @if($notifications->count() > 0)
-                {{ $notifications->first()->created_at->diffForHumans() }}
-            @else
-                No notifications
-            @endif
-        </p>
-    </div>
-
     <div class="notifications-container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="font-title--card">My Notifications</h5>
             @if($unread_notifications_count > 0)
-                <form action="{{ localeRoute('student.notifications.mark-all-read') }}" method="POST" class="d-inline">
+                <form action="{{ route('student.notifications.mark-all-read') }}" method="POST" class="d-inline">
                     @csrf
                     <button type="submit" class="btn btn-sm btn-outline-primary">
                         <i class="las la-check-double me-1"></i>Mark All as Read
@@ -194,7 +180,8 @@
 
         <div class="notifications-list">
             @forelse($notifications as $notification)
-                <div class="notification-item card mb-3 {{ $notification->is_read ? 'bg-light' : 'border-primary' }}">
+                <div class="notification-item card mb-3 {{ $notification->is_read ? 'bg-light' : 'border-primary' }}"
+                     data-notification-id="{{ $notification->id }}">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="flex-grow-1">
@@ -209,33 +196,45 @@
                                 <p class="mb-2 {{ $notification->is_read ? 'text-muted' : '' }}">
                                     {{ $notification->message }}
                                 </p>
-                                <small class="text-muted">
-                                    <i class="las la-clock me-1"></i>
-                                    {{ $notification->created_at->diffForHumans() }}
-                                </small>
 
                                 {{-- Ответ на контактное сообщение --}}
-                                @if($notification->type === 'contact_message_replied' && $notification->contact_message)
+                                @if($notification->type === 'contact_message_replied' && $notification->contact_message_id)
                                     <div class="mt-3 p-3 bg-white border rounded">
                                         <strong class="text-primary">Admin Response:</strong>
-                                        <p class="mb-1 mt-1">{{ $notification->contact_message->admin_notes }}</p>
+                                        <p class="mb-1 mt-1">
+                                            @php
+                                                $contactMessage = \App\Models\ContactMessage::find($notification->contact_message_id);
+                                            @endphp
+                                            {{ $contactMessage->admin_notes ?? 'Response details not available' }}
+                                        </p>
                                         <small class="text-muted">
                                             Status:
-                                            <span class="badge bg-{{ $notification->contact_message->status === 'resolved' ? 'success' : 'warning' }}">
-                                                {{ ucfirst($notification->contact_message->status) }}
+                                            <span class="badge bg-{{ $contactMessage->status === 'resolved' ? 'success' : 'warning' }}">
+                                                {{ ucfirst($contactMessage->status) }}
                                             </span>
                                         </small>
                                     </div>
                                 @endif
+
+                                <small class="text-muted">
+                                    <i class="las la-clock me-1"></i>
+                                    {{ $notification->created_at->diffForHumans() }}
+                                </small>
                             </div>
                             <div class="notification-actions ms-3">
                                 @if(!$notification->is_read)
-                                    <form action="{{ localeRoute('student.notifications.mark-read', $notification->id) }}" method="POST" class="d-inline">
+                                    <form action="{{ route('student.notifications.mark-read', $notification->id) }}"
+                                          method="POST" class="d-inline mark-as-read-form">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Mark as Read">
+                                        <button type="submit" class="btn btn-sm btn-outline-success"
+                                                title="Mark as Read" data-notification-id="{{ $notification->id }}">
                                             <i class="las la-check"></i>
                                         </button>
                                     </form>
+                                @else
+                                    <span class="badge bg-success">
+                                        <i class="las la-check"></i> Read
+                                    </span>
                                 @endif
                             </div>
                         </div>
@@ -250,14 +249,14 @@
             @endforelse
         </div>
 
-        {{-- Убираем пагинацию, так как показываем только последние 5 уведомлений --}}
-        @if($notifications->count() >= 5)
-            <div class="text-center mt-4">
-                <a href="{{ localeRoute('student.notifications.all') }}" class="btn btn-outline-primary">
-                    View All Notifications
-                </a>
-            </div>
-        @endif
+@if($notifications->count() > 10)
+    <div class="mt-4 text-center">
+        <p class="text-muted">Showing latest 10 notifications</p>
+        <a href="{{ route('student.notifications') }}" class="btn btn-sm btn-outline-primary">
+            View All Notifications
+        </a>
+    </div>
+@endif
     </div>
 </div>
     {{-- All Courses --}}
@@ -728,4 +727,78 @@
     font-style: italic;
 }
 </style>
+@endpush
+{{-- В конец dashboard.blade.php перед @endpush --}}
+@push('scripts')
+<script>
+$(document).ready(function() {
+    // Обработка отметки как прочитанного
+    $('.mark-as-read-form').on('submit', function(e) {
+        e.preventDefault();
+
+        const form = $(this);
+        const notificationId = form.data('notification-id');
+        const notificationItem = form.closest('.notification-item');
+
+        $.ajax({
+            url: form.attr('action'),
+            method: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    // Обновляем внешний вид уведомления
+                    notificationItem.removeClass('border-primary').addClass('bg-light');
+                    notificationItem.find('.badge.bg-primary').remove();
+                    notificationItem.find('h6').addClass('text-muted').removeClass('text-dark');
+                    notificationItem.find('p').addClass('text-muted');
+                    notificationItem.find('.mark-as-read-form').html('<span class="badge bg-success"><i class="las la-check"></i> Read</span>');
+
+                    // Обновляем счетчик непрочитанных
+                    updateUnreadCount();
+                }
+            },
+            error: function(xhr) {
+                console.error('Error marking notification as read:', xhr.responseText);
+            }
+        });
+    });
+
+    // Обработка "Mark All as Read"
+    $('form[action*="mark-all-read"]').on('submit', function(e) {
+        e.preventDefault();
+
+        const form = $(this);
+
+        $.ajax({
+            url: form.attr('action'),
+            method: 'POST',
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    // Обновляем все уведомления
+                    $('.notification-item').each(function() {
+                        $(this).removeClass('border-primary').addClass('bg-light');
+                        $(this).find('.badge.bg-primary').remove();
+                        $(this).find('h6').addClass('text-muted').removeClass('text-dark');
+                        $(this).find('p').addClass('text-muted');
+                        $(this).find('.mark-as-read-form').html('<span class="badge bg-success"><i class="las la-check"></i> Read</span>');
+                    });
+
+                    // Обновляем счетчик
+                    updateUnreadCount();
+                    form.remove(); // Убираем кнопку "Mark All as Read"
+                }
+            }
+        });
+    });
+
+    function updateUnreadCount() {
+        // Можно добавить AJAX запрос для обновления счетчика
+        // или просто перезагрузить страницу
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+});
+</script>
 @endpush
