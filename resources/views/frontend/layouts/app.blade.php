@@ -165,12 +165,15 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('searchCourse', ['locale' => $currentLocale]) }}">{{ __('menu.courses') }}</a>
                         </li>
+                        <!-- Navbar contact
+                        
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('about', ['locale' => $currentLocale]) }}">{{ __('menu.about_us') }}</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('contact', ['locale' => $currentLocale]) }}">{{ __('menu.contacts') }}</a>
                         </li>
+                        -->
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('event.search', ['locale' => app()->getLocale()]) }}">
                                {{ __('menu.events') }}

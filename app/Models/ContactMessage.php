@@ -14,6 +14,7 @@ class ContactMessage extends Model
     protected $fillable = [
         'sender_id',
         'sender_type',
+        'parent_id',
         'name',
         'email',
         'subject',
@@ -42,6 +43,17 @@ class ContactMessage extends Model
     public function assignedAdmin()
     {
         return $this->belongsTo(User::class, 'assigned_admin_id');
+    }
+
+    // 🔴 ДОБАВЛЕНО: Отношения для переписки
+    public function parent()
+    {
+        return $this->belongsTo(ContactMessage::class, 'parent_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(ContactMessage::class, 'parent_id')->orderBy('created_at', 'asc');
     }
 
     // 🔴 ДОБАВЛЕНО: Безопасные методы доступа
@@ -79,6 +91,34 @@ class ContactMessage extends Model
         }
     }
 
+    // 🔴 ДОБАВЛЕНО: Метод для получения всей истории переписки
+    public function getConversationHistoryAttribute()
+    {
+        $history = collect();
+
+        // Находим корневое сообщение
+        $rootMessage = $this;
+        while ($rootMessage->parent) {
+            $rootMessage = $rootMessage->parent;
+        }
+
+        // Добавляем корневое сообщение
+        $history->push($rootMessage);
+
+        // Добавляем все ответы
+        $replies = ContactMessage::where('parent_id', $rootMessage->id)
+            ->orWhere(function($query) use ($rootMessage) {
+                $query->where('parent_id', $this->id)
+                      ->where('id', '!=', $rootMessage->id);
+            })
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $history = $history->merge($replies);
+
+        return $history->unique('id')->sortBy('created_at');
+    }
+
     // Scopes
     public function scopeNew($query)
     {
@@ -88,5 +128,15 @@ class ContactMessage extends Model
     public function scopeResolved($query)
     {
         return $query->where('status', 'resolved');
+    }
+
+    public function scopeMainMessages($query)
+    {
+        return $query->whereNull('parent_id');
+    }
+
+    public function scopeReplies($query)
+    {
+        return $query->whereNotNull('parent_id');
     }
 }

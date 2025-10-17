@@ -15,8 +15,9 @@ class ContactMessageController extends Controller
 
 public function index(Request $request)
 {
-    // 🔴 ИСПРАВЛЕНО: Без отношений в основном запросе
-    $query = ContactMessage::orderBy('created_at', 'desc');
+    // Только корневые сообщения
+    $query = ContactMessage::whereNull('parent_id')
+        ->orderBy('created_at', 'desc');
 
     if ($request->has('status') && in_array($request->status, ['new', 'in_progress', 'resolved'])) {
         $query->where('status', $request->status);
@@ -24,42 +25,88 @@ public function index(Request $request)
 
     $contactMessages = $query->paginate(10);
 
-    // 🔴 ДОБАВЛЕНО: Загружаем отношения отдельно для каждого сообщения
-    $contactMessages->getCollection()->transform(function ($message) {
-        if ($message->sender_type === 'student') {
-            $message->load('student');
-        } elseif ($message->sender_type === 'instructor') {
-            $message->load('instructor');
-        }
-        return $message;
+    // 🔴 ИСПРАВЛЕНО: Не добавляем вычисляемые атрибуты в модель
+    // Вместо этого создаем массив с данными для отображения
+    $messagesForDisplay = $contactMessages->getCollection()->map(function ($message) {
+        $message->load(['student', 'instructor']);
+
+        return [
+            'message' => $message,
+            'sender_display_name' => $this->getSafeSenderName($message),
+            'sender_display_email' => $this->getSafeSenderEmail($message)
+        ];
     });
 
     $stats = [
-        'new' => ContactMessage::where('status', 'new')->count(),
-        'in_progress' => ContactMessage::where('status', 'in_progress')->count(),
-        'resolved' => ContactMessage::where('status', 'resolved')->count(),
-        'total' => ContactMessage::count(),
+        'new' => ContactMessage::whereNull('parent_id')->where('status', 'new')->count(),
+        'in_progress' => ContactMessage::whereNull('parent_id')->where('status', 'in_progress')->count(),
+        'resolved' => ContactMessage::whereNull('parent_id')->where('status', 'resolved')->count(),
+        'total' => ContactMessage::whereNull('parent_id')->count(),
     ];
 
-    return view('backend.communication.contact-message.index', compact('contactMessages', 'stats'));
+    return view('backend.communication.contact-message.index', compact('contactMessages', 'messagesForDisplay', 'stats'));
 }
+
 
 public function show($id)
 {
     $contactMessage = ContactMessage::findOrFail($id);
 
-    // 🔴 ИСПРАВЛЕНО: Загружаем отношения безопасно
+    // Загружаем отношения безопасно
     if ($contactMessage->sender_type === 'student') {
         $contactMessage->load('student');
     } elseif ($contactMessage->sender_type === 'instructor') {
         $contactMessage->load('instructor');
     }
 
+    // 🔴 УДАЛЕНО: Не сохраняем вычисляемые атрибуты в модель
+    // Вместо этого передаем их отдельно в view
+
     if ($contactMessage->status == 'new') {
         $contactMessage->update(['status' => 'in_progress']);
     }
 
-    return view('backend.communication.contact-message.show', compact('contactMessage'));
+    // 🔴 ИСПРАВЛЕНО: Передаем вычисляемые значения отдельно
+    $safeSenderName = $this->getSafeSenderName($contactMessage);
+    $safeSenderEmail = $this->getSafeSenderEmail($contactMessage);
+
+    return view('backend.communication.contact-message.show', compact(
+        'contactMessage',
+        'safeSenderName',
+        'safeSenderEmail'
+    ));
+}
+// 🔴 ДОБАВЛЕНО: Вспомогательные методы для безопасного доступа
+private function getSafeSenderName($contactMessage)
+{
+    if ($contactMessage->sender_type === 'student') {
+        if ($contactMessage->student) {
+            return $contactMessage->student->name . ' (Student)';
+        } else {
+            return $contactMessage->name . ' (Student - Deleted)';
+        }
+    } elseif ($contactMessage->sender_type === 'instructor') {
+        if ($contactMessage->instructor) {
+            return $contactMessage->instructor->name . ' (Instructor)';
+        } else {
+            return $contactMessage->name . ' (Instructor - Deleted)';
+        }
+    } elseif ($contactMessage->sender_type) {
+        return $contactMessage->name . ' (' . ucfirst($contactMessage->sender_type) . ')';
+    } else {
+        return $contactMessage->name . ' (Guest)';
+    }
+}
+
+private function getSafeSenderEmail($contactMessage)
+{
+    if ($contactMessage->sender_type === 'student' && $contactMessage->student) {
+        return $contactMessage->student->email;
+    } elseif ($contactMessage->sender_type === 'instructor' && $contactMessage->instructor) {
+        return $contactMessage->instructor->email;
+    } else {
+        return $contactMessage->email;
+    }
 }
     /**
      * Update the status of the message.
@@ -93,18 +140,140 @@ public function updateStatus(Request $request, $id)
     return redirect()->back()->with('success', 'Message status updated successfully.');
 }
 
+// 🔴 ИСПРАВЛЕННЫЙ МЕТОД: Обновляет существующий диалог
+public function continueConversation(Request $request)
+{
+    $request->validate([
+        'parent_id' => 'required|exists:contact_messages,id',
+        'message' => 'required|string|min:10|max:5000',
+        'subject' => 'required|string|max:255'
+    ]);
+
+    // 🔴 ИСПРАВЛЕНО: Используем проверку студента
+    $studentAuth = $this->checkStudentAuth();
+    if (!$studentAuth instanceof Student) {
+        return $studentAuth; // Возвращаем редирект или JSON ошибку
+    }
+
+    $student_id = $studentAuth->id;
+
+    try {
+        $parentMessage = ContactMessage::findOrFail($request->parent_id);
+
+        // 🔴 ИСПРАВЛЕНО: Находим корневое сообщение диалога
+        $rootMessage = $parentMessage;
+        while ($rootMessage->parent_id) {
+            $rootMessage = ContactMessage::find($rootMessage->parent_id);
+            if (!$rootMessage) break;
+        }
+
+        // 🔴 ИСПРАВЛЕНО: Проверяем, что студент имеет доступ к этому диалогу
+        $isOwner = $rootMessage->sender_id === $student_id && $rootMessage->sender_type === 'student';
+        if (!$isOwner) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not authorized to continue this conversation'
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'You are not authorized to continue this conversation');
+        }
+
+        // Создаем новое сообщение как продолжение диалога
+        $newMessage = ContactMessage::create([
+            'sender_id' => $student_id,
+            'sender_type' => 'student',
+            'parent_id' => $rootMessage->id, // 🔴 ВАЖНО: Привязываем к корневому сообщению
+            'name' => $studentAuth->name,
+            'email' => $studentAuth->email,
+            'subject' => $request->subject,
+            'message' => $request->message,
+            'status' => 'in_progress'
+        ]);
+
+        // 🔴 ИСПРАВЛЕНО: Обновляем статус КОРНЕВОГО сообщения
+        $rootMessage->update([
+            'status' => 'in_progress',
+            'resolved_at' => null
+        ]);
+
+        \Log::info('✅ CONVERSATION CONTINUED BY STUDENT', [
+            'root_message_id' => $rootMessage->id,
+            'new_message_id' => $newMessage->id,
+            'student_id' => $student_id,
+            'student_name' => $studentAuth->name
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Your reply has been sent successfully! The conversation has been reopened.'
+            ]);
+        }
+
+        return redirect()->route('student.my-messages')->with('success', 'Your reply has been sent successfully!');
+
+    } catch (\Exception $e) {
+        \Log::error('Error continuing conversation: ' . $e->getMessage());
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error sending message: ' . $e->getMessage()
+            ], 500);
+        }
+
+        return redirect()->back()->with('error', 'Error sending message: ' . $e->getMessage());
+    }
+}
+
+public function myMessages()
+{
+    // 🔴 ИСПРАВЛЕНО: Используем проверку студента
+    $studentAuth = $this->checkStudentAuth();
+    if (!$studentAuth instanceof Student) {
+        return $studentAuth; // Возвращаем редирект или JSON ошибку
+    }
+
+    $student_id = $studentAuth->id;
+
+    try {
+        // 🔴 ИСПРАВЛЕННЫЙ ЗАПРОС: Находим только корневые сообщения студента
+        $conversations = ContactMessage::where('sender_id', $student_id)
+            ->where('sender_type', 'student')
+            ->whereNull('parent_id') // Только корневые сообщения
+            ->with(['replies' => function($query) {
+                $query->orderBy('created_at', 'asc');
+            }])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        \Log::info('✅ MY MESSAGES LOADED', [
+            'student_id' => $student_id,
+            'conversations_count' => $conversations->count()
+        ]);
+
+        return view('students.my-messages', ['messages' => $conversations]);
+
+    } catch (\Exception $e) {
+        \Log::error('❌ ERROR LOADING MESSAGES: ' . $e->getMessage());
+
+        return view('students.my-messages', ['messages' => collect()])
+            ->with('error', 'Error loading messages: ' . $e->getMessage());
+    }
+}
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
-    {
-        $contactMessage = ContactMessage::findOrFail($id);
-        $contactMessage->delete();
+public function destroy($id)
+{
+    $contactMessage = ContactMessage::findOrFail($id);
+    $contactMessage->delete();
 
-        return redirect()->route('admin.contact-messages.index')
-            ->with('success', 'Message deleted successfully.');
-    }
-
+    // 🔴 ИСПРАВЛЕНО: Используем правильное имя маршрута
+    return redirect()->route('contact-messages.index')
+        ->with('success', 'Message deleted successfully.');
+}
 public function sendResponse(Request $request, $id)
 {
     \Log::info('=== SEND RESPONSE FORM SUBMITTED ===', [

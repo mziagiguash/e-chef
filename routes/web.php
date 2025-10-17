@@ -110,16 +110,11 @@ Route::middleware(['checkrole'])->prefix('admin')->group(function () {
     Route::resource('message', message::class);
     Route::resource('coupon', coupon::class);
  // Contact Messages Routes
-    Route::get('/contact-messages', [ContactMessageController::class, 'index'])
-        ->name('contact-messages.index');
-    Route::get('/contact-messages/{id}', [ContactMessageController::class, 'show'])
-        ->name('contact-messages.show');
-    Route::post('/contact-messages/{id}/update-status', [ContactMessageController::class, 'updateStatus'])
-        ->name('contact-messages.update-status');
-    Route::delete('/contact-messages/{id}', [ContactMessageController::class, 'destroy'])
-        ->name('contact-messages.destroy');
-        Route::post('/contact-messages/{id}/send-response', [ContactMessageController::class, 'sendResponse'])
-        ->name('contact-messages.send-response');
+Route::get('/contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
+    Route::get('/contact-messages/{id}', [ContactMessageController::class, 'show'])->name('contact-messages.show');
+    Route::post('/contact-messages/{id}/send-response', [ContactMessageController::class, 'sendResponse'])->name('contact-messages.send-response');
+    Route::post('/contact-messages/{id}/update-status', [ContactMessageController::class, 'updateStatus'])->name('contact-messages.update-status');
+    Route::delete('/contact-messages/{id}', [ContactMessageController::class, 'destroy'])->name('contact-messages.destroy');
    // Маршруты для Enrollment
     Route::get('/enrollment/statistics', [enrollment::class, 'statistics'])
         ->name('enrollment.statistics');
@@ -199,13 +194,10 @@ Route::prefix('{locale}')
             Route::post('/profile/save', [stu_profile::class, 'save_profile'])->name('student_save_profile');
             Route::post('/profile/savePass', [stu_profile::class, 'change_password'])->name('change_password');
             Route::post('/change-image', [stu_profile::class, 'changeImage'])->name('change_image');
-    // 🔴 ИСПРАВЛЕНО: Используем StudentNotificationController
-    Route::get('/debug-notifications', [StudentNotificationController::class, 'debugNotifications'])->name('student.debug-notifications');
-    Route::get('/notifications', [StudentNotificationController::class, 'getNotifications'])->name('student.notifications');
-    Route::post('/notifications/{notificationId}/mark-read', [StudentNotificationController::class, 'markAsRead'])->name('student.notifications.mark-read');
-    Route::post('/notifications/mark-all-read', [StudentNotificationController::class, 'markAllAsRead'])->name('student.notifications.mark-all-read');
-    Route::get('/notifications/unread-count', [StudentNotificationController::class, 'getUnreadCount'])->name('student.notifications.unread-count');
-
+ // 🔴 ДОБАВЛЕНО: Маршруты для управления сообщениями студента (без locale)
+    Route::get('/my-messages', [App\Http\Controllers\Frontend\ContactController::class, 'myMessages'])->name('student.my-messages');
+    Route::delete('/my-messages/{id}', [App\Http\Controllers\Frontend\ContactController::class, 'deleteMessage'])->name('student.delete-message');
+    
             // SSL Payment Routes - ВНУТРИ защищенной группы студентов
             Route::post('/payment/ssl/submit', [sslcz::class, 'store'])->name('payment.ssl.submit');
         });
@@ -270,6 +262,7 @@ Route::prefix('{locale}')
         Route::get('/contact', fn() => view('frontend.contact'))->name('contact');
         Route::post('/contact', [App\Http\Controllers\Frontend\ContactController::class, 'submit'])->name('contact.submit');
      });
+   Route::post('/contact/continue', [App\Http\Controllers\Frontend\ContactController::class, 'continueConversation'])->name('contact.continue');
 
 /*
 |--------------------------------------------------------------------------
@@ -277,15 +270,20 @@ Route::prefix('{locale}')
 |--------------------------------------------------------------------------
 */
 // routes/web.php
-
 // Маршруты для уведомлений студента
 Route::prefix('student')->group(function () {
-    Route::get('/debug-notifications', [studashboard::class, 'debugNotifications'])->name('student.debug-notifications');
-    Route::get('/notifications', [studashboard::class, 'getNotifications'])->name('student.notifications');
-    Route::post('/notifications/{notificationId}/mark-read', [studashboard::class, 'markAsRead'])->name('student.notifications.mark-read');
-    Route::post('/notifications/mark-all-read', [studashboard::class, 'markAllAsRead'])->name('student.notifications.mark-all-read');
-});
+    Route::get('/notifications', [StudentNotificationController::class, 'getNotifications'])->name('student.notifications');
 
+    // 🔴 ИСПРАВЛЕНО: Правильные имена маршрутов
+    Route::post('/notification/{id}/read', [StudentNotificationController::class, 'markAsRead'])
+        ->name('student.notifications.read'); // БЫЛО: student.notifications.read
+
+    Route::post('/notifications/read-all', [StudentNotificationController::class, 'markAllAsRead'])
+        ->name('student.notifications.read-all'); // БЫЛО: student.notifications.read-all
+
+    Route::get('/notifications/unread-count', [StudentNotificationController::class, 'getUnreadCount'])
+        ->name('student.notifications.unread-count');
+});
 
 Route::get('/check-courses', function () {
     $courses = \App\Models\Course::withCount('lessons')->get();

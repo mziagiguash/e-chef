@@ -140,7 +140,7 @@
                                     <p class="card-text text-muted small">
                                         {{ Str::limit($course->description, 60) }}
                                     </p>
-                                    <<a href="{{ route('course.show', ['locale' => app()->getLocale(), 'id' => $course->id]) }}"
+                                    <a href="{{ route('course.show', ['locale' => app()->getLocale(), 'id' => $course->id]) }}"
    class="btn btn-primary btn-sm">
     {{ __('View Course') }}
 </a>

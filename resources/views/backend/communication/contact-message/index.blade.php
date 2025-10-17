@@ -59,36 +59,33 @@
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
-{{-- resources/views/backend/communication/contact-message/index.blade.php --}}
-
 <tbody>
-    @forelse ($contactMessages as $message)
+    @forelse ($messagesForDisplay as $item)
     <tr>
-        <td>{{ $message->id }}</td>
+        <td>{{ $item['message']->id }}</td>
         <td>
-            <strong>{{ $message->name }}</strong>
+            <strong>{{ $item['message']->name }}</strong>
             <br>
             <small class="text-muted">
-                {{-- 🔴 ИСПРАВЛЕНО: Используем безопасные методы --}}
-                {{ $message->sender_display_name }}
+                {{ $item['sender_display_name'] }}
             </small>
         </td>
         <td>
-            {{ $message->sender_display_email }}
+            {{ $item['sender_display_email'] }}
         </td>
-        <td>{{ Str::limit($message->subject, 50) }}</td>
+        <td>{{ Str::limit($item['message']->subject, 50) }}</td>
         <td>
-            <span class="badge status-badge badge-{{ $message->status }}">
-                {{ ucfirst(str_replace('_', ' ', $message->status)) }}
+            <span class="badge status-badge badge-{{ $item['message']->status }}">
+                {{ ucfirst(str_replace('_', ' ', $item['message']->status)) }}
             </span>
         </td>
-        <td>{{ $message->created_at->format('M d, Y H:i') }}</td>
+        <td>{{ $item['message']->created_at->format('M d, Y H:i') }}</td>
         <td>
-            <a href="{{ route('contact-messages.show', $message->id) }}"
+            <a href="{{ route('contact-messages.show', $item['message']->id) }}"
                class="btn btn-sm btn-primary" title="View">
                 <i class="la la-eye"></i>
             </a>
-            <form action="{{ route('contact-messages.destroy', $message->id) }}"
+            <form action="{{ route('contact-messages.destroy', $item['message']->id) }}"
                   method="POST" class="d-inline">
                 @csrf
                 @method('DELETE')

@@ -43,48 +43,6 @@
 </div>
 @endif
 
-<!-- Contact Hero Area Starts Here -->
-<section class="section section--bg-white hero hero--one">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <div class="hero__img-content">
-                    <div class="hero__img-content--main">
-                        <img src="{{asset('frontend/dist/images/contact/image.jpg')}}" alt="image" />
-                    </div>
-                    <img src="{{asset('frontend/dist/images/shape/dots/dots-img-02.png')}}" alt="shape"
-                        class="hero__img-content--shape-01" />
-                    <img src="{{asset('frontend/dist/images/shape/rec05.png')}}" alt="shape"
-                        class="hero__img-content--shape-02" />
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="hero__content-info">
-                    <h2 class="font-title--md mb-0">Our Branches</h2>
-                    <p class="font-para--lg">
-                        Mauris eu fringilla lorem. Phasellus a sem nisl. Sed tempor arcu ac condimentum molestie. Morbi
-                        ullamcorper eleifend scelerisque. Aliquam venenatis eros elementum felis tincidunt scelerisque.
-                    </p>
-                    <ul class="hero__content-location">
-                        <li>
-                            <span><i class="fas fa-map-marker-alt fa-2x"></i></span>
-                            <p>Chikago, USA</p>
-                        </li>
-                        <li>
-                            <span><i class="fas fa-map-marker-alt fa-2x"></i></span>
-                            <p>Mumbai, India</p>
-                        </li>
-                        <li>
-                            <span><i class="fas fa-map-marker-alt fa-2x"></i></span>
-                            <p>Rome, italy</p>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- Get in Touch Area Starts Here -->
 <section class="section getin-touch overflow-hidden"
     style="background-image: url({{asset('frontend/dist/images/contact/bg.png')}});">

@@ -106,8 +106,8 @@
                     </div>
                 </div>
             </div>
-            <!-- Nav  -->
-            <nav class="students-info-intro__nav">
+        <!-- Nav  -->
+<nav class="students-info-intro__nav">
     <div class="nav" id="nav-tab" role="tablist">
         <button class="nav-link" id="nav-coursesall-tab" data-bs-toggle="tab"
             data-bs-target="#nav-coursesall" type="button" role="tab" aria-controls="nav-coursesall"
@@ -125,15 +125,41 @@
             data-bs-target="#nav-purchase" type="button" role="tab" aria-controls="nav-purchase"
             aria-selected="false">{{ __('stud_dashboard.purchase_history') }}</button>
 
-{{-- Новая вкладка для уведомлений --}}
-        <button class="nav-link" id="nav-notifications-tab" data-bs-toggle="tab"
+        {{-- Новая вкладка для уведомлений --}}
+        <button class="nav-link position-relative" id="nav-notifications-tab" data-bs-toggle="tab"
             data-bs-target="#nav-notifications" type="button" role="tab" aria-controls="nav-notifications"
             aria-selected="false">
-            Notifications
+            <i class="las la-bell me-1"></i>Notifications
             @if($unread_notifications_count > 0)
-                <span class="badge bg-danger ms-1">{{ $unread_notifications_count }}</span>
+                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                    {{ $unread_notifications_count }}
+                </span>
+            @else
+                <span class="badge bg-secondary position-absolute top-0 start-100 translate-middle" style="display: none;">
+                    0
+                </span>
             @endif
         </button>
+
+        {{-- 🔴 ДОБАВЛЕНО: Кнопка для сообщений --}}
+<a href="{{ localeRoute('student.my-messages') }}" class="nav-link position-relative">
+    <i class="las la-envelope me-1"></i>My Messages
+    @php
+        $unreadMessagesCount = \App\Models\ContactMessage::where('sender_id', auth()->id())
+            ->where('status', '!=', 'resolved')
+            ->count();
+    @endphp
+    @if($unreadMessagesCount > 0)
+        <span class="badge bg-warning position-absolute top-0 start-100 translate-middle">
+            {{ $unreadMessagesCount }}
+        </span>
+    @else
+        <span class="badge bg-secondary position-absolute top-0 start-100 translate-middle" style="display: none;">
+            0
+        </span>
+    @endif
+</a>
+
         <button class="nav-link">
             <a href="{{ localeRoute('student_profile') }}" class="text-secondary">{{ __('stud_dashboard.profile') }}</a>
         </button>
@@ -163,13 +189,12 @@
                     </div>
                 </div>
 {{-- Notifications Tab --}}
-{{-- В секции уведомлений --}}
 <div class="tab-pane fade" id="nav-notifications" role="tabpanel" aria-labelledby="nav-notifications-tab">
     <div class="notifications-container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="font-title--card">My Notifications</h5>
             @if($unread_notifications_count > 0)
-                <form action="{{ route('student.notifications.mark-all-read') }}" method="POST" class="d-inline">
+                <form method="POST" action="{{ route('student.notifications.read-all') }}" class="d-inline">
                     @csrf
                     <button type="submit" class="btn btn-sm btn-outline-primary">
                         <i class="las la-check-double me-1"></i>Mark All as Read
@@ -180,51 +205,67 @@
 
         <div class="notifications-list">
             @forelse($notifications as $notification)
-                <div class="notification-item card mb-3 {{ $notification->is_read ? 'bg-light' : 'border-primary' }}"
+                <div class="notification-item card mb-3 {{ $notification->is_read ? 'bg-light' : '' }}"
                      data-notification-id="{{ $notification->id }}">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="flex-grow-1">
                                 <div class="d-flex align-items-center mb-2">
                                     @if(!$notification->is_read)
-                                        <span class="badge bg-primary me-2">New</span>
+                                        <span class="notification-badge badge-unread me-2">New</span>
+                                    @else
+                                        <span class="notification-badge badge-read me-2">Read</span>
                                     @endif
-                                    <h6 class="mb-0 {{ $notification->is_read ? 'text-muted' : 'text-dark' }}">
+                                    <h6 class="notification-title mb-0 {{ $notification->is_read ? 'text-muted' : 'text-dark' }}">
                                         {{ $notification->title }}
                                     </h6>
                                 </div>
-                                <p class="mb-2 {{ $notification->is_read ? 'text-muted' : '' }}">
+                                <p class="notification-message mb-2 {{ $notification->is_read ? 'text-muted' : '' }}">
                                     {{ $notification->message }}
                                 </p>
 
-                                {{-- Ответ на контактное сообщение --}}
+                                {{-- Упрощенный показ контактных уведомлений --}}
                                 @if($notification->type === 'contact_message_replied' && $notification->contact_message_id)
-                                    <div class="mt-3 p-3 bg-white border rounded">
-                                        <strong class="text-primary">Admin Response:</strong>
-                                        <p class="mb-1 mt-1">
-                                            @php
-                                                $contactMessage = \App\Models\ContactMessage::find($notification->contact_message_id);
-                                            @endphp
-                                            {{ $contactMessage->admin_notes ?? 'Response details not available' }}
-                                        </p>
-                                        <small class="text-muted">
-                                            Status:
-                                            <span class="badge bg-{{ $contactMessage->status === 'resolved' ? 'success' : 'warning' }}">
-                                                {{ ucfirst($contactMessage->status) }}
-                                            </span>
-                                        </small>
-                                    </div>
+                                    @php
+                                        $contactMessage = \App\Models\ContactMessage::find($notification->contact_message_id);
+                                    @endphp
+
+                                    @if($contactMessage)
+                                        <div class="contact-notification mt-3 p-3 bg-light rounded">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="las la-comments text-primary me-2"></i>
+                                                <strong class="text-primary">New response to your message</strong>
+                                            </div>
+                                            <p class="mb-2 small">
+                                                <strong>Subject:</strong> {{ $contactMessage->subject }}
+                                            </p>
+                                            @if($contactMessage->admin_notes)
+                                                <div class="admin-preview bg-white p-2 rounded border">
+                                                    <strong class="text-success small">
+                                                        <i class="las la-reply me-1"></i>Admin Response:
+                                                    </strong>
+                                                    <p class="mb-0 small text-muted">
+                                                        {{ Str::limit($contactMessage->admin_notes, 100) }}
+                                                    </p>
+                                                </div>
+                                            @endif
+                                            <div class="mt-2">
+                                                <a href="{{ localeRoute('student.my-messages') }}" class="btn btn-outline-primary btn-sm">
+                                                    <i class="las la-inbox me-1"></i>View Conversation
+                                                </a>
+                                            </div>
+                                        </div>
+                                    @endif
                                 @endif
 
-                                <small class="text-muted">
+                                <div class="notification-meta mt-2">
                                     <i class="las la-clock me-1"></i>
-                                    {{ $notification->created_at->diffForHumans() }}
-                                </small>
+                                    <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+                                </div>
                             </div>
                             <div class="notification-actions ms-3">
                                 @if(!$notification->is_read)
-                                    <form action="{{ route('student.notifications.mark-read', $notification->id) }}"
-                                          method="POST" class="d-inline mark-as-read-form">
+                                    <form method="POST" action="{{ route('student.notifications.read', $notification->id) }}" class="d-inline mark-as-read-form">
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-outline-success"
                                                 title="Mark as Read" data-notification-id="{{ $notification->id }}">
@@ -232,8 +273,8 @@
                                         </button>
                                     </form>
                                 @else
-                                    <span class="badge bg-success">
-                                        <i class="las la-check"></i> Read
+                                    <span class="badge badge-read bg-secondary">
+                                        <i class="las la-check me-1"></i>Read
                                     </span>
                                 @endif
                             </div>
@@ -241,25 +282,26 @@
                     </div>
                 </div>
             @empty
-                <div class="text-center py-5">
-                    <i class="las la-bell-slash fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">No Notifications</h5>
+                <div class="notifications-empty-state text-center py-5">
+                    <i class="las la-bell-slash display-1 text-muted"></i>
+                    <h5 class="text-muted mt-3">No Notifications</h5>
                     <p class="text-muted">You don't have any notifications yet.</p>
                 </div>
             @endforelse
         </div>
 
-@if($notifications->count() > 10)
-    <div class="mt-4 text-center">
-        <p class="text-muted">Showing latest 10 notifications</p>
-        <a href="{{ route('student.notifications') }}" class="btn btn-sm btn-outline-primary">
-            View All Notifications
-        </a>
-    </div>
-@endif
+        @if($notifications->count() > 10)
+            <div class="mt-4 text-center">
+                <p class="text-muted">Showing latest 10 notifications</p>
+                <a href="{{ localeRoute('student.notifications') }}" class="btn btn-sm btn-outline-primary">
+                    View All Notifications
+                </a>
+            </div>
+        @endif
     </div>
 </div>
-    {{-- All Courses --}}
+
+{{-- All Courses --}}
 <div class="tab-pane fade" id="nav-coursesall" role="tabpanel" aria-labelledby="nav-coursesall-tab">
     <div class="row">
         @forelse ($all_enrollments_paginated as $a)
@@ -624,6 +666,136 @@
     color: #28a745 !important;
 }
 
+/* Стили для счетчика уведомлений в навигации */
+.students-info-intro__nav .nav-link {
+    position: relative;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: none;
+    color: #6c757d;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-radius: 0;
+    border-bottom: 3px solid transparent;
+}
+
+.students-info-intro__nav .nav-link:hover {
+    color: #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.students-info-intro__nav .nav-link.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Стили для бейджа счетчика */
+.students-info-intro__nav .nav-link .badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border: 2px solid #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.2rem 0.4rem;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+    transform: scale(1);
+    transition: transform 0.2s ease;
+}
+
+.students-info-intro__nav .nav-link:hover .badge {
+    transform: scale(1.1);
+}
+.conversation-history {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.message-bubble {
+    border-left: 4px solid #007bff;
+    position: relative;
+}
+
+.message-bubble.bg-primary {
+    border-left-color: #0056b3;
+}
+
+.message-bubble.bg-light {
+    border-left-color: #6c757d;
+}
+.message-bubble.bg-light .admin-response {
+    background: rgba(0,123,255,0.1);
+}
+
+.continue-conversation {
+    border: 1px solid #dee2e6;
+    background: #f8f9fa !important;
+}
+
+.admin-response {
+    font-size: 0.9em;
+    background: rgba(255,255,255,0.1);
+    padding: 8px;
+    border-radius: 4px;
+    margin-top: 8px;
+}
+
+.message-bubble.bg-light .admin-response {
+    background: rgba(0,123,255,0.1);
+}
+
+.notification-badge {
+    font-size: 0.7em;
+    padding: 0.25em 0.6em;
+}
+
+.badge-unread {
+    background-color: #dc3545;
+}
+
+.badge-read {
+    background-color: #6c757d;
+}
+/* Анимация пульсации для привлечения внимания */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+.students-info-intro__nav .nav-link .badge {
+    animation: pulse 2s infinite;
+}
+
+/* Для прочитанных/нулевых уведомлений - скрываем бейдж */
+.students-info-intro__nav .nav-link .badge.bg-secondary {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    animation: none;
+}
+
+
 /* Стили для Purchase History */
 .purchase-area-items-end dl {
     margin-bottom: 0;
@@ -670,8 +842,231 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.purchase-area-items-start .image img {
+/* Стили для бейджей уведомлений */
+.notification-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.375rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    white-space: nowrap;
+    display: inline-block;
+    text-align: center;
+    min-width: 60px;
+}
+
+/* Статусы для уведомлений */
+.badge-new {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.badge-unread {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.badge-read {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+    color: white;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.badge-priority {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: black;
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+}
+
+/* Стили для кнопок действий */
+.notification-actions .btn {
     border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.notification-actions .btn-outline-success:hover {
+    background-color: #28a745;
+    border-color: #28a745;
+    transform: translateY(-1px);
+}
+
+.notification-actions .btn-outline-success:active {
+    transform: translateY(0);
+}
+
+/* Стили для карточек уведомлений */
+.notification-item {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+    border-radius: 8px;
+}
+
+.notification-item:not(.bg-light) {
+    border-left-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+
+.notification-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.notification-item.bg-light {
+    border-left-color: #6c757d;
+    opacity: 0.8;
+}
+
+/* Заголовки уведомлений */
+.notification-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.notification-message {
+    color: #495057;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+}
+
+.notification-meta {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* Иконки в уведомлениях */
+.notification-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 0.5rem;
+    opacity: 0.7;
+}
+
+/* Стили для контактных ответов */
+.contact-response {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.contact-response strong {
+    color: #495057;
+    font-weight: 600;
+}
+/* Стили для активного таба уведомлений */
+#nav-notifications-tab {
+    position: relative;
+}
+
+#nav-notifications-tab .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border: 2px solid white;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .notification-badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.5rem;
+        min-width: 55px;
+    }
+
+    .notification-actions .btn {
+        width: 28px;
+        height: 28px;
+    }
+
+    .notification-item {
+        margin-bottom: 1rem;
+    }
+
+    .notification-title {
+        font-size: 0.95rem;
+    }
+
+    .notification-message {
+        font-size: 0.9rem;
+    }
+}
+
+/* Анимации */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notification-item {
+    animation: fadeInUp 0.3s ease;
+}
+
+/* Стили для пустого состояния */
+.notifications-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.notifications-empty-state i {
+    font-size: 4rem;
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+/* Стили для счетчика уведомлений в табе */
+.nav-link .badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    margin-left: 0.5rem;
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для прогресс-бара (если используется) */
+.notification-progress {
+    height: 4px;
+    background-color: #e9ecef;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.notification-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #007bff, #0056b3);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.text-center.py-5 i {
+    opacity: 0.5;
 }
 
 .text-main h6 {
@@ -728,77 +1123,164 @@
 }
 </style>
 @endpush
-{{-- В конец dashboard.blade.php перед @endpush --}}
 @push('scripts')
 <script>
+ document.addEventListener('DOMContentLoaded', function() {
+    // AJAX для отправки продолжения диалога
+    document.querySelectorAll('.continue-dialog-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            const formAction = this.action;
+
+            console.log('🚀 Form submission started');
+            console.log('📤 Action:', formAction);
+            console.log('📝 Data:', Object.fromEntries(formData));
+
+            // Показываем индикатор загрузки
+            submitBtn.innerHTML = '<i class="las la-spinner la-spin me-1"></i>Sending...';
+            submitBtn.disabled = true;
+
+            fetch(formAction, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log('📨 Response status:', response.status, response.statusText);
+
+                if (response.status === 422) {
+                    // Validation errors
+                    return response.json().then(data => {
+                        throw new Error('Validation error: ' + JSON.stringify(data.errors));
+                    });
+                }
+
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        console.error('❌ Server response:', text);
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    });
+                }
+
+                return response.json();
+            })
+            .then(data => {
+                console.log('✅ Success response:', data);
+
+                if (data.success) {
+                    // Показываем успешное сообщение
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-success alert-dismissible fade show mt-2';
+                    alert.innerHTML = `
+                        <i class="las la-check-circle me-2"></i>
+                        ${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    form.parentNode.insertBefore(alert, form);
+
+                    // Очищаем текстовое поле
+                    form.querySelector('textarea').value = '';
+
+                    // Обновляем страницу через 2 секунды
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    throw new Error(data.message || 'Unknown error occurred');
+                }
+            })
+            .catch(error => {
+                console.error('💥 Full error:', error);
+
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-danger alert-dismissible fade show mt-2';
+                alert.innerHTML = `
+                    <i class="las la-exclamation-circle me-2"></i>
+                    <strong>Error:</strong> ${error.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                form.parentNode.insertBefore(alert, form);
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+    });
+});
 $(document).ready(function() {
-    // Обработка отметки как прочитанного
+    // Обработка отметки одного уведомления
     $('.mark-as-read-form').on('submit', function(e) {
         e.preventDefault();
 
-        const form = $(this);
-        const notificationId = form.data('notification-id');
-        const notificationItem = form.closest('.notification-item');
+        var form = $(this);
+        var button = form.find('button');
+        var notificationId = button.data('notification-id');
 
+        // Блокируем кнопку
+        button.prop('disabled', true).html('<i class="las la-spinner la-spin"></i>');
+
+        // Правильный URL
         $.ajax({
-            url: form.attr('action'),
+            url: "{{ url('student/notification') }}/" + notificationId + "/read",
             method: 'POST',
-            data: form.serialize(),
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
             success: function(response) {
                 if (response.success) {
-                    // Обновляем внешний вид уведомления
-                    notificationItem.removeClass('border-primary').addClass('bg-light');
-                    notificationItem.find('.badge.bg-primary').remove();
-                    notificationItem.find('h6').addClass('text-muted').removeClass('text-dark');
-                    notificationItem.find('p').addClass('text-muted');
-                    notificationItem.find('.mark-as-read-form').html('<span class="badge bg-success"><i class="las la-check"></i> Read</span>');
-
-                    // Обновляем счетчик непрочитанных
-                    updateUnreadCount();
+                    location.reload();
+                } else {
+                    alert('Error: ' + response.error);
+                    button.prop('disabled', false).html('<i class="las la-check"></i>');
                 }
             },
             error: function(xhr) {
-                console.error('Error marking notification as read:', xhr.responseText);
+                alert('Request failed');
+                button.prop('disabled', false).html('<i class="las la-check"></i>');
             }
         });
     });
 
     // Обработка "Mark All as Read"
-    $('form[action*="mark-all-read"]').on('submit', function(e) {
+    $('form[action*="read-all"]').on('submit', function(e) {
         e.preventDefault();
 
-        const form = $(this);
+        var form = $(this);
+        var button = form.find('button');
 
+        // Блокируем кнопку
+        button.prop('disabled', true).html('<i class="las la-spinner la-spin me-1"></i>Processing...');
+
+        // Правильный URL
         $.ajax({
-            url: form.attr('action'),
+            url: "{{ url('student/notifications/read-all') }}",
             method: 'POST',
-            data: form.serialize(),
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
             success: function(response) {
                 if (response.success) {
-                    // Обновляем все уведомления
-                    $('.notification-item').each(function() {
-                        $(this).removeClass('border-primary').addClass('bg-light');
-                        $(this).find('.badge.bg-primary').remove();
-                        $(this).find('h6').addClass('text-muted').removeClass('text-dark');
-                        $(this).find('p').addClass('text-muted');
-                        $(this).find('.mark-as-read-form').html('<span class="badge bg-success"><i class="las la-check"></i> Read</span>');
-                    });
-
-                    // Обновляем счетчик
-                    updateUnreadCount();
-                    form.remove(); // Убираем кнопку "Mark All as Read"
+                    location.reload();
+                } else {
+                    alert('Error: ' + response.error);
+                    button.prop('disabled', false).html('<i class="las la-check-double me-1"></i>Mark All as Read');
                 }
+            },
+            error: function(xhr) {
+                alert('Request failed');
+                button.prop('disabled', false).html('<i class="las la-check-double me-1"></i>Mark All as Read');
             }
         });
     });
-
-    function updateUnreadCount() {
-        // Можно добавить AJAX запрос для обновления счетчика
-        // или просто перезагрузить страницу
-        setTimeout(() => {
-            location.reload();
-        }, 1000);
-    }
 });
 </script>
 @endpush

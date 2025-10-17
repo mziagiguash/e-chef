@@ -13,10 +13,11 @@ class StudentNotificationController extends Controller
     /**
      * Отладочный метод для проверки уведомлений
      */
+
     public function debugNotifications()
     {
-        $student_id = session('userId') ? encryptor('decrypt', session('userId')) : null;
-
+          $student_id = encryptor('decrypt', session('userId'));
+    session(['student_id' => $student_id]);
         if (!$student_id) {
             return response()->json(['error' => 'Student not logged in'], 401);
         }
@@ -49,8 +50,8 @@ class StudentNotificationController extends Controller
      */
     public function getNotifications()
     {
-        $student_id = session('userId') ? encryptor('decrypt', session('userId')) : null;
-
+          $student_id = encryptor('decrypt', session('userId'));
+    session(['student_id' => $student_id]);
         if (!$student_id) {
             return response()->json(['error' => 'Student not found'], 401);
         }
@@ -61,56 +62,13 @@ class StudentNotificationController extends Controller
 
         return response()->json($notifications);
     }
-
-    /**
-     * Пометка уведомления как прочитанного
-     */
-    public function markAsRead($notificationId)
-    {
-        $student_id = session('userId') ? encryptor('decrypt', session('userId')) : null;
-
-        if (!$student_id) {
-            return response()->json(['error' => 'Student not found'], 401);
-        }
-
-        $notification = UserNotification::where('id', $notificationId)
-            ->where('student_id', $student_id)
-            ->first();
-
-        if (!$notification) {
-            return response()->json(['error' => 'Notification not found'], 404);
-        }
-
-        $notification->update(['is_read' => true]);
-
-        return response()->json(['success' => true]);
-    }
-
-    /**
-     * Пометка всех уведомлений как прочитанных
-     */
-    public function markAllAsRead()
-    {
-        $student_id = session('userId') ? encryptor('decrypt', session('userId')) : null;
-
-        if (!$student_id) {
-            return response()->json(['error' => 'Student not found'], 401);
-        }
-
-        UserNotification::where('student_id', $student_id)
-            ->where('is_read', false)
-            ->update(['is_read' => true]);
-
-        return response()->json(['success' => true]);
-    }
-
     /**
      * Получить количество непрочитанных уведомлений
      */
     public function getUnreadCount()
     {
-        $student_id = session('userId') ? encryptor('decrypt', session('userId')) : null;
-
+          $student_id = encryptor('decrypt', session('userId'));
+    session(['student_id' => $student_id]);
         if (!$student_id) {
             return response()->json(['error' => 'Student not found'], 401);
         }
@@ -121,52 +79,74 @@ class StudentNotificationController extends Controller
 
         return response()->json(['unread_count' => $unreadCount]);
     }
-    public function markAsRead($notificationId)
+/**
+     * Пометка одного уведомления как прочитанного
+     */
+    public function markAsRead($id)
     {
-        $student_id = session('userId') ? encryptor('decrypt', session('userId')) : null;
+        try {
+            // Просто находим и обновляем уведомление
+            $notification = UserNotification::find($id);
 
-        if (!$student_id) {
-            return response()->json(['error' => 'Student not found'], 401);
+            if (!$notification) {
+                return response()->json(['success' => false, 'error' => 'Notification not found'], 404);
+            }
+
+            $notification->update([
+                'is_read' => true,
+                'read_at' => now()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification marked as read'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $notification = UserNotification::where('id', $notificationId)
-            ->where('student_id', $student_id)
-            ->first();
-
-        if (!$notification) {
-            return response()->json(['error' => 'Notification not found'], 404);
-        }
-
-        // Помечаем как прочитанное
-        $notification->update([
-            'is_read' => true,
-            'read_at' => now()
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'notification' => $notification
-        ]);
     }
 
     /**
      * Пометка всех уведомлений как прочитанных
      */
-    public function markAllAsRead()
+    public function markAllAsRead(Request $request)
     {
-        $student_id = session('userId') ? encryptor('decrypt', session('userId')) : null;
+        try {
+            // Получаем ID студента из сессии
+            $student_id = session('student_id');
 
-        if (!$student_id) {
-            return response()->json(['error' => 'Student not found'], 401);
-        }
+            // Если нет в сессии, пробуем расшифровать
+            if (!$student_id && session('userId')) {
+                $student_id = encryptor('decrypt', session('userId'));
+            }
 
-        UserNotification::where('student_id', $student_id)
-            ->where('is_read', false)
-            ->update([
-                'is_read' => true,
-                'read_at' => now()
+            if (!$student_id) {
+                return response()->json(['success' => false, 'error' => 'Student not found'], 401);
+            }
+
+            // Простое обновление всех непрочитанных уведомлений студента
+            $updated = UserNotification::where('student_id', $student_id)
+                ->where('is_read', false)
+                ->update([
+                    'is_read' => true,
+                    'read_at' => now()
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'All notifications marked as read',
+                'updated_count' => $updated
             ]);
 
-        return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
